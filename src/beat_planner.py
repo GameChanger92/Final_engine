@@ -28,3 +28,32 @@ def plan_beats(ep_num: int, anchors: List[Dict]) -> List[Dict]:
         {"idx": i + 1, "summary": f"Placeholder beat {i+1} for ep {ep_num}"}
         for i in range(10)
     ]
+
+def make_beats(arc_json: dict) -> list[dict]:
+    """
+    Generate 10 beat dictionaries for a given story arc.
+
+    Parameters
+    ----------
+    arc_json : dict
+        Example: {"title": "Prologue", "anchor_ep": 3}
+
+    Returns
+    -------
+    list[dict]
+        [{"idx": 1, "summary": "...", "anchor": False}, ...]
+    """
+    title = arc_json.get("title", "Untitled")
+    anchor_ep = arc_json.get("anchor_ep")
+
+    beats = []
+    for i in range(10):
+        idx = i + 1
+        beats.append(
+            {
+                "idx": idx,
+                "summary": f"{title} — beat {idx}",
+                "anchor": (idx == anchor_ep),
+            }
+        )
+    return beats
