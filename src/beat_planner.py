@@ -8,6 +8,7 @@ beat_planner.py
 
 from typing import List, Dict
 
+
 def plan_beats(ep_num: int, anchors: List[Dict]) -> List[Dict]:
     """
     Create 10 simple placeholder beats for a given episode number.
@@ -28,6 +29,7 @@ def plan_beats(ep_num: int, anchors: List[Dict]) -> List[Dict]:
         {"idx": i + 1, "summary": f"Placeholder beat {i+1} for ep {ep_num}"}
         for i in range(10)
     ]
+
 
 def make_beats(arc_json: dict) -> list[dict]:
     """
