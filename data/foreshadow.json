@@ -1,0 +1,60 @@
+{
+  "foreshadows": [
+    {
+      "id": "f166db4",
+      "hint": "신비한 검의 존재",
+      "introduced": 5,
+      "due": 20,
+      "payoff": 25
+    },
+    {
+      "id": "f6e9077",
+      "hint": "고대 마법서의 비밀",
+      "introduced": 12,
+      "due": 28,
+      "payoff": null
+    },
+    {
+      "id": "f61972f",
+      "hint": "",
+      "introduced": 5,
+      "due": 22,
+      "payoff": null
+    },
+    {
+      "id": "f18cac1",
+      "hint": "시작 복선",
+      "introduced": 0,
+      "due": 24,
+      "payoff": null
+    },
+    {
+      "id": "f252e6c",
+      "hint": "과거 복선",
+      "introduced": -5,
+      "due": 23,
+      "payoff": null
+    },
+    {
+      "id": "f45d4e2",
+      "hint": "빈 내용 테스트",
+      "introduced": 5,
+      "due": 21,
+      "payoff": null
+    },
+    {
+      "id": "f46a48d",
+      "hint": "잘못된 패턴",
+      "introduced": 5,
+      "due": 28,
+      "payoff": null
+    },
+    {
+      "id": "f037d8d",
+      "hint": "🔮 마법의 수정구 ✨",
+      "introduced": 10,
+      "due": 23,
+      "payoff": null
+    }
+  ]
+}
