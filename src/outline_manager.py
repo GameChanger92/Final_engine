@@ -1,9 +1,13 @@
 # src/outline_manager.py
-import argparse, json, pathlib, sys
+import argparse
+import json
+import pathlib
+
 
 def init_engine(args):
     anchors = json.loads(pathlib.Path(args.anchors_file).read_text())
     print(f"[✓] Init complete — episodes: {args.eps}, anchors: {len(anchors)}")
+
 
 def main():
     parser = argparse.ArgumentParser(prog="outline_manager")
@@ -20,6 +24,7 @@ def main():
         args.func(args)
     else:
         parser.print_help()
+
 
 if __name__ == "__main__":
     main()
