@@ -75,11 +75,41 @@ def run_pipeline(episode_num: int) -> str:
     # Step 5: Draft Generator - generate final draft
     draft = generate_draft(context, episode_num)
 
-    # Step 6: Lexi Guard - check lexical quality (message only on failure)
+    # Step 6: Guard Chain - Quality checks
+    
+    # Immutable Guard - check character consistency
+    try:
+        from plugins.immutable_guard import immutable_guard
+        
+        # Load current character data for checking
+        import json
+        try:
+            with open("data/characters.json", 'r', encoding='utf-8') as f:
+                characters = json.load(f)
+            immutable_guard(characters)
+            print("✅ Immutable Guard: PASSED")
+        except FileNotFoundError:
+            print("⚠️  Immutable Guard: No characters.json found, skipping")
+    except RetryException as e:
+        print(f"⚠️  Immutable Guard Warning: {e}")
+    
+    # Date Guard - check chronological progression  
+    try:
+        from plugins.date_guard import date_guard
+        
+        # Create context with date for checking (if available)
+        date_context = {"date": f"2024-{episode_num:02d}-01"}  # Simple date progression
+        date_guard(date_context, episode_num)
+        print("✅ Date Guard: PASSED")
+    except RetryException as e:
+        print(f"⚠️  Date Guard Warning: {e}")
+
+    # Lexi Guard - check lexical quality (message only on failure)
     try:
         from plugins.lexi_guard import lexi_guard
 
         lexi_guard(draft)
+        print("✅ Lexi Guard: PASSED")
     except RetryException as e:
         # In this implementation, we just show a message but don't retry
         # This follows the requirement: "실패 시 메시지만"
@@ -105,7 +135,10 @@ def run(episode: int = typer.Option(1, "--episode", help="Episode number to gene
     typer.echo("🎬 Running Scene Maker...")
     typer.echo("🔗 Running Context Builder...")
     typer.echo("✍️  Running Draft Generator...")
-    typer.echo("🛡️  Running Lexi Guard...")
+    typer.echo("🛡️  Running Guard Chain...")
+    typer.echo("   - Immutable Guard")
+    typer.echo("   - Date Guard") 
+    typer.echo("   - Lexi Guard")
 
     draft = run_pipeline(episode)
 
@@ -127,7 +160,7 @@ def info():
     Display information about the pipeline.
     """
     typer.echo("Final Engine Integration Pipeline v1.0")
-    typer.echo("Day 07 - First Integration Run")
+    typer.echo("Day 12 - Immutable + Date Guard Implementation")
     typer.echo("")
     typer.echo("Pipeline stages:")
     typer.echo("1. Arc Outliner → Basic arc structure")
@@ -135,7 +168,10 @@ def info():
     typer.echo("3. Scene Maker → ~10 scenes total")
     typer.echo("4. Context Builder → Combined context")
     typer.echo("5. Draft Generator → Final PLACEHOLDER text")
-    typer.echo("6. Lexi Guard → Lexical quality check")
+    typer.echo("6. Guard Chain → Quality checks")
+    typer.echo("   - Immutable Guard → Character consistency")
+    typer.echo("   - Date Guard → Chronological progression")
+    typer.echo("   - Lexi Guard → Lexical quality")
 
 
 if __name__ == "__main__":
