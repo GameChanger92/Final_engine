@@ -19,6 +19,30 @@ This will run the complete pipeline:
 
 The output is saved to `output/episode_1.txt` with placeholder content that will be replaced by actual LLM-generated text in future versions.
 
+## Guard Chain Testing
+
+Test the complete guard validation system with the pipeline smoke test:
+
+```bash
+python scripts/run_pipeline.py --episodes 1-20
+```
+
+This runs all guards in sequence for each episode:
+- **LexiGuard** → Checks lexical quality (TTR, 3-gram duplication)
+- **EmotionGuard** → Monitors emotional transitions
+- **ScheduleGuard** → Validates foreshadow resolution compliance  
+- **ImmutableGuard** → Ensures character consistency
+- **DateGuard** → Checks chronological progression
+
+Expected output format:
+```
+✅ LexiGuard PASS
+✅ EmotionGuard PASS
+✅ ScheduleGuard PASS
+✅ ImmutableGuard PASS
+✅ DateGuard PASS
+```
+
 ### Other Commands
 
 ```bash
@@ -28,4 +52,9 @@ python -m src.main info
 # Generate different episodes
 python -m src.main run --episode 5
 python -m src.main run --episode 10
+
+# Test guard chain with pipeline smoke test
+python scripts/run_pipeline.py --episodes 1-20
+python scripts/run_pipeline.py --episodes 5      # Single episode
+python scripts/run_pipeline.py --episodes 10-15  # Episode range
 ```
