@@ -1,1 +1,15 @@
-[{"name":"Alice","role":"hero"}]
+{
+  "MC": {
+    "name": "정선우",
+    "birth": "2002-07-15",
+    "hometown": "서울",
+    "immutable": ["birth", "hometown"]
+  },
+  "Alice": {
+    "name": "Alice",
+    "role": "hero",
+    "age": 25,
+    "background": "Royal Guard",
+    "immutable": ["age", "background"]
+  }
+}
