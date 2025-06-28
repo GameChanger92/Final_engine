@@ -12,7 +12,7 @@
       "hint": "고대 마법서의 비밀",
       "introduced": 12,
       "due": 37,
-      "payoff": null
+      "payoff": 45
     },
     {
       "id": "fc2816c",
@@ -54,6 +54,90 @@
       "hint": "🔮 마법의 수정구 ✨",
       "introduced": 10,
       "due": 23,
+      "payoff": null
+    },
+    {
+      "id": "f9391dd",
+      "hint": "",
+      "introduced": 5,
+      "due": 17,
+      "payoff": null
+    },
+    {
+      "id": "fc681c1",
+      "hint": "시작 복선",
+      "introduced": 0,
+      "due": 30,
+      "payoff": null
+    },
+    {
+      "id": "f6ccc06",
+      "hint": "과거 복선",
+      "introduced": -5,
+      "due": 17,
+      "payoff": null
+    },
+    {
+      "id": "fec2211",
+      "hint": "빈 내용 테스트",
+      "introduced": 5,
+      "due": 19,
+      "payoff": null
+    },
+    {
+      "id": "fb0c7e8",
+      "hint": "잘못된 패턴",
+      "introduced": 5,
+      "due": 17,
+      "payoff": null
+    },
+    {
+      "id": "f3faa36",
+      "hint": "🔮 마법의 수정구 ✨",
+      "introduced": 10,
+      "due": 27,
+      "payoff": null
+    },
+    {
+      "id": "f7f1fe3",
+      "hint": "",
+      "introduced": 5,
+      "due": 23,
+      "payoff": null
+    },
+    {
+      "id": "fe20cd2",
+      "hint": "시작 복선",
+      "introduced": 0,
+      "due": 18,
+      "payoff": null
+    },
+    {
+      "id": "ff86222",
+      "hint": "과거 복선",
+      "introduced": -5,
+      "due": 6,
+      "payoff": null
+    },
+    {
+      "id": "f0849d7",
+      "hint": "빈 내용 테스트",
+      "introduced": 5,
+      "due": 22,
+      "payoff": null
+    },
+    {
+      "id": "f68bd37",
+      "hint": "잘못된 패턴",
+      "introduced": 5,
+      "due": 23,
+      "payoff": null
+    },
+    {
+      "id": "f8d4767",
+      "hint": "🔮 마법의 수정구 ✨",
+      "introduced": 10,
+      "due": 31,
       "payoff": null
     }
   ]
