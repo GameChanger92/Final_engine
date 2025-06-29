@@ -43,6 +43,33 @@ Expected output format:
 ✅ DateGuard PASS
 ```
 
+## 통합 테스트 실행 예시
+
+Test anchor-driven integration flow to ensure all 5 anchor events appear within their expected episodes:
+
+```bash
+python scripts/test_anchor_flow.py
+```
+
+This validates that all anchor events from `data/anchors.json` appear within their target episodes (anchor_ep ± 1) across a 20-episode simulation:
+
+- **ANCHOR_01**: 주인공 첫 등장 (Episode 1)
+- **ANCHOR_02**: 첫 번째 시련 (Episode 5) 
+- **ANCHOR_03**: 중요한 만남 (Episode 10)
+- **ANCHOR_04**: 결정적 선택 (Episode 15)
+- **ANCHOR_05**: 마지막 대결 (Episode 20)
+
+Expected output:
+```
+🎯 TEST RESULT: PASS
+   All anchor events were found in their expected episodes!
+🎉 SUCCESS: All anchor events validated!
+```
+
+Exit codes:
+- **0**: All 5 anchors found in correct episodes
+- **1**: One or more anchors missing + failure log
+
 ### Other Commands
 
 ```bash
