@@ -77,6 +77,26 @@ def run_pipeline(episode_num: int, project: str = "default") -> str:
     # Step 5: Draft Generator - generate final draft
     draft = generate_draft(context, episode_num)
 
+    # Step 5.5: Vector Store - save scene embeddings
+    try:
+        from src.embedding.vector_store import VectorStore
+
+        vector_store = VectorStore(project)
+
+        # Save embeddings for each scene
+        for i, scene in enumerate(all_scenes):
+            scene_id = f"ep{episode_num:03d}_scene{i+1:03d}"
+            scene_text = scene["desc"]
+
+            success = vector_store.add(scene_id, scene_text)
+            if success:
+                print(f"✅ Saved embedding for scene {scene_id}")
+            else:
+                print(f"⚠️  Failed to save embedding for scene {scene_id}")
+
+    except Exception as e:
+        print(f"⚠️  Vector Store Warning: {e}")
+
     # Step 6: Guard Chain - Quality checks
 
     # Immutable Guard - check character consistency
