@@ -35,7 +35,8 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
     5. DateGuard PASS
     6. AnchorGuard PASS
     7. RuleGuard PASS
-    8. PacingGuard PASS
+    8. RelationGuard PASS
+    9. PacingGuard PASS
 
     Parameters
     ----------
@@ -89,7 +90,7 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
     """
 
     guards_passed = 0
-    total_guards = 8
+    total_guards = 9
 
     # 1. LexiGuard Test
     try:
@@ -201,7 +202,20 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
     except Exception as e:
         print(f"⚠️  RuleGuard ERROR: {e}")
 
-    # 8. PacingGuard Test
+    # 8. RelationGuard Test
+    try:
+        from src.plugins.relation_guard import relation_guard
+
+        # Test relationship changes for current episode
+        relation_guard(episode_num, project=project)
+        print("✅ RelationGuard PASS")
+        guards_passed += 1
+    except RetryException as e:
+        print(f"❌ RelationGuard FAIL: {e}")
+    except Exception as e:
+        print(f"⚠️  RelationGuard ERROR: {e}")
+
+    # 9. PacingGuard Test
     try:
         from src.plugins.pacing_guard import pacing_guard
 

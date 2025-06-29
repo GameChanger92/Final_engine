@@ -1,0 +1,10 @@
+[
+  {
+    "ep": 1,
+    "relations": {
+      "hero,mentor": "동료",
+      "hero,villain": "적",
+      "mentor,villain": "적"
+    }
+  }
+]

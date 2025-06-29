@@ -1,0 +1,9 @@
+[
+  {
+    "ep": 1,
+    "relations": {
+      "char1,char2": "친구",
+      "char2,char3": "동료"
+    }
+  }
+]
