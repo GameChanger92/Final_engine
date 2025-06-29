@@ -17,7 +17,7 @@ from src.exceptions import RetryException
 class RuleGuard:
     """
     Rule Guard - validates text against forbidden patterns from rules.json.
-    
+
     Checks text against regular expression patterns defined in rules.json
     and raises RetryException if any violations are found.
     """
@@ -55,22 +55,26 @@ class RuleGuard:
             return []
 
         try:
-            with open(self.rule_path, 'r', encoding='utf-8') as f:
+            with open(self.rule_path, "r", encoding="utf-8") as f:
                 rules = json.load(f)
-                
+
             # Validate rules structure
             if not isinstance(rules, list):
                 return []
-                
+
             # Filter valid rules that have required fields
             valid_rules = []
             for rule in rules:
-                if (isinstance(rule, dict) and 
-                    'id' in rule and 'pattern' in rule and 'message' in rule):
+                if (
+                    isinstance(rule, dict)
+                    and "id" in rule
+                    and "pattern" in rule
+                    and "message" in rule
+                ):
                     valid_rules.append(rule)
-            
+
             return valid_rules
-            
+
         except (json.JSONDecodeError, OSError):
             # Return empty rules on file errors (graceful handling)
             return []
@@ -98,7 +102,7 @@ class RuleGuard:
             "passed": True,
             "rules_checked": len(self.rules),
             "violations": [],
-            "flags": {}
+            "flags": {},
         }
 
         if not text.strip():
@@ -107,14 +111,14 @@ class RuleGuard:
 
         # Check each rule in order, stop at first violation
         for rule in self.rules:
-            rule_id = rule['id']
-            pattern = rule['pattern']
-            message = rule['message']
+            rule_id = rule["id"]
+            pattern = rule["pattern"]
+            message = rule["message"]
 
             try:
                 # Use re.search to find pattern match
                 match = re.search(pattern, text, re.IGNORECASE)
-                
+
                 if match:
                     # Rule violation found
                     violation_details = {
@@ -122,30 +126,28 @@ class RuleGuard:
                         "pattern": pattern,
                         "message": message,
                         "matched_text": match.group(),
-                        "match_position": match.start()
+                        "match_position": match.start(),
                     }
-                    
+
                     results["passed"] = False
                     results["violations"].append(violation_details)
-                    
+
                     # Create flags for RetryException
                     flags = {
                         "rule_violation": {
                             "rule_id": rule_id,
                             "pattern": pattern,
                             "matched_text": match.group(),
-                            "message": message
+                            "message": message,
                         }
                     }
                     results["flags"] = flags
 
                     # Raise exception on first violation (as per spec)
                     raise RetryException(
-                        message=message,
-                        flags=flags,
-                        guard_name="rule_guard"
+                        message=message, flags=flags, guard_name="rule_guard"
                     )
-                    
+
             except re.error:
                 # Invalid regex pattern - skip this rule
                 continue

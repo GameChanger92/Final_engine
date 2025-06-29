@@ -9,7 +9,6 @@ import pytest
 import json
 import tempfile
 import os
-from pathlib import Path
 from src.plugins.anchor_guard import (
     AnchorGuard,
     check_anchor_guard,

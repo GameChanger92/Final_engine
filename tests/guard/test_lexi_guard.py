@@ -6,7 +6,7 @@ Tests TTR and 3-gram duplication rate functionality.
 """
 
 import pytest
-from plugins.lexi_guard import (
+from src.plugins.lexi_guard import (
     calculate_ttr,
     calculate_3gram_duplication_rate,
     lexi_guard,

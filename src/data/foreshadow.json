@@ -1,0 +1,172 @@
+{
+  "foreshadows": [
+    {
+      "id": "f2bee33",
+      "hint": "",
+      "introduced": 5,
+      "due": 18,
+      "payoff": null
+    },
+    {
+      "id": "f3e210d",
+      "hint": "시작 복선",
+      "introduced": 0,
+      "due": 21,
+      "payoff": null
+    },
+    {
+      "id": "fa35016",
+      "hint": "과거 복선",
+      "introduced": -5,
+      "due": 14,
+      "payoff": null
+    },
+    {
+      "id": "ff0f545",
+      "hint": "빈 내용 테스트",
+      "introduced": 5,
+      "due": 30,
+      "payoff": null
+    },
+    {
+      "id": "fb90c56",
+      "hint": "잘못된 패턴",
+      "introduced": 5,
+      "due": 27,
+      "payoff": null
+    },
+    {
+      "id": "f187f4d",
+      "hint": "🔮 마법의 수정구 ✨",
+      "introduced": 10,
+      "due": 20,
+      "payoff": null
+    },
+    {
+      "id": "fe71d64",
+      "hint": "",
+      "introduced": 5,
+      "due": 18,
+      "payoff": null
+    },
+    {
+      "id": "fae3a88",
+      "hint": "시작 복선",
+      "introduced": 0,
+      "due": 19,
+      "payoff": null
+    },
+    {
+      "id": "fc90f52",
+      "hint": "과거 복선",
+      "introduced": -5,
+      "due": 15,
+      "payoff": null
+    },
+    {
+      "id": "f2ddc39",
+      "hint": "빈 내용 테스트",
+      "introduced": 5,
+      "due": 30,
+      "payoff": null
+    },
+    {
+      "id": "f6bd6da",
+      "hint": "잘못된 패턴",
+      "introduced": 5,
+      "due": 31,
+      "payoff": null
+    },
+    {
+      "id": "f6268ec",
+      "hint": "🔮 마법의 수정구 ✨",
+      "introduced": 10,
+      "due": 36,
+      "payoff": null
+    },
+    {
+      "id": "f6f92c3",
+      "hint": "",
+      "introduced": 5,
+      "due": 18,
+      "payoff": null
+    },
+    {
+      "id": "fefe508",
+      "hint": "시작 복선",
+      "introduced": 0,
+      "due": 15,
+      "payoff": null
+    },
+    {
+      "id": "f415c31",
+      "hint": "과거 복선",
+      "introduced": -5,
+      "due": 25,
+      "payoff": null
+    },
+    {
+      "id": "fd8ff79",
+      "hint": "빈 내용 테스트",
+      "introduced": 5,
+      "due": 22,
+      "payoff": null
+    },
+    {
+      "id": "f300f6f",
+      "hint": "잘못된 패턴",
+      "introduced": 5,
+      "due": 16,
+      "payoff": null
+    },
+    {
+      "id": "f178928",
+      "hint": "🔮 마법의 수정구 ✨",
+      "introduced": 10,
+      "due": 38,
+      "payoff": null
+    },
+    {
+      "id": "f8d72dc",
+      "hint": "",
+      "introduced": 5,
+      "due": 22,
+      "payoff": null
+    },
+    {
+      "id": "fee96b9",
+      "hint": "시작 복선",
+      "introduced": 0,
+      "due": 18,
+      "payoff": null
+    },
+    {
+      "id": "f63eb1f",
+      "hint": "과거 복선",
+      "introduced": -5,
+      "due": 11,
+      "payoff": null
+    },
+    {
+      "id": "f978e65",
+      "hint": "빈 내용 테스트",
+      "introduced": 5,
+      "due": 22,
+      "payoff": null
+    },
+    {
+      "id": "f36aa4d",
+      "hint": "잘못된 패턴",
+      "introduced": 5,
+      "due": 17,
+      "payoff": null
+    },
+    {
+      "id": "f60b56f",
+      "hint": "🔮 마법의 수정구 ✨",
+      "introduced": 10,
+      "due": 22,
+      "payoff": null
+    }
+  ]
+}

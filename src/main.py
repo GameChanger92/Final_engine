@@ -76,15 +76,16 @@ def run_pipeline(episode_num: int) -> str:
     draft = generate_draft(context, episode_num)
 
     # Step 6: Guard Chain - Quality checks
-    
+
     # Immutable Guard - check character consistency
     try:
-        from plugins.immutable_guard import immutable_guard
-        
+        from src.plugins.immutable_guard import immutable_guard
+
         # Load current character data for checking
         import json
+
         try:
-            with open("data/characters.json", 'r', encoding='utf-8') as f:
+            with open("data/characters.json", "r", encoding="utf-8") as f:
                 characters = json.load(f)
             immutable_guard(characters)
             print("✅ Immutable Guard: PASSED")
@@ -92,11 +93,11 @@ def run_pipeline(episode_num: int) -> str:
             print("⚠️  Immutable Guard: No characters.json found, skipping")
     except RetryException as e:
         print(f"⚠️  Immutable Guard Warning: {e}")
-    
-    # Date Guard - check chronological progression  
+
+    # Date Guard - check chronological progression
     try:
-        from plugins.date_guard import date_guard
-        
+        from src.plugins.date_guard import date_guard
+
         # Create context with date for checking (if available)
         date_context = {"date": f"2024-{episode_num:02d}-01"}  # Simple date progression
         date_guard(date_context, episode_num)
@@ -106,7 +107,7 @@ def run_pipeline(episode_num: int) -> str:
 
     # Lexi Guard - check lexical quality (message only on failure)
     try:
-        from plugins.lexi_guard import lexi_guard
+        from src.plugins.lexi_guard import lexi_guard
 
         lexi_guard(draft)
         print("✅ Lexi Guard: PASSED")
@@ -147,7 +148,7 @@ def run(episode: int = typer.Option(1, "--episode", help="Episode number to gene
     typer.echo("✍️  Running Draft Generator...")
     typer.echo("🛡️  Running Guard Chain...")
     typer.echo("   - Immutable Guard")
-    typer.echo("   - Date Guard") 
+    typer.echo("   - Date Guard")
     typer.echo("   - Lexi Guard")
     typer.echo("   - Rule Guard")
 

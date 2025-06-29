@@ -11,7 +11,7 @@ import tempfile
 from unittest.mock import patch
 
 import pytest
-from plugins.schedule_guard import (
+from src.plugins.schedule_guard import (
     ScheduleGuard,
     check_schedule_guard,
     schedule_guard,
@@ -27,10 +27,10 @@ class TestScheduleGuard:
         # Create temporary file for testing
         self.temp_dir = tempfile.mkdtemp()
         self.test_file = os.path.join(self.temp_dir, "foreshadow.json")
-        
+
         # Patch the file path to use our test file
         self.patcher = patch(
-            "plugins.foreshadow_scheduler._get_foreshadow_file_path",
+            "src.plugins.foreshadow_scheduler._get_foreshadow_file_path",
             return_value=self.test_file,
         )
         self.patcher.start()
@@ -39,7 +39,7 @@ class TestScheduleGuard:
         """Clean up after each test."""
         # Stop the patcher
         self.patcher.stop()
-        
+
         # Clean up test file
         if os.path.exists(self.test_file):
             os.remove(self.test_file)
@@ -63,7 +63,7 @@ class TestScheduleGuard:
                 "payoff": None,
             },
             {
-                "id": "f002", 
+                "id": "f002",
                 "hint": "미래 복선 2",
                 "introduced": 8,
                 "due": 25,
@@ -77,7 +77,7 @@ class TestScheduleGuard:
 
         # Should pass without raising exception
         result = guard.check(current_episode)
-        
+
         assert result["passed"] is True
         assert result["current_episode"] == 15
         assert len(result["overdue_foreshadows"]) == 0
@@ -102,7 +102,7 @@ class TestScheduleGuard:
 
         # Should pass because foreshadow is resolved
         result = guard.check(current_episode)
-        
+
         assert result["passed"] is True
         assert len(result["overdue_foreshadows"]) == 0
 
@@ -131,7 +131,7 @@ class TestScheduleGuard:
         assert "overdue_foreshadows" in exception.flags
         assert exception.flags["overdue_foreshadows"]["count"] == 1
         assert len(exception.flags["overdue_foreshadows"]["details"]) == 1
-        
+
         detail = exception.flags["overdue_foreshadows"]["details"][0]
         assert detail["id"] == "f001"
         assert detail["episodes_overdue"] == 1
@@ -159,7 +159,7 @@ class TestScheduleGuard:
         exception = exc_info.value
         assert exception.guard_name == "schedule_guard"
         assert "overdue_foreshadows" in exception.flags
-        
+
         detail = exception.flags["overdue_foreshadows"]["details"][0]
         assert detail["episodes_overdue"] == 10
 
@@ -176,7 +176,7 @@ class TestScheduleGuard:
             },
             {
                 "id": "f002",
-                "hint": "두 번째 과거 복선", 
+                "hint": "두 번째 과거 복선",
                 "introduced": 5,
                 "due": 12,
                 "payoff": None,
@@ -200,9 +200,11 @@ class TestScheduleGuard:
         exception = exc_info.value
         assert exception.flags["overdue_foreshadows"]["count"] == 2
         assert len(exception.flags["overdue_foreshadows"]["details"]) == 2
-        
+
         # Check that the overdue ones are correct
-        overdue_ids = [d["id"] for d in exception.flags["overdue_foreshadows"]["details"]]
+        overdue_ids = [
+            d["id"] for d in exception.flags["overdue_foreshadows"]["details"]
+        ]
         assert "f001" in overdue_ids
         assert "f002" in overdue_ids
         assert "f003" not in overdue_ids
@@ -225,11 +227,11 @@ class TestScheduleGuard:
         result = guard.update_payoff("f001", 12)
 
         assert result is True
-        
+
         # Verify the file was updated
         with open(self.test_file, "r", encoding="utf-8") as f:
             data = json.load(f)
-        
+
         assert data["foreshadows"][0]["payoff"] == 12
 
     def test_update_payoff_nonexistent_id(self):
@@ -269,11 +271,11 @@ class TestScheduleGuard:
         result = guard.update_payoff("f001", 12)  # Try to update again
 
         assert result is False
-        
+
         # Verify payoff didn't change
         with open(self.test_file, "r", encoding="utf-8") as f:
             data = json.load(f)
-        
+
         assert data["foreshadows"][0]["payoff"] == 10  # Original value
 
     def test_schedule_guard_empty_file(self):
@@ -372,7 +374,7 @@ class TestScheduleGuard:
         self._create_test_foreshadows(foreshadows)
 
         guard = ScheduleGuard()
-        
+
         try:
             guard.check(20)
         except RetryException:
@@ -380,7 +382,7 @@ class TestScheduleGuard:
 
         # Test with no overdue foreshadows
         result = guard.check(5)  # Before any due dates
-        
+
         assert "current_episode" in result
         assert "overdue_foreshadows" in result
         assert "flags" in result
@@ -408,5 +410,7 @@ class TestScheduleGuard:
             schedule_guard(20)
 
         exception = exc_info.value
-        assert str(exception).startswith("[schedule_guard] Foreshadow schedule violations")
+        assert str(exception).startswith(
+            "[schedule_guard] Foreshadow schedule violations"
+        )
         assert "1 foreshadow(s) past due episode" in str(exception)
