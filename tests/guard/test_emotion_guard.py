@@ -7,7 +7,7 @@ Tests emotion classification and delta calculation functionality.
 
 import pytest
 import numpy as np
-from plugins.emotion_guard import (
+from src.plugins.emotion_guard import (
     classify_emotions,
     emotions_to_vector,
     cosine_delta,

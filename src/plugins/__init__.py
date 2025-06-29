@@ -1,3 +1,5 @@
 """
-Plugins package for Final Engine guards.
+plugins package
+
+Quality guard plugins for the Final Engine.
 """

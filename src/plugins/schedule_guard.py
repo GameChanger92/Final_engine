@@ -7,9 +7,9 @@ Monitors foreshadows that are past their due episode without resolution (payoff=
 Raises RetryException when overdue foreshadows are detected.
 """
 
-from typing import Dict, List
+from typing import Dict
 from src.exceptions import RetryException
-from plugins.foreshadow_scheduler import (
+from src.plugins.foreshadow_scheduler import (
     _load_foreshadows,
     _save_foreshadows,
     get_overdue_foreshadows,
@@ -19,7 +19,7 @@ from plugins.foreshadow_scheduler import (
 class ScheduleGuard:
     """
     Guard that checks foreshadow resolution compliance.
-    
+
     Ensures that foreshadows are resolved by their due episode.
     """
 
@@ -79,7 +79,9 @@ class ScheduleGuard:
             results["passed"] = False
             # Create error message
             flag_messages = [flag_data["message"] for flag_data in flags.values()]
-            error_message = "Foreshadow schedule violations: " + "; ".join(flag_messages)
+            error_message = "Foreshadow schedule violations: " + "; ".join(
+                flag_messages
+            )
 
             raise RetryException(
                 message=error_message, flags=flags, guard_name="schedule_guard"

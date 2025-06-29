@@ -10,7 +10,7 @@ import os
 import tempfile
 from unittest.mock import patch
 
-from plugins.foreshadow_scheduler import (
+from src.plugins.foreshadow_scheduler import (
     schedule_foreshadow,
     track_payoff,
     get_foreshadows,
@@ -33,7 +33,7 @@ class TestForeshadowScheduler:
 
         # Patch the file path to use our temporary file
         self.file_path_patcher = patch(
-            "plugins.foreshadow_scheduler._get_foreshadow_file_path"
+            "src.plugins.foreshadow_scheduler._get_foreshadow_file_path"
         )
         self.mock_file_path = self.file_path_patcher.start()
         self.mock_file_path.return_value = self.test_file
@@ -223,7 +223,9 @@ class TestForeshadowScheduler:
     def test_get_overdue_foreshadows(self):
         """Test getting overdue foreshadows."""
         # Create foreshadows with different due episodes
-        with patch("plugins.foreshadow_scheduler._calculate_due_episode") as mock_calc:
+        with patch(
+            "src.plugins.foreshadow_scheduler._calculate_due_episode"
+        ) as mock_calc:
             # Mock specific due episodes
             mock_calc.side_effect = [15, 25, 35]  # Different due episodes
 
