@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-test_anchor_flow.py
+run_anchor_flow.py
 
 Day 15: Anchor-Driven Integration Test
 
@@ -177,8 +177,8 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python scripts/test_anchor_flow.py                    # Use default anchors.json
-  python scripts/test_anchor_flow.py --anchors custom.json  # Use custom anchors file
+  python scripts/run_anchor_flow.py                    # Use default anchors.json
+  python scripts/run_anchor_flow.py --anchors custom.json  # Use custom anchors file
 
 Expected Output:
   ✅ All anchor events found → Exit code 0

@@ -17,7 +17,7 @@ class TestAnchorFlow:
 
     def setup_method(self):
         """Set up test environment."""
-        self.script_path = Path(__file__).parent.parent.parent / "scripts" / "test_anchor_flow.py"
+        self.script_path = Path(__file__).parent.parent.parent / "scripts" / "run_anchor_flow.py"
         self.temp_dir = tempfile.mkdtemp()
         
     def teardown_method(self):

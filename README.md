@@ -48,7 +48,7 @@ Expected output format:
 Test anchor-driven integration flow to ensure all 5 anchor events appear within their expected episodes:
 
 ```bash
-python scripts/test_anchor_flow.py
+python scripts/run_anchor_flow.py
 ```
 
 This validates that all anchor events from `data/anchors.json` appear within their target episodes (anchor_ep ± 1) across a 20-episode simulation:
