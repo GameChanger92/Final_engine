@@ -25,6 +25,7 @@ sys.path.insert(0, str(project_root / "src"))
 
 from src.plugins.anchor_guard import AnchorGuard
 from src.main import run_pipeline
+from src.utils.path_helper import data_path
 
 
 def simulate_episode_content(episode_num: int) -> str:
@@ -64,7 +65,7 @@ def simulate_episode_content(episode_num: int) -> str:
     return enhanced_content
 
 
-def run_anchor_flow_test(anchors_path: str = "data/anchors.json") -> bool:
+def run_anchor_flow_test(anchors_path: str = None, project: str = "default") -> bool:
     """
     Run the complete anchor-driven integration test.
     
@@ -73,8 +74,10 @@ def run_anchor_flow_test(anchors_path: str = "data/anchors.json") -> bool:
     
     Parameters
     ----------
-    anchors_path : str
-        Path to anchors.json file
+    anchors_path : str, optional
+        Path to anchors.json file. If None, uses default path for project.
+    project : str, optional
+        Project ID for path resolution, defaults to "default"
     
     Returns
     -------
@@ -85,7 +88,10 @@ def run_anchor_flow_test(anchors_path: str = "data/anchors.json") -> bool:
     print("=" * 60)
     
     # Initialize anchor guard
-    anchor_guard = AnchorGuard(anchors_path)
+    if anchors_path is None:
+        anchor_guard = AnchorGuard(project=project)
+    else:
+        anchor_guard = AnchorGuard(anchors_path=anchors_path)
     
     if not anchor_guard.anchors:
         print("❌ ERROR: No anchors found in anchors.json")
@@ -177,8 +183,9 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python scripts/run_anchor_flow.py                    # Use default anchors.json
-  python scripts/run_anchor_flow.py --anchors custom.json  # Use custom anchors file
+  python scripts/run_anchor_flow.py                                   # Use default project
+  python scripts/run_anchor_flow.py --project-id demo_novel          # Use demo project
+  python scripts/run_anchor_flow.py --anchors custom.json            # Use custom anchors file
 
 Expected Output:
   ✅ All anchor events found → Exit code 0
@@ -189,14 +196,21 @@ Expected Output:
     parser.add_argument(
         "--anchors",
         type=str,
-        default="data/anchors.json",
-        help="Path to anchors.json file (default: data/anchors.json)"
+        default=None,
+        help="Path to anchors.json file (default: uses project structure)"
+    )
+    
+    parser.add_argument(
+        "--project-id",
+        type=str,
+        default="default",
+        help='Project ID for the story (defaults to "default")'
     )
     
     args = parser.parse_args()
     
     try:
-        success = run_anchor_flow_test(args.anchors)
+        success = run_anchor_flow_test(args.anchors, args.project_id)
         
         if success:
             print("\n🎉 SUCCESS: All anchor events validated!")

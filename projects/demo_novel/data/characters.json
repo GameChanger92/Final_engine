@@ -1,0 +1,15 @@
+{
+  "MC": {
+    "name": "이민준",
+    "birth": "2002-07-15",
+    "hometown": "부산",
+    "immutable": ["birth", "hometown"]
+  },
+  "Alice": {
+    "name": "소피아",
+    "role": "hero",
+    "age": 25,
+    "background": "Magic Academy",
+    "immutable": ["age", "background"]
+  }
+}
