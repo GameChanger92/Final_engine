@@ -240,27 +240,27 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
     # Context Builder Test (Day 20 requirement)
     try:
         from src.pipeline.context_builder import ContextBuilder
-        
+
         print("\n🔧 Testing Context Builder...")
         context_builder = ContextBuilder(project=project)
-        
+
         # Create sample scenes for context building
         sample_scenes = [
             f"Episode {episode_num} Scene 1: The adventure begins",
             f"Episode {episode_num} Scene 2: Character development",
-            f"Episode {episode_num} Scene 3: Conflict resolution"
+            f"Episode {episode_num} Scene 3: Conflict resolution",
         ]
-        
+
         # Build context with the new enhanced builder
         context = context_builder.build_context(
             scenes=sample_scenes,
             previous_episode=f"Previous episode {episode_num-1} summary",
-            scene_text_for_vector=sample_scenes[0]
+            scene_text_for_vector=sample_scenes[0],
         )
-        
+
         print("✅ Context Builder PASS")
         print(f"📄 Generated context: {len(context)} characters")
-        
+
     except Exception as e:
         print(f"⚠️  Context Builder ERROR: {e}")
 
