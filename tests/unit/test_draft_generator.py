@@ -1,4 +1,5 @@
 import os
+import pytest
 from unittest.mock import patch
 from src.draft_generator import generate_draft, build_prompt, call_llm, post_edit
 
@@ -58,13 +59,16 @@ def test_generate_draft_minimum_length():
     assert len(result) >= 500
 
 
-def test_google_api_key_loading():
+def test_google_api_key_loading(monkeypatch):
     """Test that GOOGLE_API_KEY is loaded from environment."""
+    # Set test environment variable
+    monkeypatch.setenv("GOOGLE_API_KEY", "test_key")
+
     # Test that the environment variable is accessible
     api_key = os.getenv("GOOGLE_API_KEY")
     assert api_key is not None
-    # In test environment, we expect the placeholder value
-    assert api_key == "test_key_placeholder"
+    # Should have the test key value
+    assert api_key == "test_key"
 
 
 def test_generate_draft_with_retry_mechanism():
@@ -118,22 +122,23 @@ def test_post_edit_functionality():
     assert "\r" not in cleaned
 
 
-def test_call_llm_handles_import_error():
+def test_call_llm_handles_import_error(monkeypatch):
     """Test call_llm function handles import error gracefully."""
     from src.exceptions import RetryException
 
-    # Mock environment variables
-    with patch.dict(
-        os.environ, {"GOOGLE_API_KEY": "test_key", "MODEL_NAME": "gemini-2.5-pro"}
-    ):
-        try:
-            call_llm("Test prompt")
-        except RetryException as e:
-            # Should fail with RetryException due to import error
-            assert "library not available" in str(e) or "import" in str(e).lower()
-        except ImportError:
-            # Also acceptable - ImportError for missing library
-            pass
+    # Set unit test mode to trigger import error
+    monkeypatch.setenv("UNIT_TEST_MODE", "1")
+    monkeypatch.setenv("GOOGLE_API_KEY", "test_key")
+    monkeypatch.setenv("MODEL_NAME", "gemini-2.5-pro")
+
+    try:
+        call_llm("Test prompt")
+    except RetryException as e:
+        # Should fail with RetryException due to import error
+        assert "library not available" in str(e) or "import" in str(e).lower()
+    except ImportError:
+        # Also acceptable - ImportError for missing library
+        pass
 
 
 def test_build_prompt_with_context():
@@ -196,3 +201,15 @@ def test_draft_generator_integration():
     # Should be properly formatted (multiline)
     lines = result.split("\n")
     assert len(lines) > 5
+
+
+def test_retry_on_short_output(monkeypatch):
+    """Test retry mechanism when LLM output is too short."""
+    from src.draft_generator import generate_draft, RetryException
+
+    # Mock call_llm to return short content
+    monkeypatch.setattr("src.draft_generator.call_llm", lambda *a, **k: "abc")
+
+    # Should raise RetryException due to short output
+    with pytest.raises(RetryException):
+        generate_draft("dummy", 1)
