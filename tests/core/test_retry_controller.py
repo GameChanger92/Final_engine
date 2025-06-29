@@ -5,8 +5,6 @@ Tests for the Retry Controller - comprehensive test suite.
 Tests retry functionality, backoff intervals, and error handling.
 """
 
-import time
-import logging
 from unittest.mock import Mock, patch
 import pytest
 from src.core.retry_controller import run_with_retry
@@ -20,9 +18,9 @@ class TestRetryController:
         """Test successful execution on first attempt."""
         mock_func = Mock(return_value="success")
         mock_func.__name__ = "test_func"
-        
+
         result = run_with_retry(mock_func, "arg1", kwarg1="value1")
-        
+
         assert result == "success"
         assert mock_func.call_count == 1
         mock_func.assert_called_with("arg1", kwarg1="value1")
@@ -33,11 +31,11 @@ class TestRetryController:
         mock_func.__name__ = "test_func"
         mock_func.side_effect = [
             RetryException("First attempt failed", guard_name="test_guard"),
-            "success"
+            "success",
         ]
-        
+
         result = run_with_retry(mock_func, max_retry=2)
-        
+
         assert result == "success"
         assert mock_func.call_count == 2
 
@@ -48,11 +46,11 @@ class TestRetryController:
         mock_func.side_effect = [
             RetryException("First attempt failed", guard_name="test_guard"),
             RetryException("Second attempt failed", guard_name="test_guard"),
-            "success"
+            "success",
         ]
-        
+
         result = run_with_retry(mock_func, max_retry=2)
-        
+
         assert result == "success"
         assert mock_func.call_count == 3
 
@@ -63,12 +61,12 @@ class TestRetryController:
         mock_func.side_effect = [
             RetryException("First attempt failed", guard_name="test_guard"),
             RetryException("Second attempt failed", guard_name="test_guard"),
-            RetryException("Third attempt failed", guard_name="test_guard")
+            RetryException("Third attempt failed", guard_name="test_guard"),
         ]
-        
+
         with pytest.raises(RetryException) as exc_info:
             run_with_retry(mock_func, max_retry=2)
-        
+
         assert mock_func.call_count == 3
         exception = exc_info.value
         # The exception messages include guard name formatting, so check that all messages are present
@@ -84,19 +82,17 @@ class TestRetryController:
         mock_func = Mock()
         mock_func.__name__ = "test_func"
         mock_func.side_effect = RetryException(
-            "Test failure", 
-            flags=test_flags, 
-            guard_name="test_guard"
+            "Test failure", flags=test_flags, guard_name="test_guard"
         )
-        
+
         with pytest.raises(RetryException) as exc_info:
             run_with_retry(mock_func, max_retry=1)
-        
+
         exception = exc_info.value
         assert exception.flags == test_flags
         assert exception.guard_name == "test_guard"
 
-    @patch('time.sleep')
+    @patch("time.sleep")
     def test_run_with_retry_backoff_intervals(self, mock_sleep):
         """Test that exponential backoff intervals are correct."""
         mock_func = Mock()
@@ -104,12 +100,12 @@ class TestRetryController:
         mock_func.side_effect = [
             RetryException("First attempt failed", guard_name="test_guard"),
             RetryException("Second attempt failed", guard_name="test_guard"),
-            RetryException("Third attempt failed", guard_name="test_guard")
+            RetryException("Third attempt failed", guard_name="test_guard"),
         ]
-        
+
         with pytest.raises(RetryException):
             run_with_retry(mock_func, max_retry=2)
-        
+
         # Verify sleep was called with correct intervals
         expected_calls = [0.5, 1.0]  # 0.5 * (attempt + 1) for attempts 0 and 1
         actual_calls = [call[0][0] for call in mock_sleep.call_args_list]
@@ -121,10 +117,10 @@ class TestRetryController:
         mock_func = Mock()
         mock_func.__name__ = "test_func"
         mock_func.side_effect = ValueError("Not a retry exception")
-        
+
         with pytest.raises(ValueError) as exc_info:
             run_with_retry(mock_func, max_retry=2)
-        
+
         assert mock_func.call_count == 1
         assert str(exc_info.value) == "Not a retry exception"
 
@@ -137,11 +133,11 @@ class TestRetryController:
             RetryException("Attempt 2 failed", guard_name="test_guard"),
             RetryException("Attempt 3 failed", guard_name="test_guard"),
             RetryException("Attempt 4 failed", guard_name="test_guard"),
-            "success"
+            "success",
         ]
-        
+
         result = run_with_retry(mock_func, max_retry=4)
-        
+
         assert result == "success"
         assert mock_func.call_count == 5
 
@@ -149,11 +145,13 @@ class TestRetryController:
         """Test with max_retry=0 (only one attempt)."""
         mock_func = Mock()
         mock_func.__name__ = "test_func"
-        mock_func.side_effect = RetryException("Only attempt failed", guard_name="test_guard")
-        
+        mock_func.side_effect = RetryException(
+            "Only attempt failed", guard_name="test_guard"
+        )
+
         with pytest.raises(RetryException):
             run_with_retry(mock_func, max_retry=0)
-        
+
         assert mock_func.call_count == 1
 
     def test_run_with_retry_function_arguments_preserved(self):
@@ -162,62 +160,60 @@ class TestRetryController:
         mock_func.__name__ = "test_func"
         mock_func.side_effect = [
             RetryException("First attempt failed", guard_name="test_guard"),
-            "success"
+            "success",
         ]
-        
+
         result = run_with_retry(
-            mock_func, 
-            "arg1", "arg2", 
-            kwarg1="value1", 
-            kwarg2="value2",
-            max_retry=2
+            mock_func, "arg1", "arg2", kwarg1="value1", kwarg2="value2", max_retry=2
         )
-        
+
         assert result == "success"
         assert mock_func.call_count == 2
-        
+
         # Verify all calls had the same arguments
         for call in mock_func.call_args_list:
             assert call[0] == ("arg1", "arg2")
             assert call[1] == {"kwarg1": "value1", "kwarg2": "value2"}
 
-    @patch('src.core.retry_controller.logger')
+    @patch("src.core.retry_controller.logger")
     def test_run_with_retry_logging_success(self, mock_logger):
         """Test logging for successful execution."""
         mock_func = Mock(return_value="success")
         mock_func.__name__ = "test_function"
-        
-        run_with_retry(mock_func, max_retry=2)
-        
-        mock_logger.info.assert_called_with("Retry Controller: Executing test_function (attempt 1/3)")
 
-    @patch('src.core.retry_controller.logger')
+        run_with_retry(mock_func, max_retry=2)
+
+        mock_logger.info.assert_called_with(
+            "Retry Controller: Executing test_function (attempt 1/3)"
+        )
+
+    @patch("src.core.retry_controller.logger")
     def test_run_with_retry_logging_retries(self, mock_logger):
         """Test logging for retry attempts."""
         mock_func = Mock()
         mock_func.__name__ = "test_function"
         mock_func.side_effect = [
             RetryException("First failed", guard_name="test_guard"),
-            "success"
+            "success",
         ]
-        
+
         run_with_retry(mock_func, max_retry=2)
-        
+
         # Check that retry logging occurred
         info_calls = [str(call) for call in mock_logger.info.call_args_list]
         assert any("retry 1/3" in call for call in info_calls)
         assert any("Waiting 0.5s before retry" in call for call in info_calls)
 
-    @patch('src.core.retry_controller.logger')
+    @patch("src.core.retry_controller.logger")
     def test_run_with_retry_logging_final_failure(self, mock_logger):
         """Test logging for final failure after all retries."""
         mock_func = Mock()
         mock_func.__name__ = "test_function"
         mock_func.side_effect = RetryException("Always fails", guard_name="test_guard")
-        
+
         with pytest.raises(RetryException):
             run_with_retry(mock_func, max_retry=1)
-        
+
         mock_logger.error.assert_called()
         error_call = str(mock_logger.error.call_args_list[0])
         assert "failed after 2 attempts" in error_call
@@ -228,12 +224,12 @@ class TestRetryController:
         mock_func.__name__ = "test_func"
         mock_func.side_effect = [
             RetryException("Retry this", guard_name="test_guard"),
-            ValueError("Don't retry this")
+            ValueError("Don't retry this"),
         ]
-        
+
         with pytest.raises(ValueError):
             run_with_retry(mock_func, max_retry=2)
-        
+
         assert mock_func.call_count == 2
 
     def test_run_with_retry_exception_without_guard_name(self):
@@ -241,9 +237,9 @@ class TestRetryController:
         mock_func = Mock()
         mock_func.__name__ = "test_function"
         mock_func.side_effect = RetryException("No guard name")
-        
+
         with pytest.raises(RetryException) as exc_info:
             run_with_retry(mock_func, max_retry=0)
-        
+
         exception = exc_info.value
         assert exception.guard_name == "test_function"
