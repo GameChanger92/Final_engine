@@ -326,6 +326,7 @@ def generate_fallback_draft(context: str, episode_num: int) -> str:
     result = (
         "=== [PLACEHOLDER DRAFT CONTENT] ===\n"
         "[Generated using fallback mode - replace with Gemini output when available]\n\n"
+        "Context used: (scenes + metadata omitted in fallback)\n\n"
         + fallback_text
     )
 
