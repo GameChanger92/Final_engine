@@ -7,7 +7,11 @@ Provides text embedding functionality using OpenAI's text-embedding models.
 
 import os
 from typing import List
-import openai
+
+try:
+    import openai
+except ModuleNotFoundError:
+    openai = None
 
 
 def embed_scene(text: str, model: str = "text-embedding-3-small") -> List[float]:
@@ -31,10 +35,13 @@ def embed_scene(text: str, model: str = "text-embedding-3-small") -> List[float]
     ValueError
         If text is empty or model is invalid
     RuntimeError
-        If OpenAI API call fails
+        If OpenAI API call fails or openai module is not available
     """
     if not text or not text.strip():
         raise ValueError("Text cannot be empty")
+
+    if openai is None:
+        raise RuntimeError("OpenAI module not available. Please install openai>=1.13")
 
     # Get OpenAI API key from environment
     api_key = os.getenv("OPENAI_API_KEY")

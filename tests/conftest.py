@@ -8,6 +8,15 @@ Provides shared fixtures and test project configuration.
 import pytest
 from pathlib import Path
 import json
+import sys
+import types
+
+# Mock OpenAI for testing
+dummy = types.ModuleType("openai")
+dummy.OpenAI = type("OpenAI", (), {})  # Create a mock OpenAI class
+dummy.Embedding = dummy
+dummy.Embedding.create = lambda input, model: {"data": [{"embedding": [0.0] * 1536}]}
+sys.modules["openai"] = dummy
 
 
 PROJECT_ID = "test_proj"
