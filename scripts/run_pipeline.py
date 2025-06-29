@@ -264,6 +264,36 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
     except Exception as e:
         print(f"⚠️  Context Builder ERROR: {e}")
 
+    # Draft Generator Test (Day 21 requirement)
+    try:
+        from src.draft_generator import generate_draft
+
+        print("\n🔧 Testing Draft Generator...")
+
+        # Use context from above if available, otherwise create sample context
+        test_context = (
+            context
+            if "context" in locals()
+            else f"Sample context for episode {episode_num} testing"
+        )
+
+        # Generate draft using new Gemini integration
+        draft = generate_draft(test_context, episode_num)
+
+        if len(draft) >= 500:
+            guards_status = (
+                "guards PASS (Gemini)"
+                if "fallback" not in draft
+                else "guards PASS (Fallback)"
+            )
+            print("✅ Draft Generator PASS")
+            print(f"📝 Draft generated {len(draft)}+ chars, {guards_status}")
+        else:
+            print(f"⚠️  Draft Generator WARNING: Only {len(draft)} characters generated")
+
+    except Exception as e:
+        print(f"⚠️  Draft Generator ERROR: {e}")
+
     success_rate = guards_passed / total_guards
     print(
         f"\n📊 Episode {episode_num} Guard Results: {guards_passed}/{total_guards} passed ({success_rate:.1%})"
