@@ -1,0 +1,23 @@
+{
+  "platform": "문피아",
+  "style": {
+    "tone": "친근한",
+    "voice": "1인칭",
+    "tense": "과거형",
+    "description_level": "detailed",
+    "dialogue_style": "natural"
+  },
+  "formatting": {
+    "paragraph_length": "medium",
+    "line_breaks": "double",
+    "emphasis": "bold"
+  },
+  "content_preferences": {
+    "romance_level": "light",
+    "action_intensity": "moderate",
+    "humor_level": "moderate",
+    "emotional_depth": "deep"
+  },
+  "target_audience": "young_adult",
+  "word_count_target": 2000
+}

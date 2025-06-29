@@ -1,0 +1,50 @@
+# Context for Story Generation
+
+## Character Information
+{% if characters %}
+{% for char_id, char_info in characters.items() %}
+**{{ char_info.name }}**: {{ char_info.background }}
+- 특성: {{ char_info.traits | join(', ') }}
+{% if char_info.relationships %}
+- 관계: {{ char_info.relationships | join(', ') }}
+{% endif %}
+{% endfor %}
+{% else %}
+[Character Info: TO BE ADDED]
+{% endif %}
+
+## Previous Episode Summary
+{% if previous_episode %}
+{{ previous_episode }}
+{% else %}
+[Previous Episode: TO BE ADDED]
+{% endif %}
+
+## Similar Scenes (Vector Search Results)
+{% if similar_scenes %}
+{% for scene_id, similarity in similar_scenes %}
+- {{ scene_id }} (유사도: {{ "%.2f"|format(similarity) }})
+{% endfor %}
+{% else %}
+[Vector Search: TO BE ADDED]
+{% endif %}
+
+## Story Elements
+{% if story_elements %}
+- 테마: {{ story_elements.themes | join(', ') }}
+- 톤: {{ story_elements.tone }}
+- 장르: {{ story_elements.genre }}
+{% endif %}
+
+## Style Guidelines
+{% if style %}
+- 플랫폼: {{ style.platform }}
+- 문체: {{ style.style.tone }}, {{ style.style.voice }}, {{ style.style.tense }}
+- 서술 수준: {{ style.style.description_level }}
+- 목표 단어 수: {{ style.word_count_target }}
+{% endif %}
+
+## Current Scenes
+{% for scene in scenes %}
+{{ loop.index }}. {{ scene }}
+{% endfor %}
