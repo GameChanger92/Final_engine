@@ -2,7 +2,7 @@
 
 [PLACEHOLDER DRAFT CONTENT]
 
-Context used: 522 characters
+Context used: 1129 characters
 
 This is a stub implementation that will be replaced
 with actual LLM-generated content in the future.
