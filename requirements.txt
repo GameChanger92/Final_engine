@@ -2,3 +2,4 @@ typer
 numpy>=1.24.0
 chromadb>=0.4
 openai>=1.13
+jinja2>=3.1
