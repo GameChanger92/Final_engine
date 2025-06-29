@@ -239,7 +239,7 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
 
     # Context Builder Test (Day 20 requirement)
     try:
-        from src.pipeline.context_builder import ContextBuilder
+        from src.context_builder import ContextBuilder
 
         print("\n🔧 Testing Context Builder...")
         context_builder = ContextBuilder(project=project)

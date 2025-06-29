@@ -1,11 +1,11 @@
 """
-Tests for the enhanced context builder in src/pipeline/context_builder.py
+Tests for the enhanced context builder in src/context_builder.py
 """
 
 import pytest
 from unittest.mock import Mock, patch
 
-from src.pipeline.context_builder import ContextBuilder, make_context
+from src.context_builder import ContextBuilder, make_context
 
 
 class TestContextBuilder:
@@ -102,7 +102,7 @@ class TestContextBuilder:
         similar_scenes = context_builder.get_similar_scenes(None)
         assert similar_scenes == []
 
-    @patch("src.pipeline.context_builder.VectorStore")
+    @patch("src.context_builder.VectorStore")
     def test_get_similar_scenes_with_results(self, mock_vector_store, context_builder):
         """Test getting similar scenes with mocked results."""
         # Mock vector store to return sample results
@@ -156,7 +156,7 @@ class TestContextBuilder:
         assert isinstance(context, str)
         # Should still have basic structure even with no scenes
 
-    @patch("src.pipeline.context_builder.VectorStore")
+    @patch("src.context_builder.VectorStore")
     def test_build_context_with_similar_scenes(
         self, mock_vector_store, context_builder, sample_scenes
     ):
@@ -219,7 +219,7 @@ class TestContextBuilder:
         assert "한글 씬 2" in context
         assert "한글 씬 3" in context
 
-    @patch("src.pipeline.context_builder.logger")
+    @patch("src.context_builder.logger")
     def test_logging_similar_scenes(self, mock_logger, context_builder, sample_scenes):
         """Test that similar scenes are logged properly."""
         with patch.object(context_builder, "get_similar_scenes") as mock_get_similar:
