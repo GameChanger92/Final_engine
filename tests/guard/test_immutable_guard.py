@@ -341,7 +341,7 @@ class TestImmutableGuard:
         # Patch the default snapshot path temporarily
         original_init = ImmutableGuard.__init__
 
-        def patched_init(self, snapshot_path="data/immutable_snapshot.json"):
+        def patched_init(self, *args, project="default", **kwargs):
             original_init(self, snapshot_path=temp_snapshot)
 
         ImmutableGuard.__init__ = patched_init
@@ -371,7 +371,7 @@ class TestImmutableGuard:
         # Patch the default snapshot path temporarily
         original_init = ImmutableGuard.__init__
 
-        def patched_init(self, snapshot_path="data/immutable_snapshot.json"):
+        def patched_init(self, *args, project="default", **kwargs):
             original_init(self, snapshot_path=temp_snapshot)
 
         ImmutableGuard.__init__ = patched_init
@@ -408,7 +408,7 @@ class TestImmutableGuard:
         # Patch the default snapshot path temporarily
         original_init = ImmutableGuard.__init__
 
-        def patched_init(self, snapshot_path="data/immutable_snapshot.json"):
+        def patched_init(self, *args, project="default", **kwargs):
             original_init(self, snapshot_path=temp_snapshot)
 
         ImmutableGuard.__init__ = patched_init

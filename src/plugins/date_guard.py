@@ -22,7 +22,7 @@ class DateGuard:
     Tracks episode dates and ensures they don't go backwards in time.
     """
 
-    def __init__(self, date_log_path: str = None, project: str = "default"):
+    def __init__(self, *args, project="default", **kwargs):
         """
         Initialize DateGuard.
 
@@ -34,11 +34,18 @@ class DateGuard:
         project : str, optional
             Project ID for path resolution, defaults to "default"
         """
+        # Handle backward compatibility for date_log_path parameter
+        date_log_path = None
+        if args:
+            date_log_path = args[0]
+        elif "date_log_path" in kwargs:
+            date_log_path = kwargs.pop("date_log_path")
+
+        self.project = project
         if date_log_path is None:
             self.date_log_path = data_path("episode_dates.json", project)
         else:
             self.date_log_path = date_log_path
-        self.project = project
 
     def _load_date_log(self) -> Dict[int, str]:
         """

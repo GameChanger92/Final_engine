@@ -22,7 +22,7 @@ class ImmutableGuard:
     current values to detect unauthorized changes.
     """
 
-    def __init__(self, snapshot_path: str = None, project: str = "default"):
+    def __init__(self, *args, project="default", **kwargs):
         """
         Initialize ImmutableGuard.
 
@@ -34,11 +34,18 @@ class ImmutableGuard:
         project : str, optional
             Project ID for path resolution, defaults to "default"
         """
+        # Handle backward compatibility for snapshot_path parameter
+        snapshot_path = None
+        if args:
+            snapshot_path = args[0]
+        elif "snapshot_path" in kwargs:
+            snapshot_path = kwargs.pop("snapshot_path")
+
+        self.project = project
         if snapshot_path is None:
             self.snapshot_path = data_path("immutable_snapshot.json", project)
         else:
             self.snapshot_path = snapshot_path
-        self.project = project
 
     def _load_characters(self, characters_path: str = None) -> Dict[str, Any]:
         """

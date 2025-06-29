@@ -24,7 +24,7 @@ class AnchorGuard:
     specified episode range (anchor_ep ± 1).
     """
 
-    def __init__(self, anchors_path: str = None, project: str = "default"):
+    def __init__(self, *args, project="default", **kwargs):
         """
         Initialize AnchorGuard with anchors file path.
 
@@ -36,6 +36,14 @@ class AnchorGuard:
         project : str, optional
             Project ID for path resolution, defaults to "default"
         """
+        # Handle backward compatibility for anchors_path parameter
+        anchors_path = None
+        if args:
+            anchors_path = args[0]
+        elif "anchors_path" in kwargs:
+            anchors_path = kwargs.pop("anchors_path")
+
+        self.project = project
         if anchors_path is None:
             self.anchors_path = data_path("anchors.json", project)
         else:

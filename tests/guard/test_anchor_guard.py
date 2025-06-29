@@ -273,9 +273,11 @@ class TestAnchorGuard:
         original_guard_class = anchor_module.AnchorGuard
 
         class TestAnchorGuard(original_guard_class):
-            def __init__(self, anchors_path="data/anchors.json"):
+            def __init__(self, *args, project="default", **kwargs):
+                anchors_path = args[0] if args else "data/anchors.json"
                 super().__init__(
-                    self.test_path if hasattr(self, "test_path") else anchors_path
+                    self.test_path if hasattr(self, "test_path") else anchors_path,
+                    project=project,
                 )
 
         TestAnchorGuard.test_path = self.anchors_path
@@ -300,9 +302,11 @@ class TestAnchorGuard:
         original_guard_class = anchor_module.AnchorGuard
 
         class TestAnchorGuard(original_guard_class):
-            def __init__(self, anchors_path="data/anchors.json"):
+            def __init__(self, *args, project="default", **kwargs):
+                anchors_path = args[0] if args else "data/anchors.json"
                 super().__init__(
-                    self.test_path if hasattr(self, "test_path") else anchors_path
+                    self.test_path if hasattr(self, "test_path") else anchors_path,
+                    project=project,
                 )
 
         TestAnchorGuard.test_path = self.anchors_path
@@ -327,9 +331,11 @@ class TestAnchorGuard:
         original_guard_class = anchor_module.AnchorGuard
 
         class TestAnchorGuard(original_guard_class):
-            def __init__(self, anchors_path="data/anchors.json"):
+            def __init__(self, *args, project="default", **kwargs):
+                anchors_path = args[0] if args else "data/anchors.json"
                 super().__init__(
-                    self.test_path if hasattr(self, "test_path") else anchors_path
+                    self.test_path if hasattr(self, "test_path") else anchors_path,
+                    project=project,
                 )
 
         TestAnchorGuard.test_path = self.anchors_path
