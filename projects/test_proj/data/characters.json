@@ -1,0 +1,14 @@
+{
+  "main_character": {
+    "name": "TestCharacter",
+    "role": "protagonist",
+    "traits": [
+      "brave",
+      "intelligent"
+    ],
+    "immutable": [
+      "name",
+      "role"
+    ]
+  }
+}

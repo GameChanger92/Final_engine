@@ -1,0 +1,10 @@
+=== Episode 2 Draft ===
+
+[PLACEHOLDER DRAFT CONTENT]
+
+Context used: 522 characters
+
+This is a stub implementation that will be replaced
+with actual LLM-generated content in the future.
+
+Episode 2 - Generated draft complete.

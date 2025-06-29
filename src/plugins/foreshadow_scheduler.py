@@ -27,27 +27,33 @@ import random
 import re
 import uuid
 from typing import Dict, List
+from src.utils.path_helper import data_path
 
 
 # Default total episodes for due calculation
 TOTAL_EPISODES = 250
 
 
-def _get_foreshadow_file_path() -> str:
+def _get_foreshadow_file_path(project: str = "default") -> str:
     """Get the path to the foreshadow.json file."""
-    return os.path.join(os.path.dirname(__file__), "..", "data", "foreshadow.json")
+    return str(data_path("foreshadow.json", project))
 
 
-def _load_foreshadows() -> Dict:
+def _load_foreshadows(project: str = "default") -> Dict:
     """
     Load foreshadows from the JSON file.
+
+    Parameters
+    ----------
+    project : str, optional
+        Project ID for path resolution, defaults to "default"
 
     Returns
     -------
     Dict
         Dictionary containing foreshadows data
     """
-    file_path = _get_foreshadow_file_path()
+    file_path = _get_foreshadow_file_path(project)
 
     if not os.path.exists(file_path):
         # Create empty structure if file doesn't exist
@@ -61,7 +67,7 @@ def _load_foreshadows() -> Dict:
         return {"foreshadows": []}
 
 
-def _save_foreshadows(data: Dict) -> None:
+def _save_foreshadows(data: Dict, project: str = "default") -> None:
     """
     Save foreshadows to the JSON file.
 
@@ -69,8 +75,10 @@ def _save_foreshadows(data: Dict) -> None:
     ----------
     data : Dict
         Dictionary containing foreshadows data
+    project : str, optional
+        Project ID for path resolution, defaults to "default"
     """
-    file_path = _get_foreshadow_file_path()
+    file_path = _get_foreshadow_file_path(project)
 
     # Ensure directory exists
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
@@ -134,7 +142,9 @@ def _calculate_due_episode(
     return min(due_episode, total_episodes)
 
 
-def schedule_foreshadow(hint: str, introduced_ep: int) -> dict:
+def schedule_foreshadow(
+    hint: str, introduced_ep: int, project: str = "default"
+) -> dict:
     """
     Schedule a new foreshadow element.
 
@@ -144,6 +154,8 @@ def schedule_foreshadow(hint: str, introduced_ep: int) -> dict:
         Description of the foreshadow hint
     introduced_ep : int
         Episode number where the foreshadow is introduced
+    project : str, optional
+        Project ID for path resolution, defaults to "default"
 
     Returns
     -------
@@ -151,7 +163,7 @@ def schedule_foreshadow(hint: str, introduced_ep: int) -> dict:
         Created foreshadow record with id, hint, introduced, due, and payoff fields
     """
     # Load existing foreshadows
-    data = _load_foreshadows()
+    data = _load_foreshadows(project)
 
     # Get existing IDs for uniqueness check
     existing_ids = [f["id"] for f in data["foreshadows"]]
@@ -173,12 +185,12 @@ def schedule_foreshadow(hint: str, introduced_ep: int) -> dict:
 
     # Add to data and save
     data["foreshadows"].append(foreshadow)
-    _save_foreshadows(data)
+    _save_foreshadows(data, project)
 
     return foreshadow
 
 
-def track_payoff(episode: int, content: str) -> bool:
+def track_payoff(episode: int, content: str, project: str = "default") -> bool:
     """
     Track foreshadow payoff by looking for resolution patterns in content.
 
@@ -191,6 +203,8 @@ def track_payoff(episode: int, content: str) -> bool:
         Current episode number
     content : str
         Episode content to analyze for resolution patterns
+    project : str, optional
+        Project ID for path resolution, defaults to "default"
 
     Returns
     -------
@@ -198,7 +212,7 @@ def track_payoff(episode: int, content: str) -> bool:
         True if any foreshadows were resolved, False otherwise
     """
     # Load existing foreshadows
-    data = _load_foreshadows()
+    data = _load_foreshadows(project)
 
     # Pattern to match [RESOLVED:{id}]
     pattern = r"\[RESOLVED:([^\]]+)\]"
@@ -218,38 +232,50 @@ def track_payoff(episode: int, content: str) -> bool:
 
     # Save updated data if any resolutions were found
     if resolved_any:
-        _save_foreshadows(data)
+        _save_foreshadows(data, project)
 
     return resolved_any
 
 
-def get_foreshadows() -> List[dict]:
+def get_foreshadows(project: str = "default") -> List[dict]:
     """
     Get all foreshadows.
+
+    Parameters
+    ----------
+    project : str, optional
+        Project ID for path resolution, defaults to "default"
 
     Returns
     -------
     List[dict]
         List of all foreshadow records
     """
-    data = _load_foreshadows()
+    data = _load_foreshadows(project)
     return data["foreshadows"]
 
 
-def get_unresolved_foreshadows() -> List[dict]:
+def get_unresolved_foreshadows(project: str = "default") -> List[dict]:
     """
     Get all unresolved foreshadows.
+
+    Parameters
+    ----------
+    project : str, optional
+        Project ID for path resolution, defaults to "default"
 
     Returns
     -------
     List[dict]
         List of foreshadow records where payoff is None
     """
-    data = _load_foreshadows()
+    data = _load_foreshadows(project)
     return [f for f in data["foreshadows"] if f["payoff"] is None]
 
 
-def get_overdue_foreshadows(current_episode: int) -> List[dict]:
+def get_overdue_foreshadows(
+    current_episode: int, project: str = "default"
+) -> List[dict]:
     """
     Get foreshadows that are overdue for resolution.
 
@@ -257,11 +283,13 @@ def get_overdue_foreshadows(current_episode: int) -> List[dict]:
     ----------
     current_episode : int
         Current episode number
+    project : str, optional
+        Project ID for path resolution, defaults to "default"
 
     Returns
     -------
     List[dict]
         List of foreshadow records that are past their due episode and unresolved
     """
-    unresolved = get_unresolved_foreshadows()
+    unresolved = get_unresolved_foreshadows(project)
     return [f for f in unresolved if current_episode > f["due"]]

@@ -11,6 +11,7 @@ import json
 import os
 from typing import Dict, Any
 from src.exceptions import RetryException
+from src.utils.path_helper import data_path
 
 
 class ImmutableGuard:
@@ -21,33 +22,49 @@ class ImmutableGuard:
     current values to detect unauthorized changes.
     """
 
-    def __init__(self, snapshot_path: str = "data/immutable_snapshot.json"):
+    def __init__(self, *args, project="default", **kwargs):
         """
         Initialize ImmutableGuard.
 
         Parameters
         ----------
-        snapshot_path : str
-            Path to the snapshot file for storing immutable field values
+        snapshot_path : str, optional
+            Path to the snapshot file for storing immutable field values.
+            If None, uses default path for the project.
+        project : str, optional
+            Project ID for path resolution, defaults to "default"
         """
-        self.snapshot_path = snapshot_path
+        # Handle backward compatibility for snapshot_path parameter
+        snapshot_path = None
+        if args:
+            snapshot_path = args[0]
+        elif "snapshot_path" in kwargs:
+            snapshot_path = kwargs.pop("snapshot_path")
 
-    def _load_characters(
-        self, characters_path: str = "data/characters.json"
-    ) -> Dict[str, Any]:
+        self.project = project
+        if snapshot_path is None:
+            self.snapshot_path = data_path("immutable_snapshot.json", project)
+        else:
+            self.snapshot_path = snapshot_path
+
+    def _load_characters(self, characters_path: str = None) -> Dict[str, Any]:
         """
         Load character data from JSON file.
 
         Parameters
         ----------
-        characters_path : str
-            Path to characters.json file
+        characters_path : str, optional
+            Path to characters.json file.
+            If None, uses default path for the project.
 
         Returns
         -------
         Dict[str, Any]
             Character data dictionary
         """
+        if characters_path is None:
+            characters_path = data_path("characters.json", self.project)
+
         try:
             with open(characters_path, "r", encoding="utf-8") as f:
                 return json.load(f)
@@ -225,7 +242,9 @@ class ImmutableGuard:
         return results
 
 
-def check_immutable_guard(current_chars: Dict[str, Any]) -> Dict[str, Any]:
+def check_immutable_guard(
+    current_chars: Dict[str, Any], project: str = "default"
+) -> Dict[str, Any]:
     """
     Check immutable guard with current character data.
 
@@ -233,6 +252,8 @@ def check_immutable_guard(current_chars: Dict[str, Any]) -> Dict[str, Any]:
     ----------
     current_chars : Dict[str, Any]
         Current character data
+    project : str, optional
+        Project ID for path resolution, defaults to "default"
 
     Returns
     -------
@@ -244,11 +265,11 @@ def check_immutable_guard(current_chars: Dict[str, Any]) -> Dict[str, Any]:
     RetryException
         If immutable violations are detected
     """
-    guard = ImmutableGuard()
+    guard = ImmutableGuard(project=project)
     return guard.check(current_chars)
 
 
-def immutable_guard(current_chars: Dict[str, Any]) -> bool:
+def immutable_guard(current_chars: Dict[str, Any], project: str = "default") -> bool:
     """
     Main entry point for immutable guard check.
 
@@ -256,6 +277,8 @@ def immutable_guard(current_chars: Dict[str, Any]) -> bool:
     ----------
     current_chars : Dict[str, Any]
         Current character data to check
+    project : str, optional
+        Project ID for path resolution, defaults to "default"
 
     Returns
     -------
@@ -268,7 +291,7 @@ def immutable_guard(current_chars: Dict[str, Any]) -> bool:
         If immutable violations are detected
     """
     try:
-        check_immutable_guard(current_chars)
+        check_immutable_guard(current_chars, project)
         return True
     except RetryException:
         # Re-raise the exception to be handled by the caller

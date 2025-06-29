@@ -6,8 +6,13 @@ my-novel-engine
 Generate your first episode with the integrated pipeline:
 
 ```bash
+# Generate for default project
 python -m src.main run --episode 1
-cat output/episode_1.txt
+cat projects/default/outputs/episode_1.txt
+
+# Generate for a specific project
+python -m src.main run --episode 1 --project-id demo_novel
+cat projects/demo_novel/outputs/episode_1.txt
 ```
 
 This will run the complete pipeline:
@@ -17,14 +22,18 @@ This will run the complete pipeline:
 4. **Context Builder** → Combines scenes into narrative context
 5. **Draft Generator** → Produces final episode draft
 
-The output is saved to `output/episode_1.txt` with placeholder content that will be replaced by actual LLM-generated text in future versions.
+The output is saved to `projects/{project-id}/outputs/episode_1.txt` with placeholder content that will be replaced by actual LLM-generated text in future versions.
 
 ## Guard Chain Testing
 
 Test the complete guard validation system with the pipeline smoke test:
 
 ```bash
+# Test default project
 python scripts/run_pipeline.py --episodes 1-20
+
+# Test specific project
+python scripts/run_pipeline.py --project-id demo_novel --episodes 1-3
 ```
 
 This runs all guards in sequence for each episode:
@@ -48,10 +57,14 @@ Expected output format:
 Test anchor-driven integration flow to ensure all 5 anchor events appear within their expected episodes:
 
 ```bash
+# Test default project
 python scripts/run_anchor_flow.py
+
+# Test specific project  
+python scripts/run_anchor_flow.py --project-id demo_novel
 ```
 
-This validates that all anchor events from `data/anchors.json` appear within their target episodes (anchor_ep ± 1) across a 20-episode simulation:
+This validates that all anchor events from `projects/{project-id}/data/anchors.json` appear within their target episodes (anchor_ep ± 1) across a 20-episode simulation:
 
 - **ANCHOR_01**: 주인공 첫 등장 (Episode 1)
 - **ANCHOR_02**: 첫 번째 시련 (Episode 5) 
@@ -76,12 +89,12 @@ Exit codes:
 # Show pipeline information
 python -m src.main info
 
-# Generate different episodes
-python -m src.main run --episode 5
-python -m src.main run --episode 10
+# Generate different episodes for different projects
+python -m src.main run --episode 5 --project-id default
+python -m src.main run --episode 10 --project-id demo_novel
 
 # Test guard chain with pipeline smoke test
-python scripts/run_pipeline.py --episodes 1-20
-python scripts/run_pipeline.py --episodes 5      # Single episode
-python scripts/run_pipeline.py --episodes 10-15  # Episode range
+python scripts/run_pipeline.py --project-id default --episodes 1-20
+python scripts/run_pipeline.py --project-id demo_novel --episodes 5      # Single episode
+python scripts/run_pipeline.py --project-id default --episodes 10-15     # Episode range
 ```

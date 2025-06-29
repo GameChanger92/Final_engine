@@ -12,6 +12,7 @@ import json
 from pathlib import Path
 from typing import Dict, List, Any
 from src.exceptions import RetryException
+from src.utils.path_helper import data_path
 
 
 class RuleGuard:
@@ -22,16 +23,22 @@ class RuleGuard:
     and raises RetryException if any violations are found.
     """
 
-    def __init__(self, rule_path: str = "data/rules.json"):
+    def __init__(self, rule_path: str = None, project: str = "default"):
         """
         Initialize RuleGuard with rules file path.
 
         Parameters
         ----------
-        rule_path : str
-            Path to rules.json file containing patterns and messages
+        rule_path : str, optional
+            Path to rules.json file containing patterns and messages.
+            If None, uses default path for the project.
+        project : str, optional
+            Project ID for path resolution, defaults to "default"
         """
-        self.rule_path = Path(rule_path)
+        if rule_path is None:
+            self.rule_path = data_path("rules.json", project)
+        else:
+            self.rule_path = Path(rule_path)
         self.rules = self._load_rules()
 
     def _load_rules(self) -> List[Dict[str, str]]:
@@ -155,7 +162,9 @@ class RuleGuard:
         return results
 
 
-def check_rule_guard(text: str, rule_path: str = "data/rules.json") -> Dict[str, Any]:
+def check_rule_guard(
+    text: str, rule_path: str = None, project: str = "default"
+) -> Dict[str, Any]:
     """
     Convenience function to run rule guard check.
 
@@ -163,8 +172,11 @@ def check_rule_guard(text: str, rule_path: str = "data/rules.json") -> Dict[str,
     ----------
     text : str
         Text to analyze
-    rule_path : str
-        Path to rules.json file
+    rule_path : str, optional
+        Path to rules.json file.
+        If None, uses default path for the project.
+    project : str, optional
+        Project ID for path resolution, defaults to "default"
 
     Returns
     -------
@@ -176,11 +188,11 @@ def check_rule_guard(text: str, rule_path: str = "data/rules.json") -> Dict[str,
     RetryException
         If text violates any rules
     """
-    guard = RuleGuard(rule_path=rule_path)
+    guard = RuleGuard(rule_path=rule_path, project=project)
     return guard.check(text)
 
 
-def rule_guard(text: str, rule_path: str = "data/rules.json") -> bool:
+def rule_guard(text: str, rule_path: str = None, project: str = "default") -> bool:
     """
     Main entry point for rule guard check.
 
@@ -188,8 +200,11 @@ def rule_guard(text: str, rule_path: str = "data/rules.json") -> bool:
     ----------
     text : str
         Text to check
-    rule_path : str
-        Path to rules.json file
+    rule_path : str, optional
+        Path to rules.json file.
+        If None, uses default path for the project.
+    project : str, optional
+        Project ID for path resolution, defaults to "default"
 
     Returns
     -------
@@ -202,7 +217,7 @@ def rule_guard(text: str, rule_path: str = "data/rules.json") -> bool:
         If text violates any rules
     """
     try:
-        check_rule_guard(text, rule_path)
+        check_rule_guard(text, rule_path, project)
         return True
     except RetryException:
         # Re-raise the exception to be handled by the caller

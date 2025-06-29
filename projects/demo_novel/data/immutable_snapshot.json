@@ -1,0 +1,10 @@
+{
+  "MC": {
+    "birth": "2002-07-15",
+    "hometown": "부산"
+  },
+  "Alice": {
+    "age": 25,
+    "background": "Magic Academy"
+  }
+}

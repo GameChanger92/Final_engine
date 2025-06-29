@@ -266,7 +266,7 @@ class TestDateGuard:
         # Patch the default log path temporarily
         original_init = DateGuard.__init__
 
-        def patched_init(self, date_log_path="data/episode_dates.json"):
+        def patched_init(self, *args, project="default", **kwargs):
             original_init(self, date_log_path=temp_log)
 
         DateGuard.__init__ = patched_init
@@ -290,7 +290,7 @@ class TestDateGuard:
         # Patch the default log path temporarily
         original_init = DateGuard.__init__
 
-        def patched_init(self, date_log_path="data/episode_dates.json"):
+        def patched_init(self, *args, project="default", **kwargs):
             original_init(self, date_log_path=temp_log)
 
         DateGuard.__init__ = patched_init
@@ -319,7 +319,7 @@ class TestDateGuard:
         # Patch the default log path temporarily
         original_init = DateGuard.__init__
 
-        def patched_init(self, date_log_path="data/episode_dates.json"):
+        def patched_init(self, *args, project="default", **kwargs):
             original_init(self, date_log_path=temp_log)
 
         DateGuard.__init__ = patched_init

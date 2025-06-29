@@ -13,6 +13,7 @@ import re
 from pathlib import Path
 from typing import Dict, List, Any
 from src.exceptions import RetryException
+from src.utils.path_helper import data_path
 
 
 class AnchorGuard:
@@ -23,16 +24,30 @@ class AnchorGuard:
     specified episode range (anchor_ep ± 1).
     """
 
-    def __init__(self, anchors_path: str = "data/anchors.json"):
+    def __init__(self, *args, project="default", **kwargs):
         """
         Initialize AnchorGuard with anchors file path.
 
         Parameters
         ----------
-        anchors_path : str
-            Path to anchors.json file containing anchor events
+        anchors_path : str, optional
+            Path to anchors.json file containing anchor events.
+            If None, uses default path for the project.
+        project : str, optional
+            Project ID for path resolution, defaults to "default"
         """
-        self.anchors_path = Path(anchors_path)
+        # Handle backward compatibility for anchors_path parameter
+        anchors_path = None
+        if args:
+            anchors_path = args[0]
+        elif "anchors_path" in kwargs:
+            anchors_path = kwargs.pop("anchors_path")
+
+        self.project = project
+        if anchors_path is None:
+            self.anchors_path = data_path("anchors.json", project)
+        else:
+            self.anchors_path = Path(anchors_path)
         self.anchors = self._load_anchors()
 
     def _load_anchors(self) -> List[Dict[str, Any]]:
@@ -248,7 +263,9 @@ class AnchorGuard:
         return results
 
 
-def check_anchor_guard(episode_content: str, episode_num: int) -> Dict[str, Any]:
+def check_anchor_guard(
+    episode_content: str, episode_num: int, project: str = "default"
+) -> Dict[str, Any]:
     """
     Check anchor guard with episode content and number.
 
@@ -258,6 +275,8 @@ def check_anchor_guard(episode_content: str, episode_num: int) -> Dict[str, Any]
         Content of the episode to check
     episode_num : int
         Current episode number
+    project : str, optional
+        Project ID for path resolution, defaults to "default"
 
     Returns
     -------
@@ -269,11 +288,13 @@ def check_anchor_guard(episode_content: str, episode_num: int) -> Dict[str, Any]
     RetryException
         If anchor compliance violations are detected
     """
-    guard = AnchorGuard()
+    guard = AnchorGuard(project=project)
     return guard.check(episode_content, episode_num)
 
 
-def anchor_guard(episode_content: str, episode_num: int) -> None:
+def anchor_guard(
+    episode_content: str, episode_num: int, project: str = "default"
+) -> None:
     """
     Main anchor guard function - validates anchor events in episode content.
 
@@ -283,10 +304,12 @@ def anchor_guard(episode_content: str, episode_num: int) -> None:
         Content of the episode to check
     episode_num : int
         Current episode number
+    project : str, optional
+        Project ID for path resolution, defaults to "default"
 
     Raises
     ------
     RetryException
         If anchor compliance violations are detected
     """
-    check_anchor_guard(episode_content, episode_num)
+    check_anchor_guard(episode_content, episode_num, project)

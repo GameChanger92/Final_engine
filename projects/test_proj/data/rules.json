@@ -1,0 +1,6 @@
+[
+  {
+    "pattern": "forbidden_word",
+    "message": "Forbidden word detected"
+  }
+]
