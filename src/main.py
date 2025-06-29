@@ -14,6 +14,7 @@ from .scene_maker import make_scenes
 from .context_builder import make_context
 from .draft_generator import generate_draft
 from .exceptions import RetryException
+from .utils.path_helper import data_path, out_path, ensure_project_dirs
 
 
 def create_arc_outline(episode_num: int) -> Dict:
@@ -37,7 +38,7 @@ def create_arc_outline(episode_num: int) -> Dict:
     }
 
 
-def run_pipeline(episode_num: int) -> str:
+def run_pipeline(episode_num: int, project: str = "default") -> str:
     """
     Run the complete integration pipeline.
 
@@ -45,6 +46,8 @@ def run_pipeline(episode_num: int) -> str:
     ----------
     episode_num : int
         Episode number to generate
+    project : str, optional
+        Project ID for path resolution, defaults to "default"
 
     Returns
     -------
@@ -85,9 +88,10 @@ def run_pipeline(episode_num: int) -> str:
         import json
 
         try:
-            with open("data/characters.json", "r", encoding="utf-8") as f:
+            characters_path = data_path("characters.json", project)
+            with open(characters_path, "r", encoding="utf-8") as f:
                 characters = json.load(f)
-            immutable_guard(characters)
+            immutable_guard(characters, project)
             print("✅ Immutable Guard: PASSED")
         except FileNotFoundError:
             print("⚠️  Immutable Guard: No characters.json found, skipping")
@@ -100,7 +104,7 @@ def run_pipeline(episode_num: int) -> str:
 
         # Create context with date for checking (if available)
         date_context = {"date": f"2024-{episode_num:02d}-01"}  # Simple date progression
-        date_guard(date_context, episode_num)
+        date_guard(date_context, episode_num, project)
         print("✅ Date Guard: PASSED")
     except RetryException as e:
         print(f"⚠️  Date Guard Warning: {e}")
@@ -120,7 +124,7 @@ def run_pipeline(episode_num: int) -> str:
     try:
         from src.plugins.rule_guard import rule_guard
 
-        rule_guard(draft)
+        rule_guard(draft, project=project)
         print("✅ Rule Guard: PASSED")
     except RetryException as e:
         # Show warning for rule violations but don't stop pipeline
@@ -134,11 +138,17 @@ app = typer.Typer(help="Final Engine - Integration Pipeline", no_args_is_help=Tr
 
 
 @app.command()
-def run(episode: int = typer.Option(1, "--episode", help="Episode number to generate")):
+def run(
+    episode: int = typer.Option(1, "--episode", help="Episode number to generate"),
+    project_id: str = typer.Option("default", "--project-id", help="Project ID for the story")
+):
     """
     Run the complete pipeline to generate an episode.
     """
-    typer.echo(f"🚀 Starting pipeline for Episode {episode}...")
+    typer.echo(f"🚀 Starting pipeline for Episode {episode} (Project: {project_id})...")
+
+    # Ensure project directories exist
+    ensure_project_dirs(project_id)
 
     # Run the pipeline
     typer.echo("📝 Running Arc Outliner...")
@@ -152,14 +162,11 @@ def run(episode: int = typer.Option(1, "--episode", help="Episode number to gene
     typer.echo("   - Lexi Guard")
     typer.echo("   - Rule Guard")
 
-    draft = run_pipeline(episode)
+    draft = run_pipeline(episode, project_id)
 
-    # Create output directory if it doesn't exist
-    output_dir = Path("output")
-    output_dir.mkdir(exist_ok=True)
-
-    # Save to file
-    output_file = output_dir / f"episode_{episode}.txt"
+    # Create output directory if it doesn't exist and save to file
+    output_file = out_path(f"episode_{episode}.txt", project_id)
+    output_file.parent.mkdir(parents=True, exist_ok=True)
     output_file.write_text(draft, encoding="utf-8")
 
     typer.echo(f"✅ Pipeline complete! Output saved to: {output_file}")

@@ -12,6 +12,7 @@ import os
 from datetime import datetime
 from typing import Dict, Any, Optional
 from src.exceptions import RetryException
+from src.utils.path_helper import data_path
 
 
 class DateGuard:
@@ -21,16 +22,23 @@ class DateGuard:
     Tracks episode dates and ensures they don't go backwards in time.
     """
 
-    def __init__(self, date_log_path: str = "data/episode_dates.json"):
+    def __init__(self, date_log_path: str = None, project: str = "default"):
         """
         Initialize DateGuard.
 
         Parameters
         ----------
-        date_log_path : str
-            Path to the file storing episode dates
+        date_log_path : str, optional
+            Path to the file storing episode dates.
+            If None, uses default path for the project.
+        project : str, optional
+            Project ID for path resolution, defaults to "default"
         """
-        self.date_log_path = date_log_path
+        if date_log_path is None:
+            self.date_log_path = data_path("episode_dates.json", project)
+        else:
+            self.date_log_path = date_log_path
+        self.project = project
 
     def _load_date_log(self) -> Dict[int, str]:
         """
@@ -242,7 +250,7 @@ class DateGuard:
         return results
 
 
-def check_date_guard(context: Dict[str, Any], episode_num: int) -> Dict[str, Any]:
+def check_date_guard(context: Dict[str, Any], episode_num: int, project: str = "default") -> Dict[str, Any]:
     """
     Check date guard with current episode context and number.
 
@@ -252,6 +260,8 @@ def check_date_guard(context: Dict[str, Any], episode_num: int) -> Dict[str, Any
         Episode context data
     episode_num : int
         Current episode number
+    project : str, optional
+        Project ID for path resolution, defaults to "default"
 
     Returns
     -------
@@ -263,11 +273,11 @@ def check_date_guard(context: Dict[str, Any], episode_num: int) -> Dict[str, Any
     RetryException
         If date progression violations are detected
     """
-    guard = DateGuard()
+    guard = DateGuard(project=project)
     return guard.check(context, episode_num)
 
 
-def date_guard(context: Dict[str, Any], episode_num: int) -> bool:
+def date_guard(context: Dict[str, Any], episode_num: int, project: str = "default") -> bool:
     """
     Main entry point for date guard check.
 
@@ -277,6 +287,8 @@ def date_guard(context: Dict[str, Any], episode_num: int) -> bool:
         Episode context data containing date information
     episode_num : int
         Current episode number
+    project : str, optional
+        Project ID for path resolution, defaults to "default"
 
     Returns
     -------
@@ -289,7 +301,7 @@ def date_guard(context: Dict[str, Any], episode_num: int) -> bool:
         If date progression violations are detected
     """
     try:
-        check_date_guard(context, episode_num)
+        check_date_guard(context, episode_num, project)
         return True
     except RetryException:
         # Re-raise the exception to be handled by the caller

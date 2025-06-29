@@ -18,11 +18,12 @@ sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(project_root / "src"))
 
 from src.exceptions import RetryException  # noqa: E402
+from src.utils.path_helper import data_path  # noqa: E402
 
 # TODO: from src.main import run_pipeline  # Not used in current implementation
 
 
-def test_guards_sequence(episode_num: int) -> bool:
+def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
     """
     Test all guards in the specified sequence and return success status.
 
@@ -39,6 +40,8 @@ def test_guards_sequence(episode_num: int) -> bool:
     ----------
     episode_num : int
         Episode number to test
+    project : str, optional
+        Project ID for path resolution, defaults to "default"
 
     Returns
     -------
@@ -130,7 +133,7 @@ def test_guards_sequence(episode_num: int) -> bool:
         from src.plugins.immutable_guard import immutable_guard
 
         # Load or create sample character data with proper structure
-        char_path = Path(__file__).parent.parent / "data" / "characters.json"
+        char_path = data_path("characters.json", project)
         try:
             with open(char_path, "r", encoding="utf-8") as f:
                 characters = json.load(f)
@@ -145,7 +148,7 @@ def test_guards_sequence(episode_num: int) -> bool:
                 }
             }
 
-        immutable_guard(characters)
+        immutable_guard(characters, project)
         print("✅ ImmutableGuard PASS")
         guards_passed += 1
     except RetryException as e:
@@ -162,7 +165,7 @@ def test_guards_sequence(episode_num: int) -> bool:
             "current_date": f"2024-{episode_num:02d}-01",
             "episode": episode_num,
         }
-        date_guard(date_context, episode_num)
+        date_guard(date_context, episode_num, project)
         print("✅ DateGuard PASS")
         guards_passed += 1
     except RetryException as e:
@@ -175,7 +178,7 @@ def test_guards_sequence(episode_num: int) -> bool:
         from src.plugins.anchor_guard import anchor_guard
 
         # Test with draft content that should contain anchor events
-        anchor_guard(draft_content, episode_num)
+        anchor_guard(draft_content, episode_num, project)
         print("✅ AnchorGuard PASS")
         guards_passed += 1
     except RetryException as e:
@@ -188,7 +191,7 @@ def test_guards_sequence(episode_num: int) -> bool:
         from src.plugins.rule_guard import rule_guard
 
         # Test with content that should pass all rules
-        rule_guard(draft_content)
+        rule_guard(draft_content, project=project)
         print("✅ RuleGuard PASS")
         guards_passed += 1
     except RetryException as e:
@@ -204,7 +207,7 @@ def test_guards_sequence(episode_num: int) -> bool:
     return guards_passed == total_guards
 
 
-def run_episodes_test(start_ep: int, end_ep: int) -> None:
+def run_episodes_test(start_ep: int, end_ep: int, project: str = "default") -> None:
     """
     Run pipeline test for episodes in the given range.
 
@@ -214,15 +217,17 @@ def run_episodes_test(start_ep: int, end_ep: int) -> None:
         Starting episode number
     end_ep : int
         Ending episode number (inclusive)
+    project : str, optional
+        Project ID for path resolution, defaults to "default"
     """
-    print(f"🚀 Starting Pipeline Test for Episodes {start_ep}-{end_ep}")
+    print(f"🚀 Starting Pipeline Test for Episodes {start_ep}-{end_ep} (Project: {project})")
     print("=" * 60)
 
     passed_episodes = []
     failed_episodes = []
 
     for episode in range(start_ep, end_ep + 1):
-        success = test_guards_sequence(episode)
+        success = test_guards_sequence(episode, project)
 
         if success:
             passed_episodes.append(episode)
@@ -289,6 +294,7 @@ Examples:
   python run_pipeline.py --episodes 1-20    # Test episodes 1 through 20
   python run_pipeline.py --episodes 5       # Test only episode 5
   python run_pipeline.py --episodes 10-15   # Test episodes 10 through 15
+  python run_pipeline.py --project-id demo_novel --episodes 1-3  # Test with demo project
 
 Expected Output Format:
   ✅ LexiGuard PASS
@@ -308,6 +314,13 @@ Expected Output Format:
         help='Episode range to test (e.g., "1-20", "5", "10-15")',
     )
 
+    parser.add_argument(
+        "--project-id",
+        type=str,
+        default="default",
+        help='Project ID for the story (defaults to "default")',
+    )
+
     args = parser.parse_args()
 
     try:
@@ -317,7 +330,7 @@ Expected Output Format:
             print("❌ Error: Invalid episode range")
             sys.exit(1)
 
-        run_episodes_test(start_ep, end_ep)
+        run_episodes_test(start_ep, end_ep, args.project_id)
 
     except ValueError as e:
         print(f"❌ Error parsing episode range '{args.episodes}': {e}")
