@@ -1,0 +1,7 @@
+[
+  { "id": "NO_MAGIC", "pattern": "마법|마도", "message": "마법 사용은 금지!" },
+  { "id": "NO_ELF", "pattern": "엘프", "message": "엘프는 세계관에 존재하지 않음!" },
+  { "id": "NO_DRAGON", "pattern": "드래곤|용", "message": "드래곤은 이 세계에 등장할 수 없습니다!" },
+  { "id": "NO_PROFANITY", "pattern": "바보|멍청이", "message": "욕설이나 비속어 사용 금지!" },
+  { "id": "NO_MODERN_TECH", "pattern": "컴퓨터|스마트폰|인터넷", "message": "현대 기술은 세계관에 맞지 않습니다!" }
+]

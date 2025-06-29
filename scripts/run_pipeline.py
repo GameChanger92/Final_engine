@@ -32,6 +32,7 @@ def test_guards_sequence(episode_num: int) -> bool:
     3. ScheduleGuard PASS
     4. ImmutableGuard PASS
     5. DateGuard PASS
+    6. RuleGuard PASS
     
     Parameters
     ----------
@@ -81,7 +82,7 @@ def test_guards_sequence(episode_num: int) -> bool:
     """
     
     guards_passed = 0
-    total_guards = 5
+    total_guards = 6
     
     # 1. LexiGuard Test
     try:
@@ -161,6 +162,18 @@ def test_guards_sequence(episode_num: int) -> bool:
         print(f"❌ DateGuard FAIL: {e}")
     except Exception as e:
         print(f"⚠️  DateGuard ERROR: {e}")
+    
+    # 6. RuleGuard Test
+    try:
+        from src.plugins.rule_guard import rule_guard
+        # Test with content that should pass all rules
+        rule_guard(draft_content)
+        print("✅ RuleGuard PASS")
+        guards_passed += 1
+    except RetryException as e:
+        print(f"❌ RuleGuard FAIL: {e}")
+    except Exception as e:
+        print(f"⚠️  RuleGuard ERROR: {e}")
     
     success_rate = guards_passed / total_guards
     print(f"\n📊 Episode {episode_num} Guard Results: {guards_passed}/{total_guards} passed ({success_rate:.1%})")

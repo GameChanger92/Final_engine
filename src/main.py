@@ -115,6 +115,16 @@ def run_pipeline(episode_num: int) -> str:
         # This follows the requirement: "실패 시 메시지만"
         print(f"⚠️  Lexi Guard Warning: {e}")
 
+    # Rule Guard - check forbidden patterns and world rules
+    try:
+        from src.plugins.rule_guard import rule_guard
+
+        rule_guard(draft)
+        print("✅ Rule Guard: PASSED")
+    except RetryException as e:
+        # Show warning for rule violations but don't stop pipeline
+        print(f"⚠️  Rule Guard Warning: {e}")
+
     return draft
 
 
@@ -139,6 +149,7 @@ def run(episode: int = typer.Option(1, "--episode", help="Episode number to gene
     typer.echo("   - Immutable Guard")
     typer.echo("   - Date Guard") 
     typer.echo("   - Lexi Guard")
+    typer.echo("   - Rule Guard")
 
     draft = run_pipeline(episode)
 
@@ -160,7 +171,7 @@ def info():
     Display information about the pipeline.
     """
     typer.echo("Final Engine Integration Pipeline v1.0")
-    typer.echo("Day 12 - Immutable + Date Guard Implementation")
+    typer.echo("Day 13 - Rule Guard Implementation")
     typer.echo("")
     typer.echo("Pipeline stages:")
     typer.echo("1. Arc Outliner → Basic arc structure")
@@ -172,6 +183,7 @@ def info():
     typer.echo("   - Immutable Guard → Character consistency")
     typer.echo("   - Date Guard → Chronological progression")
     typer.echo("   - Lexi Guard → Lexical quality")
+    typer.echo("   - Rule Guard → Forbidden pattern detection")
 
 
 if __name__ == "__main__":
