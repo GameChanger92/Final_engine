@@ -1,1 +1,7 @@
-[{"id":"ANCHOR_01","goal":"주인공 첫 등장","anchor_ep":1}]
+[
+  {"id":"ANCHOR_01","goal":"주인공 첫 등장","anchor_ep":1},
+  {"id":"ANCHOR_02","goal":"첫 번째 시련","anchor_ep":5},
+  {"id":"ANCHOR_03","goal":"중요한 만남","anchor_ep":10},
+  {"id":"ANCHOR_04","goal":"결정적 선택","anchor_ep":15},
+  {"id":"ANCHOR_05","goal":"마지막 대결","anchor_ep":20}
+]

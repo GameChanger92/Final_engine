@@ -167,6 +167,132 @@
       "introduced": 10,
       "due": 22,
       "payoff": null
+    },
+    {
+      "id": "f36a82e",
+      "hint": "",
+      "introduced": 5,
+      "due": 24,
+      "payoff": null
+    },
+    {
+      "id": "fc1e10a",
+      "hint": "시작 복선",
+      "introduced": 0,
+      "due": 26,
+      "payoff": null
+    },
+    {
+      "id": "f94b22a",
+      "hint": "과거 복선",
+      "introduced": -5,
+      "due": 7,
+      "payoff": null
+    },
+    {
+      "id": "f8c4913",
+      "hint": "빈 내용 테스트",
+      "introduced": 5,
+      "due": 27,
+      "payoff": null
+    },
+    {
+      "id": "f8642ea",
+      "hint": "잘못된 패턴",
+      "introduced": 5,
+      "due": 20,
+      "payoff": null
+    },
+    {
+      "id": "fc9b177",
+      "hint": "🔮 마법의 수정구 ✨",
+      "introduced": 10,
+      "due": 30,
+      "payoff": null
+    },
+    {
+      "id": "f048047",
+      "hint": "",
+      "introduced": 5,
+      "due": 27,
+      "payoff": null
+    },
+    {
+      "id": "fbbb522",
+      "hint": "시작 복선",
+      "introduced": 0,
+      "due": 25,
+      "payoff": null
+    },
+    {
+      "id": "f26c524",
+      "hint": "과거 복선",
+      "introduced": -5,
+      "due": 25,
+      "payoff": null
+    },
+    {
+      "id": "f2ec8c4",
+      "hint": "빈 내용 테스트",
+      "introduced": 5,
+      "due": 20,
+      "payoff": null
+    },
+    {
+      "id": "f15e428",
+      "hint": "잘못된 패턴",
+      "introduced": 5,
+      "due": 34,
+      "payoff": null
+    },
+    {
+      "id": "f680725",
+      "hint": "🔮 마법의 수정구 ✨",
+      "introduced": 10,
+      "due": 35,
+      "payoff": null
+    },
+    {
+      "id": "fa72255",
+      "hint": "",
+      "introduced": 5,
+      "due": 15,
+      "payoff": null
+    },
+    {
+      "id": "feb81df",
+      "hint": "시작 복선",
+      "introduced": 0,
+      "due": 24,
+      "payoff": null
+    },
+    {
+      "id": "fceaa89",
+      "hint": "과거 복선",
+      "introduced": -5,
+      "due": 18,
+      "payoff": null
+    },
+    {
+      "id": "f4813fe",
+      "hint": "빈 내용 테스트",
+      "introduced": 5,
+      "due": 33,
+      "payoff": null
+    },
+    {
+      "id": "f19c5cf",
+      "hint": "잘못된 패턴",
+      "introduced": 5,
+      "due": 20,
+      "payoff": null
+    },
+    {
+      "id": "f86637e",
+      "hint": "🔮 마법의 수정구 ✨",
+      "introduced": 10,
+      "due": 35,
+      "payoff": null
     }
   ]
 }
