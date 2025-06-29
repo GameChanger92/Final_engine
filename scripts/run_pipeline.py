@@ -32,7 +32,8 @@ def test_guards_sequence(episode_num: int) -> bool:
     3. ScheduleGuard PASS
     4. ImmutableGuard PASS
     5. DateGuard PASS
-    6. RuleGuard PASS
+    6. AnchorGuard PASS
+    7. RuleGuard PASS
     
     Parameters
     ----------
@@ -48,7 +49,8 @@ def test_guards_sequence(episode_num: int) -> bool:
     
     # Sample draft content for testing with high lexical diversity
     draft_content = f"""
-    Episode {episode_num} begins with our protagonist facing unprecedented challenges. 
+    Episode {episode_num} begins with our protagonist facing unprecedented challenges.
+    주인공 첫 등장 - The protagonist makes their first appearance in this pivotal episode.
     The morning sun illuminated the bustling marketplace where merchants displayed 
     their colorful wares. Children laughed gleefully while playing nearby fountains.
     
@@ -82,7 +84,7 @@ def test_guards_sequence(episode_num: int) -> bool:
     """
     
     guards_passed = 0
-    total_guards = 6
+    total_guards = 7
     
     # 1. LexiGuard Test
     try:
@@ -163,7 +165,19 @@ def test_guards_sequence(episode_num: int) -> bool:
     except Exception as e:
         print(f"⚠️  DateGuard ERROR: {e}")
     
-    # 6. RuleGuard Test
+    # 6. AnchorGuard Test
+    try:
+        from src.plugins.anchor_guard import anchor_guard
+        # Test with draft content that should contain anchor events
+        anchor_guard(draft_content, episode_num)
+        print("✅ AnchorGuard PASS")
+        guards_passed += 1
+    except RetryException as e:
+        print(f"❌ AnchorGuard FAIL: {e}")
+    except Exception as e:
+        print(f"⚠️  AnchorGuard ERROR: {e}")
+    
+    # 7. RuleGuard Test
     try:
         from src.plugins.rule_guard import rule_guard
         # Test with content that should pass all rules
@@ -273,6 +287,8 @@ Expected Output Format:
   ✅ ScheduleGuard PASS
   ✅ ImmutableGuard PASS
   ✅ DateGuard PASS
+  ✅ AnchorGuard PASS
+  ✅ RuleGuard PASS
         """
     )
     
