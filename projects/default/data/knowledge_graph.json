@@ -1,0 +1,44 @@
+{
+  "characters": {
+    "MC": {
+      "name": "정선우",
+      "relationships": ["Alice", "Professor_Kim"],
+      "traits": ["curious", "determined"],
+      "background": "Engineering student"
+    },
+    "Alice": {
+      "name": "Alice",
+      "relationships": ["MC"],
+      "traits": ["brave", "loyal"],
+      "background": "Royal Guard"
+    },
+    "Professor_Kim": {
+      "name": "김교수",
+      "relationships": ["MC"],
+      "traits": ["wise", "mysterious"],
+      "background": "University professor"
+    }
+  },
+  "locations": {
+    "University": {
+      "description": "서울대학교 공과대학",
+      "atmosphere": "academic",
+      "connected_to": ["Library", "Lab"]
+    },
+    "Library": {
+      "description": "고풍스러운 대학 도서관",
+      "atmosphere": "quiet",
+      "connected_to": ["University"]
+    },
+    "Lab": {
+      "description": "첨단 연구실",
+      "atmosphere": "modern",
+      "connected_to": ["University"]
+    }
+  },
+  "story_elements": {
+    "themes": ["성장", "우정", "모험"],
+    "tone": "청춘",
+    "genre": "현대판타지"
+  }
+}
