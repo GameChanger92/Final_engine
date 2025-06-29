@@ -255,7 +255,9 @@ class AnchorGuard:
         return results
 
 
-def check_anchor_guard(episode_content: str, episode_num: int, project: str = "default") -> Dict[str, Any]:
+def check_anchor_guard(
+    episode_content: str, episode_num: int, project: str = "default"
+) -> Dict[str, Any]:
     """
     Check anchor guard with episode content and number.
 
@@ -282,7 +284,9 @@ def check_anchor_guard(episode_content: str, episode_num: int, project: str = "d
     return guard.check(episode_content, episode_num)
 
 
-def anchor_guard(episode_content: str, episode_num: int, project: str = "default") -> None:
+def anchor_guard(
+    episode_content: str, episode_num: int, project: str = "default"
+) -> None:
     """
     Main anchor guard function - validates anchor events in episode content.
 

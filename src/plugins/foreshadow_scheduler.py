@@ -142,7 +142,9 @@ def _calculate_due_episode(
     return min(due_episode, total_episodes)
 
 
-def schedule_foreshadow(hint: str, introduced_ep: int, project: str = "default") -> dict:
+def schedule_foreshadow(
+    hint: str, introduced_ep: int, project: str = "default"
+) -> dict:
     """
     Schedule a new foreshadow element.
 
@@ -271,7 +273,9 @@ def get_unresolved_foreshadows(project: str = "default") -> List[dict]:
     return [f for f in data["foreshadows"] if f["payoff"] is None]
 
 
-def get_overdue_foreshadows(current_episode: int, project: str = "default") -> List[dict]:
+def get_overdue_foreshadows(
+    current_episode: int, project: str = "default"
+) -> List[dict]:
     """
     Get foreshadows that are overdue for resolution.
 

@@ -162,7 +162,9 @@ class RuleGuard:
         return results
 
 
-def check_rule_guard(text: str, rule_path: str = None, project: str = "default") -> Dict[str, Any]:
+def check_rule_guard(
+    text: str, rule_path: str = None, project: str = "default"
+) -> Dict[str, Any]:
     """
     Convenience function to run rule guard check.
 

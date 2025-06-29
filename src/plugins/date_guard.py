@@ -250,7 +250,9 @@ class DateGuard:
         return results
 
 
-def check_date_guard(context: Dict[str, Any], episode_num: int, project: str = "default") -> Dict[str, Any]:
+def check_date_guard(
+    context: Dict[str, Any], episode_num: int, project: str = "default"
+) -> Dict[str, Any]:
     """
     Check date guard with current episode context and number.
 
@@ -277,7 +279,9 @@ def check_date_guard(context: Dict[str, Any], episode_num: int, project: str = "
     return guard.check(context, episode_num)
 
 
-def date_guard(context: Dict[str, Any], episode_num: int, project: str = "default") -> bool:
+def date_guard(
+    context: Dict[str, Any], episode_num: int, project: str = "default"
+) -> bool:
     """
     Main entry point for date guard check.
 

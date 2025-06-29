@@ -220,7 +220,9 @@ def run_episodes_test(start_ep: int, end_ep: int, project: str = "default") -> N
     project : str, optional
         Project ID for path resolution, defaults to "default"
     """
-    print(f"🚀 Starting Pipeline Test for Episodes {start_ep}-{end_ep} (Project: {project})")
+    print(
+        f"🚀 Starting Pipeline Test for Episodes {start_ep}-{end_ep} (Project: {project})"
+    )
     print("=" * 60)
 
     passed_episodes = []

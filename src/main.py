@@ -6,7 +6,6 @@ Connects Arc Outliner → Beat Planner → Scene Maker → Context Builder → D
 """
 
 import typer
-from pathlib import Path
 from typing import Dict
 
 from .beat_planner import plan_beats
@@ -140,7 +139,9 @@ app = typer.Typer(help="Final Engine - Integration Pipeline", no_args_is_help=Tr
 @app.command()
 def run(
     episode: int = typer.Option(1, "--episode", help="Episode number to generate"),
-    project_id: str = typer.Option("default", "--project-id", help="Project ID for the story")
+    project_id: str = typer.Option(
+        "default", "--project-id", help="Project ID for the story"
+    ),
 ):
     """
     Run the complete pipeline to generate an episode.

@@ -13,14 +13,14 @@ BASE = Path("projects")
 def data_path(fname: str, project: str = "default") -> Path:
     """
     Get path to a data file in the specified project.
-    
+
     Parameters
     ----------
     fname : str
         Filename within the data directory
     project : str, optional
         Project ID, defaults to "default"
-        
+
     Returns
     -------
     Path
@@ -32,14 +32,14 @@ def data_path(fname: str, project: str = "default") -> Path:
 def out_path(fname: str, project: str = "default") -> Path:
     """
     Get path to an output file in the specified project.
-    
+
     Parameters
     ----------
     fname : str
-        Filename within the outputs directory  
+        Filename within the outputs directory
     project : str, optional
         Project ID, defaults to "default"
-        
+
     Returns
     -------
     Path
@@ -51,7 +51,7 @@ def out_path(fname: str, project: str = "default") -> Path:
 def ensure_project_dirs(project: str = "default") -> None:
     """
     Ensure project data and outputs directories exist.
-    
+
     Parameters
     ----------
     project : str, optional
@@ -59,6 +59,6 @@ def ensure_project_dirs(project: str = "default") -> None:
     """
     data_dir = BASE / project / "data"
     outputs_dir = BASE / project / "outputs"
-    
+
     data_dir.mkdir(parents=True, exist_ok=True)
     outputs_dir.mkdir(parents=True, exist_ok=True)

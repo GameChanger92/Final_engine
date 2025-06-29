@@ -40,9 +40,7 @@ class ImmutableGuard:
             self.snapshot_path = snapshot_path
         self.project = project
 
-    def _load_characters(
-        self, characters_path: str = None
-    ) -> Dict[str, Any]:
+    def _load_characters(self, characters_path: str = None) -> Dict[str, Any]:
         """
         Load character data from JSON file.
 
@@ -59,7 +57,7 @@ class ImmutableGuard:
         """
         if characters_path is None:
             characters_path = data_path("characters.json", self.project)
-        
+
         try:
             with open(characters_path, "r", encoding="utf-8") as f:
                 return json.load(f)
@@ -237,7 +235,9 @@ class ImmutableGuard:
         return results
 
 
-def check_immutable_guard(current_chars: Dict[str, Any], project: str = "default") -> Dict[str, Any]:
+def check_immutable_guard(
+    current_chars: Dict[str, Any], project: str = "default"
+) -> Dict[str, Any]:
     """
     Check immutable guard with current character data.
 

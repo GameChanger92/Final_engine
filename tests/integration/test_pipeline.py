@@ -36,9 +36,9 @@ def test_pipeline_execution_time():
 
 
 def test_output_file_creation():
-    """Test that output/episode_1.txt is created and contains expected content."""
+    """Test that projects/default/outputs/episode_1.txt is created and contains expected content."""
     # Clean up any existing file
-    output_file = Path("output/episode_1.txt")
+    output_file = Path("projects/default/outputs/episode_1.txt")
     if output_file.exists():
         output_file.unlink()
 
@@ -46,7 +46,16 @@ def test_output_file_creation():
     import subprocess
 
     result = subprocess.run(
-        [sys.executable, "-m", "src.main", "run", "--episode", "1"],
+        [
+            sys.executable,
+            "-m",
+            "src.main",
+            "run",
+            "--episode",
+            "1",
+            "--project-id",
+            "default",
+        ],
         capture_output=True,
         text=True,
         cwd=Path(__file__).parent.parent.parent,
@@ -56,7 +65,9 @@ def test_output_file_creation():
     assert result.returncode == 0, f"Command failed: {result.stderr}"
 
     # Verify output file exists
-    assert output_file.exists(), "output/episode_1.txt was not created"
+    assert (
+        output_file.exists()
+    ), "projects/default/outputs/episode_1.txt was not created"
 
     # Read and verify file content
     content = output_file.read_text(encoding="utf-8")
@@ -74,7 +85,7 @@ def test_output_file_creation():
 def test_output_directory_creation():
     """Test that the output directory is automatically created."""
     # Remove output directory if it exists
-    output_dir = Path("output")
+    output_dir = Path("projects/default/outputs")
     if output_dir.exists():
         import shutil
 
@@ -84,13 +95,22 @@ def test_output_directory_creation():
     assert not output_dir.exists(), "Output directory should not exist initially"
 
     # Run pipeline
-    run_pipeline(1)
+    run_pipeline(1, "default")
 
     # Run CLI to create file
     import subprocess
 
     subprocess.run(
-        [sys.executable, "-m", "src.main", "run", "--episode", "1"],
+        [
+            sys.executable,
+            "-m",
+            "src.main",
+            "run",
+            "--episode",
+            "1",
+            "--project-id",
+            "default",
+        ],
         capture_output=True,
         text=True,
         cwd=Path(__file__).parent.parent.parent,
