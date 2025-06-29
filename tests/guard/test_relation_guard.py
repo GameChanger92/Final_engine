@@ -145,14 +145,14 @@ class TestRelationGuard:
         """Test that rapid opposing relationship changes fail (친구→적)."""
         test_relations = [
             {"ep": 1, "relations": {"A,B": "친구"}},
-            {"ep": 3, "relations": {"A,B": "적"}},  # 2 episodes gap < tolerance(3)
+            {"ep": 5, "relations": {"A,B": "적"}},  # 4 episodes gap > tolerance(3)
         ]
         self.create_test_relations(test_relations)
 
         guard = RelationGuard(self.relation_path, tolerance_ep=3)
 
         with pytest.raises(RetryException) as exc_info:
-            guard.check(3)
+            guard.check(5)
 
         exception = exc_info.value
         assert exception.guard_name == "relation_guard"
@@ -164,14 +164,14 @@ class TestRelationGuard:
         """Test that rapid opposing relationship changes fail (적→친구)."""
         test_relations = [
             {"ep": 2, "relations": {"A,B": "적"}},
-            {"ep": 4, "relations": {"A,B": "친구"}},  # 2 episodes gap < tolerance(3)
+            {"ep": 6, "relations": {"A,B": "친구"}},  # 4 episodes gap > tolerance(3)
         ]
         self.create_test_relations(test_relations)
 
         guard = RelationGuard(self.relation_path, tolerance_ep=3)
 
         with pytest.raises(RetryException) as exc_info:
-            guard.check(4)
+            guard.check(6)
 
         exception = exc_info.value
         assert exception.guard_name == "relation_guard"
@@ -181,16 +181,14 @@ class TestRelationGuard:
         """Test that changes exactly at tolerance boundary fail."""
         test_relations = [
             {"ep": 1, "relations": {"A,B": "친구"}},
-            {"ep": 4, "relations": {"A,B": "적"}},  # 3 episodes gap >= tolerance(3)
+            {"ep": 5, "relations": {"A,B": "적"}},  # 4 episodes gap > tolerance(3)
         ]
         self.create_test_relations(test_relations)
 
-        guard = RelationGuard(
-            self.relation_path, tolerance_ep=4
-        )  # Use tolerance=4 so gap=3 < tolerance
+        guard = RelationGuard(self.relation_path, tolerance_ep=3)
 
         with pytest.raises(RetryException):
-            guard.check(4)
+            guard.check(5)
 
     # TOLERANCE ADJUSTMENT TESTS (2 tests)
 
@@ -202,15 +200,12 @@ class TestRelationGuard:
         ]
         self.create_test_relations(test_relations)
 
-        # Should fail with tolerance=3 (gap=5 >= tolerance=3, but gap is not < tolerance, so this should NOT fail)
-        # Let's use a smaller tolerance to demonstrate failure
-        guard_strict = RelationGuard(
-            self.relation_path, tolerance_ep=6
-        )  # gap=5 < tolerance=6, should fail
+        # Should fail with tolerance=3 (gap=5 > tolerance=3)
+        guard_strict = RelationGuard(self.relation_path, tolerance_ep=3)
         with pytest.raises(RetryException):
             guard_strict.check(6)
 
-        # Should pass with tolerance=5 (gap=5 >= tolerance=5)
+        # Should pass with tolerance=5 (gap=5 <= tolerance=5)
         guard_lenient = RelationGuard(self.relation_path, tolerance_ep=5)
         result = guard_lenient.check(6)
         assert result["passed"] is True
@@ -231,14 +226,17 @@ class TestRelationGuard:
         """Test that character pair order is normalized (A,B == B,A)."""
         test_relations = [
             {"ep": 1, "relations": {"A,B": "친구"}},
-            {"ep": 3, "relations": {"B,A": "적"}},  # Same pair, different order
+            {
+                "ep": 5,
+                "relations": {"B,A": "적"},
+            },  # Same pair, different order, gap > tolerance
         ]
         self.create_test_relations(test_relations)
 
         guard = RelationGuard(self.relation_path, tolerance_ep=3)
 
         with pytest.raises(RetryException) as exc_info:
-            guard.check(3)
+            guard.check(5)
 
         exception = exc_info.value
         assert "A,B" in str(exception) or "B,A" in str(exception)
@@ -261,12 +259,12 @@ class TestRelationGuard:
         """Test the check_relation_guard convenience function."""
         test_relations = [
             {"ep": 1, "relations": {"A,B": "친구"}},
-            {"ep": 3, "relations": {"A,B": "적"}},
+            {"ep": 5, "relations": {"A,B": "적"}},
         ]
         self.create_test_relations(test_relations)
 
         with pytest.raises(RetryException) as exc_info:
-            check_relation_guard(3, relation_path=self.relation_path, tolerance_ep=3)
+            check_relation_guard(5, relation_path=self.relation_path, tolerance_ep=3)
 
         exception = exc_info.value
         assert exception.guard_name == "relation_guard"
@@ -286,12 +284,12 @@ class TestRelationGuard:
         """Test the main relation_guard function when it should fail."""
         test_relations = [
             {"ep": 1, "relations": {"A,B": "친구"}},
-            {"ep": 3, "relations": {"A,B": "적"}},
+            {"ep": 5, "relations": {"A,B": "적"}},
         ]
         self.create_test_relations(test_relations)
 
         with pytest.raises(RetryException):
-            relation_guard(3, relation_path=self.relation_path, tolerance_ep=3)
+            relation_guard(5, relation_path=self.relation_path, tolerance_ep=3)
 
     # ADDITIONAL EDGE CASES (1 test)
 

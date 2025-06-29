@@ -212,10 +212,10 @@ class RelationGuard:
             # Check if the most recent relationship is opposing and within tolerance
             if most_recent_relation and most_recent_ep > 0:
                 episode_gap = episode_num - most_recent_ep
-                if episode_gap < self.tolerance_ep and self._is_opposing_relation(
+                if episode_gap > self.tolerance_ep and self._is_opposing_relation(
                     most_recent_relation, current_relation
                 ):
-                    # Found opposing relationship within tolerance window
+                    # Found opposing relationship beyond tolerance window
                     violation = {
                         "char_pair": char_pair,
                         "previous_episode": most_recent_ep,
