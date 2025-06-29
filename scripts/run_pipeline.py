@@ -35,6 +35,7 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
     5. DateGuard PASS
     6. AnchorGuard PASS
     7. RuleGuard PASS
+    8. PacingGuard PASS
 
     Parameters
     ----------
@@ -50,44 +51,45 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
     """
     print(f"\n🧪 Testing Episode {episode_num} Guard Sequence...")
 
-    # Sample draft content for testing with high lexical diversity
+    # Sample draft content for testing with high lexical diversity and Korean pacing elements
     draft_content = f"""
     Episode {episode_num} begins with our protagonist facing unprecedented challenges.
-    주인공 첫 등장 - The protagonist makes their first appearance in this pivotal episode.
-    The morning sun illuminated the bustling marketplace where merchants displayed 
-    their colorful wares. Children laughed gleefully while playing nearby fountains.
+    주인공이 달렸다. "어디로 가야 하지?" 그는 생각했다. The protagonist makes their first appearance.
     
-    Suddenly, mysterious shadows emerged from ancient alleyways, creating tension 
-    throughout the peaceful community. Citizens gathered nervously, whispering 
-    concerns about recent supernatural occurrences plaguing neighboring villages.
+    The morning sun illuminated the bustling marketplace. 상인이 물건을 꺼냈다.
+    "좋은 아침입니다!" 그가 외쳤다. Children laughed gleefully while playing nearby fountains.
+    아이들이 뛰어갔다. "재미있다!" 그들이 말했다. 행복하다고 느꼈다.
     
-    Our brave heroes must navigate complex political intrigue involving powerful 
-    nobles who secretly manipulate economic policies. Each character demonstrates 
-    unique abilities: magical healing, strategic warfare, diplomatic negotiations.
+    Suddenly, mysterious shadows emerged from ancient alleyways. 그림자가 움직였다.
+    Citizens gathered nervously. "무슨 일이지?" 그들이 걱정했다. 두렵다고 생각했다.
     
-    The antagonist reveals sinister motivations rooted in historical grievances 
-    spanning multiple generations. Family loyalties clash against moral obligations,
-    forcing difficult choices between personal safety and collective responsibility.
+    Our brave heroes must navigate complex political intrigue. 영웅들이 싸웠다.
+    "우리가 해야 할 일이 무엇인가?" 대장이 물었다. 각자 다짐했다.
+    Each character demonstrates unique abilities. 치료사가 치유했다.
     
-    Romance blooms unexpectedly between unlikely partners during dangerous missions.
-    Their relationship develops gradually through shared hardships, mutual respect,
-    and complementary strengths that overcome individual weaknesses effectively.
+    The antagonist reveals sinister motivations. 악역이 공격했다.
+    "너희는 이해하지 못한다!" 그가 소리쳤다. 분노했다고 깨달았다.
+    Family loyalties clash against moral obligations. 가족이 갈등했다.
     
-    Technological innovations transform traditional combat methods, introducing 
-    advanced weaponry requiring specialized training. Veterans struggle adapting
-    while younger fighters embrace revolutionary tactical approaches enthusiastically.
+    Romance blooms unexpectedly between unlikely partners. 연인들이 만났다.
+    "당신을 사랑합니다." 그녀가 고백했다. 기쁘다고 알았다.
+    Their relationship develops gradually through shared hardships.
     
-    Environmental disasters threaten agricultural sustainability, creating resource
-    scarcity that exacerbates existing social tensions between different cultural
-    groups competing for limited territorial control and economic opportunities.
+    Technological innovations transform traditional combat methods. 전사들이 훈련했다.
+    "새로운 무기를 배워야 한다." 교관이 설명했다. 어렵다고 판단했다.
+    Veterans struggle adapting while younger fighters embrace new approaches.
     
-    The episode concludes with surprising revelations about hidden conspiracies
-    connecting seemingly unrelated events across vast geographical distances,
-    setting up future storylines that will explore themes of redemption and justice.
+    Environmental disasters threaten agricultural sustainability. 농민들이 일했다.
+    "비가 오지 않는다." 그들이 한탄했다. 절망했다고 받아들였다.
+    Resource scarcity exacerbates existing social tensions.
+    
+    The episode concludes with surprising revelations. 진실이 드러났다.
+    "모든 것이 연결되어 있었다!" 탐정이 발견했다. 놀랐다고 이해했다.
+    Setting up future storylines that will explore themes of redemption and justice.
     """
 
     guards_passed = 0
-    total_guards = 7
+    total_guards = 8
 
     # 1. LexiGuard Test
     try:
@@ -199,6 +201,27 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
     except Exception as e:
         print(f"⚠️  RuleGuard ERROR: {e}")
 
+    # 8. PacingGuard Test
+    try:
+        from src.plugins.pacing_guard import pacing_guard
+
+        # Create scene texts for pacing analysis
+        scene_texts = [
+            draft_content[: len(draft_content) // 3],  # First third
+            draft_content[
+                len(draft_content) // 3 : 2 * len(draft_content) // 3
+            ],  # Middle third
+            draft_content[2 * len(draft_content) // 3 :],  # Last third
+        ]
+
+        pacing_guard(scene_texts, episode_num, project)
+        print("✅ PacingGuard PASS")
+        guards_passed += 1
+    except RetryException as e:
+        print(f"❌ PacingGuard FAIL: {e}")
+    except Exception as e:
+        print(f"⚠️  PacingGuard ERROR: {e}")
+
     success_rate = guards_passed / total_guards
     print(
         f"\n📊 Episode {episode_num} Guard Results: {guards_passed}/{total_guards} passed ({success_rate:.1%})"
@@ -306,6 +329,7 @@ Expected Output Format:
   ✅ DateGuard PASS
   ✅ AnchorGuard PASS
   ✅ RuleGuard PASS
+  ✅ PacingGuard PASS
         """,
     )
 
