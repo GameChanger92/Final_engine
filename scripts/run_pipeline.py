@@ -19,6 +19,7 @@ sys.path.insert(0, str(project_root / "src"))
 
 from src.exceptions import RetryException  # noqa: E402
 from src.utils.path_helper import data_path  # noqa: E402
+from src.core.retry_controller import run_with_retry  # noqa: E402
 
 # TODO: from src.main import run_pipeline  # Not used in current implementation
 
@@ -96,7 +97,7 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
     try:
         from src.plugins.lexi_guard import lexi_guard
 
-        lexi_guard(draft_content)
+        run_with_retry(lexi_guard, draft_content)
         print("✅ LexiGuard PASS")
         guards_passed += 1
     except RetryException as e:
@@ -110,7 +111,7 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
 
         # Test with neutral content that shouldn't trigger emotion alerts
         prev_text = "This is some neutral previous content."
-        emotion_guard(prev_text, draft_content)
+        run_with_retry(emotion_guard, prev_text, draft_content)
         print("✅ EmotionGuard PASS")
         guards_passed += 1
     except RetryException as e:
@@ -123,7 +124,7 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
         from src.plugins.schedule_guard import schedule_guard
 
         # Pass episode number directly as schedule_guard expects int
-        schedule_guard(episode_num)
+        run_with_retry(schedule_guard, episode_num)
         print("✅ ScheduleGuard PASS")
         guards_passed += 1
     except RetryException as e:
@@ -151,7 +152,7 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
                 }
             }
 
-        immutable_guard(characters, project)
+        run_with_retry(immutable_guard, characters, project)
         print("✅ ImmutableGuard PASS")
         guards_passed += 1
     except RetryException as e:
@@ -168,7 +169,7 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
             "current_date": f"2024-{episode_num:02d}-01",
             "episode": episode_num,
         }
-        date_guard(date_context, episode_num, project)
+        run_with_retry(date_guard, date_context, episode_num, project)
         print("✅ DateGuard PASS")
         guards_passed += 1
     except RetryException as e:
@@ -181,7 +182,7 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
         from src.plugins.anchor_guard import anchor_guard
 
         # Test with draft content that should contain anchor events
-        anchor_guard(draft_content, episode_num, project)
+        run_with_retry(anchor_guard, draft_content, episode_num, project)
         print("✅ AnchorGuard PASS")
         guards_passed += 1
     except RetryException as e:
@@ -194,7 +195,7 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
         from src.plugins.rule_guard import rule_guard
 
         # Test with content that should pass all rules
-        rule_guard(draft_content, project=project)
+        run_with_retry(rule_guard, draft_content, project=project)
         print("✅ RuleGuard PASS")
         guards_passed += 1
     except RetryException as e:
@@ -207,7 +208,7 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
         from src.plugins.relation_guard import relation_guard
 
         # Test relationship changes for current episode
-        relation_guard(episode_num, project=project)
+        run_with_retry(relation_guard, episode_num, project=project)
         print("✅ RelationGuard PASS")
         guards_passed += 1
     except RetryException as e:
@@ -228,7 +229,7 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
             draft_content[2 * len(draft_content) // 3 :],  # Last third
         ]
 
-        pacing_guard(scene_texts, episode_num, project)
+        run_with_retry(pacing_guard, scene_texts, episode_num, project)
         print("✅ PacingGuard PASS")
         guards_passed += 1
     except RetryException as e:
