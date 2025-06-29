@@ -559,6 +559,48 @@
       "introduced": 10,
       "due": 38,
       "payoff": null
+    },
+    {
+      "id": "f4d6e48",
+      "hint": "",
+      "introduced": 5,
+      "due": 25,
+      "payoff": null
+    },
+    {
+      "id": "f48cffb",
+      "hint": "시작 복선",
+      "introduced": 0,
+      "due": 29,
+      "payoff": null
+    },
+    {
+      "id": "f9b6292",
+      "hint": "과거 복선",
+      "introduced": -5,
+      "due": 12,
+      "payoff": null
+    },
+    {
+      "id": "f4a5ecc",
+      "hint": "빈 내용 테스트",
+      "introduced": 5,
+      "due": 24,
+      "payoff": null
+    },
+    {
+      "id": "f0a5c47",
+      "hint": "잘못된 패턴",
+      "introduced": 5,
+      "due": 26,
+      "payoff": null
+    },
+    {
+      "id": "f51dc06",
+      "hint": "🔮 마법의 수정구 ✨",
+      "introduced": 10,
+      "due": 33,
+      "payoff": null
     }
   ]
 }
