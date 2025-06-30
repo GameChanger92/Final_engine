@@ -155,7 +155,48 @@ def call_llm(prompt: str) -> str:
         raise RetryException(f"LLM generation failed: {str(e)}", guard_name="llm_call")
 
 
-def plan_beats(episode_num: int, prev_beats: List[str] = None) -> dict:
+def _mock_beats(episode_num: int, flat: bool = False) -> dict:
+    """
+    Generate mock beats for testing or when API key is unavailable.
+    
+    Parameters
+    ----------
+    episode_num : int
+        Episode number
+    flat : bool, optional
+        If True, return flat list. If False, return nested dict.
+        
+    Returns
+    -------
+    dict or list
+        Mock beats in requested format
+    """
+    if flat:
+        # Return flat list compatible with main.py expectations
+        beats = []
+        for i in range(24):  # 6 sequences * 4 beats each = 24 beats
+            seq_num = (i // 4) + 1
+            beat_in_seq = (i % 4) + 1
+            beat_name = "beat_tp" if beat_in_seq == 4 else f"beat_{beat_in_seq}"
+            
+            beats.append({
+                "idx": i + 1,
+                "summary": f"Episode {episode_num} - Act {get_act_number(seq_num)} Seq{seq_num} {beat_name}",
+                "anchor": False
+            })
+        return beats
+    else:
+        # Return nested dict structure (original format)
+        episode_key = f"ep_{episode_num}"
+        episode_data = {}
+        
+        for seq_num in range(1, 7):
+            episode_data[f"seq_{seq_num}"] = generate_fallback_beats(seq_num)
+            
+        return {episode_key: episode_data}
+
+
+def plan_beats(episode_num: int, prev_beats: List[str] = None, *, return_flat: bool = False) -> dict:
     """
     Generate beats for all 6 sequences of an episode using 3-Act structure.
 
@@ -165,14 +206,22 @@ def plan_beats(episode_num: int, prev_beats: List[str] = None) -> dict:
         Episode number (1-based)
     prev_beats : List[str], optional
         Previous episode beats for context
+    return_flat : bool, optional
+        If True, return flat list of beat dicts. If False, return nested dict.
 
     Returns
     -------
-    dict
-        Nested dictionary with ep_X -> seq_Y -> beat_Z structure
+    dict or list
+        Nested dictionary with ep_X -> seq_Y -> beat_Z structure (return_flat=False)
+        or flat list of beat dictionaries (return_flat=True)
     """
     if prev_beats is None:
         prev_beats = []
+
+    # ❶ 테스트/무키 상황: 모의 Beats 반환
+    if os.getenv("UNIT_TEST_MODE") == "1" or not os.getenv("GOOGLE_API_KEY"):
+        logger.info("⚡ Beat Planner fallback (UNIT_TEST_MODE)")
+        return _mock_beats(episode_num, flat=return_flat)
 
     # Create arc goal based on episode
     arc_goal = f"Episode {episode_num}: Continue the story progression with compelling character development and plot advancement."
@@ -212,7 +261,29 @@ def plan_beats(episode_num: int, prev_beats: List[str] = None) -> dict:
             # Fallback beats for this sequence
             episode_data[f"seq_{seq_num}"] = generate_fallback_beats(seq_num)
 
-    return {episode_key: episode_data}
+    # Return in requested format
+    beats_result = {episode_key: episode_data}
+    
+    if return_flat:
+        # Convert nested dict to flat list of beat dictionaries
+        flat_beats = []
+        beat_idx = 1
+        
+        for seq_num in range(1, 7):
+            seq_key = f"seq_{seq_num}"
+            seq_beats = episode_data[seq_key]
+            
+            for beat_key in ["beat_1", "beat_2", "beat_3", "beat_tp"]:
+                flat_beats.append({
+                    "idx": beat_idx,
+                    "summary": seq_beats[beat_key],
+                    "anchor": False
+                })
+                beat_idx += 1
+                
+        return flat_beats
+    
+    return beats_result
 
 
 def parse_beat_output(raw_output: str) -> dict:
