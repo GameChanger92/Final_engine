@@ -67,10 +67,35 @@ The log output will show the temperature being used:
 
 This will run the complete pipeline:
 1. **Arc Outliner** → Creates basic story arc structure
-2. **Beat Planner** → Generates 3 story beats 
+2. **Beat Planner v2** → Generates 3-Act structure with 6 sequences and 4 beats each
 3. **Scene Maker** → Creates ~10 scenes from the beats
 4. **Context Builder** → Combines scenes into narrative context
 5. **Draft Generator** → Produces final episode draft
+
+### Beat Planner v2 Structure
+
+The Beat Planner now generates beats in a structured 3-Act format:
+
+**3-Act Structure:**
+- **Act 1 (Setup)**: Sequences 1-2 
+- **Act 2 (Confrontation)**: Sequences 3-4
+- **Act 3 (Resolution)**: Sequences 5-6
+
+**Each sequence contains 4 beats:**
+- `beat_1`, `beat_2`, `beat_3`: Story progression beats
+- `beat_tp`: Turning point for narrative tension
+
+**Output Example:**
+```yaml
+ep_42:
+  seq_2:
+    beat_1: "훈련에서 굴욕적인 패배"
+    beat_2: "비밀 연습 시작"
+    beat_3: "첫 가시적 성장"
+    beat_tp: "교관의 의심 어린 시선"
+```
+
+This structure is fully compatible with Scene Maker v2 and uses the `seq_x/beat_y` format for seamless integration.
 
 The output is saved to `projects/{project-id}/outputs/episode_1.txt` with placeholder content that will be replaced by actual LLM-generated text in future versions.
 
