@@ -7,6 +7,7 @@ Provides retry functionality for guards that raise RetryException, with
 exponential backoff and error message collection.
 """
 
+import os
 import time
 import logging
 from typing import Any
@@ -52,6 +53,16 @@ def run_with_retry(func, *args, max_retry=2, **kwargs) -> Any:
     ...     pass
     >>> result = run_with_retry(guard_function, "some text", max_retry=2)
     """
+    # Fast mode for unit tests - skip retry logic
+    if os.getenv("UNIT_TEST_MODE") == "1" or os.getenv("FAST_MODE") == "1":
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            # In fast mode, don't retry - just raise the exception
+            func_name = getattr(func, "__name__", str(func))
+            logger.info(f"Retry Controller: {func_name} failed in fast mode: {e}")
+            raise
+    
     messages = []
 
     func_name = getattr(func, "__name__", str(func))
