@@ -148,6 +148,8 @@ class TestBeatPlannerV2:
 
     def test_call_llm_missing_api_key(self, monkeypatch):
         """Test call_llm fails appropriately when API key is missing."""
+        # Remove UNIT_TEST_MODE to test real API key validation
+        monkeypatch.delenv("UNIT_TEST_MODE", raising=False)
         # Remove API key
         monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
         

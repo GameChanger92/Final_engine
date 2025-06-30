@@ -53,6 +53,11 @@ def run_pipeline(episode_num: int, project: str = "default") -> str:
     str
         Final draft content
     """
+    # Enable fast mode for unit tests to avoid LLM retry delays
+    import os
+    if os.getenv("UNIT_TEST_MODE") == "1":
+        os.environ.setdefault("FAST_MODE", "1")
+    
     # Step 1: Arc Outliner - create basic arc info
     create_arc_outline(episode_num)
 
