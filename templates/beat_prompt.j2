@@ -1,0 +1,42 @@
+# Beat Generation Request
+
+## Task
+Generate 4 compelling story beats for a specific sequence in a 3-Act narrative structure.
+
+## Story Context
+{{ arc_goal }}
+
+## Previous Beats Context
+{% if prev_beats %}
+Previous beats for reference:
+{% for beat_info in prev_beats %}
+- {{ beat_info }}
+{% endfor %}
+{% else %}
+This is the beginning of the story - no previous beats available.
+{% endif %}
+
+## Current Sequence Information
+- **Sequence Number**: {{ sequence_no }}
+- **Act Structure**: 
+  - Act 1 (Setup): Sequences 1-2
+  - Act 2 (Confrontation): Sequences 3-4  
+  - Act 3 (Resolution): Sequences 5-6
+
+## Requirements
+- Generate exactly 4 beats for Sequence {{ sequence_no }}
+- Each beat should be 50-100 characters in Korean
+- Include one turning point (beat_tp) that creates narrative tension
+- Beats should follow logical progression within the sequence
+- Maintain consistency with previous beats context
+- Use vivid, engaging descriptions that work for scene generation
+
+## Output Format
+Provide only the 4 beat descriptions in this exact format:
+
+beat_1: "첫 번째 비트 설명"
+beat_2: "두 번째 비트 설명"  
+beat_3: "세 번째 비트 설명"
+beat_tp: "전환점 비트 설명"
+
+Do not include any additional commentary, explanations, or formatting.
