@@ -120,12 +120,14 @@ def call_llm(prompt: str) -> str:
         model = genai.GenerativeModel(model_name)
 
         # Configure generation parameters
+        temperature = float(os.getenv("TEMP_DRAFT", "0.7"))
         generation_config = {
             "max_output_tokens": 60000,
-            "temperature": 0.7,
+            "temperature": temperature,
         }
 
         # Generate content
+        logger.info(f"✍️  Draft Generator… (temperature={temperature}, max_output_tokens=60000)")
         logger.info(f"Calling {model_name} for draft generation...")
         response = model.generate_content(prompt, generation_config=generation_config)
 
