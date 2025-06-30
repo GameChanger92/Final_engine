@@ -187,6 +187,69 @@ Expected output format:
 ✅ CritiqueGuard PASS
 ```
 
+## Batch Execution
+
+Run large episode batches (1-240) with the Full-Season Runner for comprehensive story generation and KPI tracking:
+
+```bash
+# Generate episodes 1-10 with default project
+python scripts/run_full_season.py --episodes 1-10
+
+# Generate full season (1-240) with specific project
+python scripts/run_full_season.py --project-id demo_novel --episodes 1-240
+
+# Generate custom range with style override
+python scripts/run_full_season.py --episodes 1-50 --style munpia
+
+# Generate specific episodes
+python scripts/run_full_season.py --episodes 1,10,20
+```
+
+### Features
+
+- **Automated Episode Generation**: Runs the complete pipeline for each episode in the range
+- **KPI Tracking**: Collects quality metrics across all episodes:
+  - `avg_fun`: Average entertainment score from Self-Critique (1-10)
+  - `avg_logic`: Average logic/coherence score from Self-Critique (1-10)  
+  - `guard_pass_rate`: Percentage of episodes passing all 10 guards
+  - `avg_chars`: Average character count per episode
+- **Progress Monitoring**: Real-time console output showing episode-by-episode results
+- **HTML Reporting**: Automatic generation of `reports/season_KPI.html` with charts and tables
+
+### Expected Output
+
+```
+🚀 Starting Full Season Runner: Episodes 1-10 (Project: default)
+============================================================
+
+📺 Processing Episode 1...
+   ✅ PASS | Fun: 8.1 | Logic: 8.4 | Chars: 5,650
+----------------------------------------
+📺 Processing Episode 2...
+   ✅ PASS | Fun: 8.3 | Logic: 8.2 | Chars: 5,420
+...
+
+============================================================
+📊 KPI SUMMARY
+============================================================
+📈 Fun Score (avg):      8.1/10
+🧠 Logic Score (avg):    8.4/10
+🛡️  Guard Pass Rate:      92%
+📝 Average Characters:   5,650
+⏱️  Total Runtime:        45.2s
+✅ Passed Episodes:      9
+❌ Failed Episodes:      1
+
+📊 KPI Summary — fun 8.1 / logic 8.4 / guard_pass 92 % / avg chars 5,650
+✔️  Report saved to reports/season_KPI.html
+```
+
+The HTML report includes:
+- Interactive KPI dashboard with charts
+- Episode-by-episode detailed results table
+- Visual score distribution graphs
+- Overall statistics summary
+
 ## 통합 테스트 실행 예시
 
 Test anchor-driven integration flow to ensure all 5 anchor events appear within their expected episodes:

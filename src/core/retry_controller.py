@@ -7,6 +7,7 @@ Provides retry functionality for guards that raise RetryException, with
 exponential backoff and error message collection.
 """
 
+import os
 import time
 import logging
 from typing import Any
@@ -52,6 +53,8 @@ def run_with_retry(func, *args, max_retry=2, **kwargs) -> Any:
     ...     pass
     >>> result = run_with_retry(guard_function, "some text", max_retry=2)
     """
+    fast_mode = os.getenv("FAST_MODE") == "1" or os.getenv("UNIT_TEST_MODE") == "1"
+    
     messages = []
 
     func_name = getattr(func, "__name__", str(func))
@@ -83,7 +86,11 @@ def run_with_retry(func, *args, max_retry=2, **kwargs) -> Any:
                 )
 
             # Wait before next retry with exponential backoff
-            sleep_time = 0.5 * (attempt + 1)
+            # Use shorter delays in fast mode
+            if fast_mode:
+                sleep_time = 0.01  # Very short delay for tests
+            else:
+                sleep_time = 0.5 * (attempt + 1)
             logger.info(f"Retry Controller: Waiting {sleep_time}s before retry...")
             time.sleep(sleep_time)
         except Exception as e:

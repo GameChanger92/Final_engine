@@ -97,7 +97,7 @@ class TestSceneMakerV2:
         assert mock_call_llm.called
 
     @patch('src.scene_maker.VectorStore')
-    @patch.dict(os.environ, {"GOOGLE_API_KEY": "test_key"})
+    @patch.dict(os.environ, {"GOOGLE_API_KEY": "test_key", "FAST_MODE": "0", "UNIT_TEST_MODE": "0"})
     def test_vector_store_metadata_storage(self, mock_vector_store_class):
         """Test that VectorStore stores metadata correctly."""
         # Mock VectorStore instance
