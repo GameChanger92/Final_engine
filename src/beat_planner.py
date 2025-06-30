@@ -109,7 +109,7 @@ def call_llm(prompt: str) -> str:
         try:
             # Test mode flag for unit tests
             if os.getenv("UNIT_TEST_MODE") == "1":
-                raise ImportError("Forced import error for unit test")
+                raise RetryException("Gemini import error", guard_name="call_llm")
             import google.generativeai as genai
         except ImportError:
             # Fast mode for unit tests - return stub immediately (but only after import check)
