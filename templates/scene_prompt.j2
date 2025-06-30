@@ -1,0 +1,56 @@
+# Scene Generation Request
+
+## Task
+Generate 8-12 detailed scene points for the given beat description. Each scene point should include point of view, purpose, description, and relevant tags.
+
+## Beat Information
+**Beat Description**: {{ beat_desc }}
+
+## Characters
+{% if characters %}
+{% for char_id, char_info in characters.items() %}
+**{{ char_info.name }}**: {{ char_info.background }}
+- 특성: {{ char_info.traits | join(', ') }}
+{% if char_info.relationships %}
+- 관계: {{ char_info.relationships | join(', ') }}
+{% endif %}
+{% endfor %}
+{% else %}
+[Character information to be added based on story context]
+{% endif %}
+
+## Requirements
+- Generate between 8-12 scene points for this beat
+- Each scene point must include:
+  - `pov`: Either "main" (main character perspective) or "side" (supporting character/external perspective)
+  - `purpose`: Brief description of the scene's narrative purpose (한국어, 10-30 characters)
+  - `desc`: Detailed scene description in Korean (50-150 characters)
+  - `tags`: List of relevant characters and locations mentioned in the scene (array of strings)
+
+## Style Guidelines
+{% if style and style.prompt_suffix %}- {{ style.prompt_suffix }}{% endif %}
+- Use engaging, vivid descriptions suitable for the target platform
+- Maintain narrative flow and pacing throughout the scenes
+- Include diverse points of view to create dynamic storytelling
+- Ensure each scene advances the story or develops character
+
+## Output Format
+Provide only the scene points in this exact YAML format:
+
+```yaml
+scene_01:
+  pov: main
+  purpose: "목적 설명"
+  tags: ["캐릭터1", "장소1"]
+  desc: "상세한 장면 설명..."
+
+scene_02:
+  pov: side
+  purpose: "목적 설명"
+  tags: ["캐릭터2", "장소2"]
+  desc: "상세한 장면 설명..."
+
+[Continue for 8-12 scenes...]
+```
+
+Do not include any additional commentary, explanations, or formatting outside the YAML block.

@@ -117,7 +117,7 @@ class VectorStore:
 
         return chroma_path
 
-    def add(self, scene_id: str, text: str) -> bool:
+    def add(self, scene_id: str, text: str, metadata: dict = None) -> bool:
         """
         Add a scene embedding to the vector store.
 
@@ -127,6 +127,8 @@ class VectorStore:
             Unique identifier for the scene
         text : str
             Scene text content to embed
+        metadata : dict, optional
+            Additional metadata to store with the scene (e.g., tags, pov, purpose)
 
         Returns
         -------
@@ -139,7 +141,10 @@ class VectorStore:
 
             # Add to ChromaDB collection
             self.collection.add(
-                embeddings=[embedding], documents=[text], ids=[scene_id]
+                embeddings=[embedding], 
+                documents=[text], 
+                ids=[scene_id],
+                metadatas=[metadata] if metadata else None
             )
 
             return True
