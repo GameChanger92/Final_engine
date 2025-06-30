@@ -38,6 +38,7 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
     7. RuleGuard PASS
     8. RelationGuard PASS
     9. PacingGuard PASS
+    10. CritiqueGuard PASS
 
     Parameters
     ----------
@@ -91,7 +92,7 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
     """
 
     guards_passed = 0
-    total_guards = 9
+    total_guards = 10  # Updated to include critique guard
 
     # 1. LexiGuard Test
     try:
@@ -236,6 +237,19 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
         print(f"❌ PacingGuard FAIL: {e}")
     except Exception as e:
         print(f"⚠️  PacingGuard ERROR: {e}")
+
+    # 10. CritiqueGuard Test - Self-Critique Guard (Day 25)
+    try:
+        from src.plugins.critique_guard import critique_guard
+
+        # Test LLM-based fun and logic evaluation
+        run_with_retry(critique_guard, draft_content)
+        print("✅ CritiqueGuard PASS")
+        guards_passed += 1
+    except RetryException as e:
+        print(f"❌ CritiqueGuard FAIL: {e}")
+    except Exception as e:
+        print(f"⚠️  CritiqueGuard ERROR: {e}")
 
     # Context Builder Test (Day 20 requirement)
     try:

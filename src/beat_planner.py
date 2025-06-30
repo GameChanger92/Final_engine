@@ -19,6 +19,7 @@ from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 
 from src.core.retry_controller import run_with_retry
 from src.exceptions import RetryException
+from src.plugins.critique_guard import critique_guard
 
 # Load environment variables
 load_dotenv(".env", override=True)
@@ -236,7 +237,7 @@ def plan_beats(episode_num: int, prev_beats: List[str] = None, *, return_flat: b
             # Build prompt for this sequence
             prompt = build_prompt(arc_goal, prev_beats, seq_num)
 
-            # Call LLM with retry mechanism
+            # Call LLM with retry mechanism and critique validation
             def llm_wrapper():
                 raw_output = call_llm(prompt)
                 # Parse and validate the output
@@ -246,6 +247,11 @@ def plan_beats(episode_num: int, prev_beats: List[str] = None, *, return_flat: b
                         f"Expected 4 beats, got {len(beats)}",
                         guard_name="beat_count",
                     )
+                
+                # Validate beats with critique guard
+                beats_text = "\n".join([f"Beat {i+1}: {list(beats.values())[i]}" for i in range(len(beats))])
+                validate_beats_with_critique(beats_text)
+                
                 return beats
 
             beats = run_with_retry(llm_wrapper)
@@ -284,6 +290,28 @@ def plan_beats(episode_num: int, prev_beats: List[str] = None, *, return_flat: b
         return flat_beats
     
     return beats_result
+
+
+def validate_beats_with_critique(beats_text: str) -> None:
+    """
+    Validate beat descriptions with critique guard.
+
+    Parameters
+    ----------
+    beats_text : str
+        Combined text of all beats to validate
+
+    Raises
+    ------
+    RetryException
+        If beats fail critique validation
+    """
+    try:
+        critique_guard(beats_text)
+        logger.info("Beat critique validation PASS")
+    except RetryException as e:
+        logger.warning(f"Beat critique validation FAIL: {e}")
+        raise
 
 
 def parse_beat_output(raw_output: str) -> dict:
