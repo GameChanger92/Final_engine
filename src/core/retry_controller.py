@@ -53,8 +53,9 @@ def run_with_retry(func, *args, max_retry=2, **kwargs) -> Any:
     ...     pass
     >>> result = run_with_retry(guard_function, "some text", max_retry=2)
     """
-    # Fast mode for unit tests - skip retry logic
-    if os.getenv("UNIT_TEST_MODE") == "1" or os.getenv("FAST_MODE") == "1":
+    # Skip retry logic only in FAST_MODE but not UNIT_TEST_MODE
+    # UNIT_TEST_MODE may still need retry testing
+    if os.getenv("FAST_MODE") == "1":
         try:
             return func(*args, **kwargs)
         except Exception as e:
@@ -94,7 +95,11 @@ def run_with_retry(func, *args, max_retry=2, **kwargs) -> Any:
                 )
 
             # Wait before next retry with exponential backoff
-            sleep_time = 0.5 * (attempt + 1)
+            # Use shorter delays in unit test mode
+            if os.getenv("UNIT_TEST_MODE") == "1":
+                sleep_time = 0.01  # Very short delay for tests
+            else:
+                sleep_time = 0.5 * (attempt + 1)
             logger.info(f"Retry Controller: Waiting {sleep_time}s before retry...")
             time.sleep(sleep_time)
         except Exception as e:

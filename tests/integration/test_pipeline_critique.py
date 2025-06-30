@@ -47,20 +47,44 @@ class TestPipelineCritique:
     def test_pipeline_with_critique_guard_retry(self):
         """Test that pipeline handles critique guard failures with retry."""
         from src.exceptions import RetryException
-        from scripts.run_pipeline import test_guards_sequence
+        from unittest.mock import patch, MagicMock
+        import sys
+        import importlib
         
-        # Mock critique guard to fail first, then succeed
-        with patch('src.plugins.critique_guard.critique_guard') as mock_critique:
-            mock_critique.side_effect = [
-                RetryException("Low scores: fun=5.0, logic=6.0", guard_name="critique_guard"),
-                None  # Success on retry
-            ]
-            
-            # Run the guard sequence 
-            result = test_guards_sequence(2)
-            
-            # Verify critique guard was called multiple times due to retry
-            assert mock_critique.call_count >= 2
+        # Enable retries for this test by setting UNIT_TEST_MODE to 0
+        original_unit_test_mode = os.environ.get("UNIT_TEST_MODE")
+        os.environ["UNIT_TEST_MODE"] = "0"  # Explicitly disable test mode for retry test
+        
+        try:
+            # Directly patch the critique_guard module
+            with patch.dict('sys.modules', {'src.plugins.critique_guard': MagicMock()}):
+                mock_critique = MagicMock()
+                mock_critique.side_effect = [
+                    RetryException("Low scores: fun=5.0, logic=6.0", guard_name="critique_guard"),
+                    None  # Success on retry
+                ]
+                
+                # Set the critique_guard function on the mocked module
+                sys.modules['src.plugins.critique_guard'].critique_guard = mock_critique
+                
+                # Force reload the run_pipeline module to use our mock
+                if 'scripts.run_pipeline' in sys.modules:
+                    importlib.reload(sys.modules['scripts.run_pipeline'])
+                
+                from scripts.run_pipeline import test_guards_sequence
+                
+                # Run the guard sequence 
+                result = test_guards_sequence(2)
+                
+                # Verify critique guard was called multiple times due to retry
+                assert mock_critique.call_count >= 2
+                
+        finally:
+            # Restore original state
+            if original_unit_test_mode is not None:
+                os.environ["UNIT_TEST_MODE"] = original_unit_test_mode
+            elif "UNIT_TEST_MODE" in os.environ:
+                del os.environ["UNIT_TEST_MODE"]
 
     def test_pipeline_with_high_critique_threshold(self):
         """Test pipeline behavior with high critique score threshold."""
