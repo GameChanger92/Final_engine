@@ -157,8 +157,11 @@ def test_build_prompt_with_style():
     context = "Test context"
     style = {
         "platform": "web",
-        "style": {"tone": "dramatic", "voice": "3rd_person", "tense": "present"},
-        "word_count_target": 1500,
+        "tone": "dramatic",
+        "voice_main": "3rd_person",
+        "voice_side": "present",
+        "enter_rule": "custom_rule",
+        "prompt_suffix": "with specific requirements"
     }
 
     prompt = build_prompt(context, style)
@@ -166,7 +169,7 @@ def test_build_prompt_with_style():
     assert isinstance(prompt, str)
     assert context in prompt
     assert "dramatic" in prompt
-    assert "1500" in prompt
+    assert "3rd_person" in prompt
 
 
 def test_generate_draft_fallback_mode():

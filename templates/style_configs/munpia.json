@@ -1,0 +1,8 @@
+{
+  "platform": "munpia",
+  "tone": "대사 중심 경쾌",
+  "voice_main": "3인칭 관찰자",
+  "voice_side": "감정 몰입형",
+  "enter_rule": "액션마다 줄바꿈",
+  "prompt_suffix": "문피아 독자층에 맞는 몰입감 있는 서술로 작성해주세요."
+}

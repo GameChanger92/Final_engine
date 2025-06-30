@@ -39,9 +39,10 @@
 ## Style Guidelines
 {% if style %}
 - 플랫폼: {{ style.platform }}
-- 문체: {{ style.style.tone }}, {{ style.style.voice }}, {{ style.style.tense }}
-- 서술 수준: {{ style.style.description_level }}
-- 목표 단어 수: {{ style.word_count_target }}
+- 문체: {{ style.tone }}
+- 주요 시점: {{ style.voice_main }}
+- 보조 시점: {{ style.voice_side }}
+- 줄바꿈 규칙: {{ style.enter_rule }}
 {% endif %}
 
 ## Current Scenes

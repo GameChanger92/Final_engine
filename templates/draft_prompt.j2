@@ -9,13 +9,15 @@ Generate a compelling episode draft based on the provided context and style guid
 ## Style Guidelines
 {% if style %}
 - 플랫폼: {{ style.platform }}
-- 문체: {{ style.style.tone }}, {{ style.style.voice }}, {{ style.style.tense }}
-- 서술 수준: {{ style.style.description_level }}
-- 목표 단어 수: {{ style.word_count_target }}
+- 문체: {{ style.tone }}
+- 주요 시점: {{ style.voice_main }}
+- 보조 시점: {{ style.voice_side }}
+- 줄바꿈 규칙: {{ style.enter_rule }}
 {% else %}
-- 문체: 흥미진진한, 3인칭, 현재시제
-- 서술 수준: 중간
-- 목표 단어 수: 2000
+- 문체: 균형 잡힌
+- 주요 시점: 3인칭 관찰자
+- 보조 시점: 표준형
+- 줄바꿈 규칙: 문단별 줄바꿈
 {% endif %}
 
 ## Requirements
@@ -25,6 +27,7 @@ Generate a compelling episode draft based on the provided context and style guid
 - Include character development and plot progression
 - Use vivid descriptions and engaging dialogue
 - Ensure proper pacing and story flow
+{% if style and style.prompt_suffix %}- {{ style.prompt_suffix }}{% endif %}
 
 ## Output Format
 Provide only the episode draft text without any additional commentary or metadata.

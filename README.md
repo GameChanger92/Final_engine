@@ -15,6 +15,27 @@ python -m src.main run --episode 1 --project-id demo_novel
 cat projects/demo_novel/outputs/episode_1.txt
 ```
 
+### Platform Style Configuration
+
+The engine supports different writing styles for different platforms. Configure the style by setting the `PLATFORM` environment variable:
+
+```bash
+# Use munpia style (default)
+PLATFORM=munpia python -m src.main run --episode 1
+
+# Use kakao style  
+PLATFORM=kakao python -m src.main run --episode 1
+```
+
+Available platforms:
+- **munpia**: 대사 중심 경쾌한 스타일 (dialogue-focused, upbeat style)
+- **kakao**: 정서적 깊이감 있는 스타일 (emotionally deep style)
+
+You can also set this in your `.env` file:
+```
+PLATFORM=munpia
+```
+
 This will run the complete pipeline:
 1. **Arc Outliner** → Creates basic story arc structure
 2. **Beat Planner** → Generates 3 story beats 
