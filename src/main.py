@@ -57,7 +57,7 @@ def run_pipeline(episode_num: int, project: str = "default") -> str:
     create_arc_outline(episode_num)
 
     # Step 2: Beat Planner - generate beats (take first 3 for simplified version)
-    all_beats = plan_beats(episode_num, [])  # Empty anchors for now
+    all_beats = plan_beats(episode_num, [], return_flat=True)  # Get flat list
     beats = all_beats[:3]  # Take first 3 beats
 
     # Step 3: Scene Maker - generate scenes for each beat (aim for ~10 total scenes)

@@ -68,9 +68,30 @@ The log output will show the temperature being used:
 This will run the complete pipeline:
 1. **Arc Outliner** → Creates basic story arc structure
 2. **Beat Planner v2** → Generates 3-Act structure with 6 sequences and 4 beats each
-3. **Scene Maker** → Creates ~10 scenes from the beats
+3. **Scene Maker v2** → Creates 8-12 ScenePoints from the beats with enhanced metadata
 4. **Context Builder** → Combines scenes into narrative context
 5. **Draft Generator** → Produces final episode draft
+
+### Scene Maker v2 Structure
+
+Scene Maker v2 now generates 8-12 detailed ScenePoints per beat with enhanced metadata:
+
+**ScenePoint Schema:**
+```yaml
+scene_03:
+  pov: side          # main | side
+  purpose: "훈련 결과 발표"
+  tags: ["지아", "교관", "훈련장"]
+  desc: "지아는 낮은 점수에도 불구하고 교관의 시선을 느낀다…"
+```
+
+**Key Features:**
+- **pov**: Perspective type (`main` for main character, `side` for supporting character)
+- **purpose**: Brief narrative purpose of the scene (Korean, 10-30 characters)
+- **tags**: List of characters and locations mentioned in the scene
+- **desc**: Detailed scene description (Korean, 50-150 characters)
+
+The Scene Maker v2 also stores scene metadata in the vector database for enhanced search and retrieval capabilities.
 
 ### Beat Planner v2 Structure
 
