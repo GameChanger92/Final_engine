@@ -20,6 +20,7 @@ from src.core.retry_controller import run_with_retry
 from src.exceptions import RetryException
 from src.prompt_loader import load_style
 from src.embedding.vector_store import VectorStore
+from src.plugins.critique_guard import critique_guard
 
 # Load environment variables
 load_dotenv(".env", override=True)
@@ -253,7 +254,7 @@ def make_scenes(beat_json: dict) -> list[dict]:
         # Build prompt for scene generation
         prompt = build_prompt(beat_desc, beat_idx)
 
-        # Call LLM with retry logic
+        # Call LLM with retry logic and guard validation
         def llm_wrapper():
             raw_output = call_llm(prompt)
             scenes = parse_scene_yaml(raw_output)
@@ -261,6 +262,10 @@ def make_scenes(beat_json: dict) -> list[dict]:
             # Add beat_id to each scene
             for scene in scenes:
                 scene["beat_id"] = beat_idx
+            
+            # Validate scenes with critique guard
+            scenes_text = "\n".join([f"Scene {scene['idx']}: {scene['desc']}" for scene in scenes])
+            validate_scenes_with_critique(scenes_text)
                 
             return scenes
 
@@ -290,6 +295,28 @@ def make_scenes(beat_json: dict) -> list[dict]:
         logger.error(f"Scene generation failed for beat {beat_idx}: {e}")
         # Fallback to placeholder scenes if LLM fails
         return _generate_fallback_scenes(beat_idx, beat_desc)
+
+
+def validate_scenes_with_critique(scenes_text: str) -> None:
+    """
+    Validate scene descriptions with critique guard.
+
+    Parameters
+    ----------
+    scenes_text : str
+        Combined text of all scenes to validate
+
+    Raises
+    ------
+    RetryException
+        If scenes fail critique validation
+    """
+    try:
+        critique_guard(scenes_text)
+        logger.info("Scene critique validation PASS")
+    except RetryException as e:
+        logger.warning(f"Scene critique validation FAIL: {e}")
+        raise
 
 
 def _generate_fallback_scenes(beat_idx: int, beat_desc: str) -> list[dict]:

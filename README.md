@@ -118,6 +118,35 @@ ep_42:
 
 This structure is fully compatible with Scene Maker v2 and uses the `seq_x/beat_y` format for seamless integration.
 
+### Guard Configuration
+
+The engine supports advanced quality control through configurable guards. Set thresholds in your `.env` file:
+
+```bash
+# Self-Critique Guard: LLM-based fun & logic evaluation
+MIN_CRITIQUE_SCORE=7.0    # Minimum score (1-10) for fun and logic
+
+# Other guard settings (examples)
+# LEXI_TTR_THRESHOLD=0.17
+# EMOTION_DELTA_MAX=0.7
+```
+
+**Self-Critique Guard Features:**
+- Uses Gemini 2.5 Pro to evaluate generated content
+- Scores content on two dimensions: **재미 (fun)** and **개연성 (logic)**
+- Raises RetryException if `min(fun, logic) < MIN_CRITIQUE_SCORE`
+- Integrated into Beat Planner, Scene Maker, and Draft Generator workflows
+- Automatic retry with exponential backoff on low scores
+
+Test with different thresholds:
+```bash
+# Strict quality control
+MIN_CRITIQUE_SCORE=8.5 python scripts/run_pipeline.py --episode 2
+
+# Relaxed quality control  
+MIN_CRITIQUE_SCORE=6.0 python scripts/run_pipeline.py --episode 2
+```
+
 The output is saved to `projects/{project-id}/outputs/episode_1.txt` with placeholder content that will be replaced by actual LLM-generated text in future versions.
 
 ## Guard Chain Testing
@@ -138,6 +167,11 @@ This runs all guards in sequence for each episode:
 - **ScheduleGuard** → Validates foreshadow resolution compliance  
 - **ImmutableGuard** → Ensures character consistency
 - **DateGuard** → Checks chronological progression
+- **AnchorGuard** → Validates anchor event compliance
+- **RuleGuard** → Checks forbidden pattern violations
+- **RelationGuard** → Monitors character relationship changes
+- **PacingGuard** → Validates narrative pacing balance
+- **CritiqueGuard** → LLM-based fun & logic evaluation
 
 Expected output format:
 ```
@@ -146,6 +180,11 @@ Expected output format:
 ✅ ScheduleGuard PASS
 ✅ ImmutableGuard PASS
 ✅ DateGuard PASS
+✅ AnchorGuard PASS
+✅ RuleGuard PASS
+✅ RelationGuard PASS
+✅ PacingGuard PASS
+✅ CritiqueGuard PASS
 ```
 
 ## 통합 테스트 실행 예시
