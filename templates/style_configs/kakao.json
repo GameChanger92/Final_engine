@@ -1,0 +1,8 @@
+{
+  "platform": "kakao",
+  "tone": "정서적 깊이감",
+  "voice_main": "1인칭 내레이터",
+  "voice_side": "심리 묘사형",
+  "enter_rule": "장면전환시 줄바꿈",
+  "prompt_suffix": "카카오페이지 독자층에 맞는 감성적이고 몰입도 높은 서술로 작성해주세요."
+}
