@@ -135,7 +135,7 @@ class VectorStore:
         bool
             True if successfully added, False otherwise
         """
-        # Fast mode for unit tests - skip actual vector store operations
+        # Fast mode for unit tests - skip actual vector store operations for speed
         if os.getenv("UNIT_TEST_MODE") == "1" or os.getenv("FAST_MODE") == "1":
             return True
             

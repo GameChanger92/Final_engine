@@ -278,12 +278,13 @@ def plan_beats(episode_num: int, prev_beats: List[str] = None, *, return_flat: b
             seq_key = f"seq_{seq_num}"
             episode_data[seq_key] = beats
 
-            logger.info("Beat Planner… Beats generated (seq=%s)", seq_num)
-
         except Exception as e:
             logger.error(f"Failed to generate beats for sequence {seq_num}: {e}")
             # Fallback beats for this sequence
             episode_data[f"seq_{seq_num}"] = generate_fallback_beats(seq_num)
+        
+        # Log beat generation completion for this sequence (regardless of success/failure)
+        logger.info("Beat Planner… Beats generated (seq=%s)", seq_num)
 
     # Return in requested format
     beats_result = {episode_key: episode_data}

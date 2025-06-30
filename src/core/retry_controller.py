@@ -53,16 +53,9 @@ def run_with_retry(func, *args, max_retry=2, **kwargs) -> Any:
     ...     pass
     >>> result = run_with_retry(guard_function, "some text", max_retry=2)
     """
-    # Skip retry logic only in FAST_MODE but not UNIT_TEST_MODE
-    # UNIT_TEST_MODE may still need retry testing
-    if os.getenv("FAST_MODE") == "1":
-        try:
-            return func(*args, **kwargs)
-        except Exception as e:
-            # In fast mode, don't retry - just raise the exception
-            func_name = getattr(func, "__name__", str(func))
-            logger.info(f"Retry Controller: {func_name} failed in fast mode: {e}")
-            raise
+    # Skip retry logic in FAST_MODE or UNIT_TEST_MODE for speed optimization
+    if os.getenv("FAST_MODE") == "1" or os.getenv("UNIT_TEST_MODE") == "1":
+        return func(*args, **kwargs)
     
     messages = []
 

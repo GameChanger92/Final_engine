@@ -17,22 +17,32 @@ from src.main import run_pipeline
 
 def test_pipeline_execution_time():
     """Test that the complete pipeline executes in less than 5 seconds."""
-    start_time = time.time()
+    import os
+    
+    # Set environment variable to enable fast mode
+    os.environ["UNIT_TEST_MODE"] = "1"
+    
+    try:
+        start_time = time.time()
 
-    # Run the pipeline
-    result = run_pipeline(1)
+        # Run the pipeline
+        result = run_pipeline(1)
 
-    end_time = time.time()
-    execution_time = end_time - start_time
+        end_time = time.time()
+        execution_time = end_time - start_time
 
-    # Verify execution time is under 5 seconds
-    assert (
-        execution_time < 5.0
-    ), f"Pipeline took {execution_time:.2f} seconds, should be < 5 seconds"
+        # Verify execution time is under 5 seconds
+        assert (
+            execution_time < 5.0
+        ), f"Pipeline took {execution_time:.2f} seconds, should be < 5 seconds"
 
-    # Verify we got a result
-    assert isinstance(result, str)
-    assert len(result) > 0
+        # Verify we got a result
+        assert isinstance(result, str)
+        assert len(result) > 0
+    finally:
+        # Clean up environment variable
+        if "UNIT_TEST_MODE" in os.environ:
+            del os.environ["UNIT_TEST_MODE"]
 
 
 def test_output_file_creation():

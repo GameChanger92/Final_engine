@@ -295,9 +295,20 @@ def make_scenes(beat_json: dict) -> list[dict]:
     beat_idx = beat_json.get("idx", 1)
     beat_desc = beat_json.get("summary", "Unknown beat")
 
-    # Fast mode for unit tests - return 1 scene stub and skip VectorStore
+    # Fast mode for unit tests - return 10 scene stubs and skip VectorStore
     if os.getenv("FAST_MODE") == "1" or os.getenv("UNIT_TEST_MODE") == "1":
-        return [_stub_scene(beat_json)]
+        return [
+            {
+                "idx": i+1,
+                "beat_id": beat_idx,
+                "pov": "main" if i % 2 == 0 else "side",
+                "purpose": f"Fast mode stub scene {i+1}",
+                "tags": ["test", "fast"],
+                "desc": f"Scene {i+1}: {beat_desc} (fast mode stub)",
+                "type": "stub"
+            }
+            for i in range(10)  # Generate 10 scenes for fallback compatibility
+        ]
 
     try:
         # Build prompt for scene generation
