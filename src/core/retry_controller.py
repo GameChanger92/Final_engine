@@ -53,9 +53,7 @@ def run_with_retry(func, *args, max_retry=2, **kwargs) -> Any:
     ...     pass
     >>> result = run_with_retry(guard_function, "some text", max_retry=2)
     """
-    # Skip retry logic in FAST_MODE or UNIT_TEST_MODE for speed optimization
-    if os.getenv("FAST_MODE") == "1" or os.getenv("UNIT_TEST_MODE") == "1":
-        return func(*args, **kwargs)
+    fast_mode = os.getenv("FAST_MODE") == "1" or os.getenv("UNIT_TEST_MODE") == "1"
     
     messages = []
 
@@ -88,8 +86,8 @@ def run_with_retry(func, *args, max_retry=2, **kwargs) -> Any:
                 )
 
             # Wait before next retry with exponential backoff
-            # Use shorter delays in unit test mode
-            if os.getenv("UNIT_TEST_MODE") == "1":
+            # Use shorter delays in fast mode
+            if fast_mode:
                 sleep_time = 0.01  # Very short delay for tests
             else:
                 sleep_time = 0.5 * (attempt + 1)

@@ -116,7 +116,7 @@ The draft concludes with a satisfying resolution that ties together the themes.'
             
             logger.error("google-generativeai not installed")
             raise RetryException(
-                "Google Generative AI library not available", guard_name="llm_call"
+                "Google Generative AI library not available", guard_name="call_llm"
             )
 
         # Configure the API

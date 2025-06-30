@@ -121,7 +121,7 @@ beat_tp: "Fast mode stub turning point"'''
             
             logger.error("google-generativeai not installed")
             raise RetryException(
-                "Google Generative AI library not available", guard_name="llm_call"
+                "Google Generative AI library not available", guard_name="beat_planner"
             )
 
         # Configure the API
