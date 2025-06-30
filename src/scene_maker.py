@@ -6,8 +6,12 @@ scene_maker.py
 나중에 실제 로직으로 교체할 예정입니다.
 """
 
+import os
 from typing import List, Dict
 import typer
+
+# Temperature setting for future LLM integration
+# TEMP_SCENE = float(os.getenv("TEMP_SCENE", "0.6"))
 
 
 def make_scenes(beat_json: dict) -> list[dict]:

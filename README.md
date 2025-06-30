@@ -36,6 +36,35 @@ You can also set this in your `.env` file:
 PLATFORM=munpia
 ```
 
+## Advanced Settings
+
+### LLM Temperature Control
+
+The engine allows fine-tuning of creativity levels for different pipeline stages using temperature parameters:
+
+```bash
+# Experimental draft with higher creativity
+export TEMP_DRAFT=0.85
+python scripts/run_pipeline.py --project-id easy-money --episodes 1-1
+```
+
+Available temperature settings:
+- **TEMP_DRAFT**: Controls creativity for final draft generation (default: 0.7)
+- **TEMP_BEAT**: Controls creativity for beat planning (default: 0.3)  
+- **TEMP_SCENE**: Controls creativity for scene generation (default: 0.6)
+
+You can set these in your `.env` file:
+```env
+TEMP_DRAFT=0.7
+TEMP_BEAT=0.3
+TEMP_SCENE=0.6
+```
+
+The log output will show the temperature being used:
+```
+✍️  Draft Generator… (temperature=0.85, max_output_tokens=60000)
+```
+
 This will run the complete pipeline:
 1. **Arc Outliner** → Creates basic story arc structure
 2. **Beat Planner** → Generates 3 story beats 

@@ -6,7 +6,11 @@ beat_planner.py
 나중에 실제 로직으로 교체할 예정입니다.
 """
 
+import os
 from typing import List, Dict
+
+# Temperature setting for future LLM integration
+# TEMP_BEAT = float(os.getenv("TEMP_BEAT", "0.3"))
 
 
 def plan_beats(ep_num: int, anchors: List[Dict]) -> List[Dict]:
