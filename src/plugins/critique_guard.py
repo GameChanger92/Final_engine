@@ -245,7 +245,7 @@ class CritiqueGuard(BaseGuard):
 
 def check_critique_guard(text: str, min_score: float = None) -> Dict[str, Any]:
     """
-    Convenience function to run critique guard check.
+    Wrapper function to run critique guard check.
 
     Parameters
     ----------
@@ -290,7 +290,7 @@ def check_critique_guard(text: str, min_score: float = None) -> Dict[str, Any]:
     return result
 
 
-def critique_guard(text: str, *, min_score: float = 7.0) -> None:
+def critique_guard(text: str, min_score: float = None) -> None:
     """
     Main entry point for critique guard check.
 
@@ -308,9 +308,16 @@ def critique_guard(text: str, *, min_score: float = 7.0) -> None:
         If critique scores fall below minimum threshold
     """
     # Use environment variable if available, otherwise use provided min_score
-    env_min_score = os.getenv("MIN_CRITIQUE_SCORE")
-    if env_min_score is not None:
-        min_score = float(env_min_score)
+    if min_score is None:
+        env_min_score = os.getenv("MIN_CRITIQUE_SCORE")
+        if env_min_score is not None:
+            min_score = float(env_min_score)
+        else:
+            min_score = 7.0
 
     # Single call to check_critique_guard - let any RetryException propagate
     check_critique_guard(text, min_score)
+
+
+# Re-export functions for top-level access
+__all__ = ["CritiqueGuard", "check_critique_guard", "critique_guard"]
