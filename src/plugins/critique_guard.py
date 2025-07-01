@@ -269,7 +269,25 @@ def check_critique_guard(text: str, min_score: float = None) -> Dict[str, Any]:
         min_score = float(os.getenv("MIN_CRITIQUE_SCORE", "7.0"))
 
     guard = CritiqueGuard(min_score=min_score)
-    return guard.check(text)
+    result = guard.check(text)
+
+    # If the result indicates failure, raise RetryException
+    if not result["passed"]:
+        # Extract failure information
+        fun_score = result["fun_score"]
+        logic_score = result["logic_score"]
+        comment = result["comment"]
+        flags = result["flags"]
+
+        # Create and raise RetryException
+        message = (
+            f"Critique scores too low: fun={fun_score:.1f}, "
+            f"logic={logic_score:.1f} (min={min_score:.1f}). "
+            f"Comment: {comment}"
+        )
+        raise RetryException(message=message, flags=flags, guard_name="critique_guard")
+
+    return result
 
 
 def critique_guard(text: str, *, min_score: float = 7.0) -> None:
@@ -294,27 +312,5 @@ def critique_guard(text: str, *, min_score: float = 7.0) -> None:
     if env_min_score is not None:
         min_score = float(env_min_score)
 
-    try:
-        result = check_critique_guard(text, min_score)
-
-        # Check if the result indicates failure
-        if not result["passed"]:
-            # Extract failure information
-            fun_score = result["fun_score"]
-            logic_score = result["logic_score"]
-            comment = result["comment"]
-            flags = result["flags"]
-
-            # Create and raise RetryException
-            message = (
-                f"Critique scores too low: fun={fun_score:.1f}, "
-                f"logic={logic_score:.1f} (min={min_score:.1f}). "
-                f"Comment: {comment}"
-            )
-            raise RetryException(
-                message=message, flags=flags, guard_name="critique_guard"
-            )
-
-    except RetryException:
-        # Re-raise the exception to be handled by the caller
-        raise
+    # Single call to check_critique_guard - let any RetryException propagate
+    check_critique_guard(text, min_score)
