@@ -13,9 +13,11 @@ from pathlib import Path
 from typing import Dict, List, Any
 from src.exceptions import RetryException
 from src.utils.path_helper import data_path
+from src.core.guard_registry import BaseGuard, register_guard
 
 
-class RuleGuard:
+@register_guard(order=7)
+class RuleGuard(BaseGuard):
     """
     Rule Guard - validates text against forbidden patterns from rules.json.
 

@@ -13,9 +13,11 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 from src.exceptions import RetryException
 from src.utils.path_helper import data_path
+from src.core.guard_registry import BaseGuard, register_guard
 
 
-class DateGuard:
+@register_guard(order=5)
+class DateGuard(BaseGuard):
     """
     Guard that monitors chronological date progression.
 

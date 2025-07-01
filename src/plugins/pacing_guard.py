@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Dict, List, Any
 from src.exceptions import RetryException
 from src.utils.path_helper import data_path
+from src.core.guard_registry import BaseGuard, register_guard
 
 
 # Korean action verb keywords
@@ -87,7 +88,8 @@ MONOLOG_KEYWORDS = [
 ]
 
 
-class PacingGuard:
+@register_guard(order=9)
+class PacingGuard(BaseGuard):
     """
     Pacing Guard - validates action/dialog/monolog balance in scene content.
 
@@ -99,7 +101,7 @@ class PacingGuard:
     Raises RetryException when ratios deviate >±25% from rolling average.
     """
 
-    def __init__(self, project: str = "default"):
+    def __init__(self, project: str = "default", **kwargs):
         """
         Initialize PacingGuard with project configuration.
 
@@ -107,7 +109,10 @@ class PacingGuard:
         ----------
         project : str, optional
             Project ID for path resolution, defaults to "default"
+        **kwargs
+            Additional keyword arguments for compatibility
         """
+        super().__init__()
         self.project = project
         self.config_path = data_path("pacing_config.json", project)
         self.config = self._load_config()

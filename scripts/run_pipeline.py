@@ -20,8 +20,124 @@ sys.path.insert(0, str(project_root / "src"))
 from src.exceptions import RetryException  # noqa: E402
 from src.utils.path_helper import data_path  # noqa: E402
 from src.core.retry_controller import run_with_retry  # noqa: E402
+from src.core.guard_registry import get_sorted_guards  # noqa: E402
 
 # TODO: from src.main import run_pipeline  # Not used in current implementation
+
+
+def test_guards_auto_registry(episode_num: int, project: str = "default") -> bool:
+    """
+    Test all guards using auto-registry system and return success status.
+
+    Uses the guard registry to automatically discover and execute guards
+    in the proper order without manual sequence management.
+
+    Parameters
+    ----------
+    episode_num : int
+        Episode number to test
+    project : str, optional
+        Project ID for path resolution, defaults to "default"
+
+    Returns
+    -------
+    bool
+        True if all guards pass, False otherwise
+    """
+    # Import all guards to trigger registration
+    import src.plugins.lexi_guard  # noqa: F401
+    import src.plugins.emotion_guard  # noqa: F401
+    import src.plugins.schedule_guard  # noqa: F401
+    import src.plugins.immutable_guard  # noqa: F401
+    import src.plugins.date_guard  # noqa: F401
+    import src.plugins.anchor_guard  # noqa: F401
+    import src.plugins.rule_guard  # noqa: F401
+    import src.plugins.relation_guard  # noqa: F401
+    import src.plugins.pacing_guard  # noqa: F401
+    import src.plugins.critique_guard  # noqa: F401
+
+    # Get registered guards in order
+    guard_classes = get_sorted_guards()
+    guards_passed = 0
+    total_guards = len(guard_classes)
+
+    # Sample draft content for testing
+    draft_content = f"""
+    Episode {episode_num}: A mysterious story unfolds as our protagonist discovers
+    hidden secrets in the ancient library. The detective carefully examined the evidence,
+    piece by piece, connecting seemingly unrelated clues. 
+    "모든 것이 연결되어 있었다!" 탐정이 발견했다. 놀랐다고 이해했다.
+    Setting up future storylines that will explore themes of redemption and justice.
+    """
+
+    print(f"Testing {total_guards} guards using auto-registry...")
+
+    for i, guard_class in enumerate(guard_classes, 1):
+        guard_name = guard_class.__name__
+        try:
+            # Create guard instance
+            guard = guard_class(project=project)
+
+            # Prepare appropriate arguments based on guard type
+            if guard_name == "LexiGuard":
+                run_with_retry(guard.check, draft_content)
+            elif guard_name == "EmotionGuard":
+                prev_text = "This is some neutral previous content."
+                run_with_retry(guard.check, prev_text, draft_content)
+            elif guard_name == "ScheduleGuard":
+                run_with_retry(guard.check, episode_num)
+            elif guard_name == "ImmutableGuard":
+                # Load or create sample character data
+                char_path = data_path("characters.json", project)
+                try:
+                    with open(char_path, "r", encoding="utf-8") as f:
+                        characters = json.load(f)
+                except FileNotFoundError:
+                    characters = {
+                        "main_character": {
+                            "name": "TestCharacter",
+                            "role": "protagonist",
+                            "traits": ["brave", "intelligent"],
+                            "immutable": ["name", "role"],
+                        }
+                    }
+                run_with_retry(guard.check, characters)
+            elif guard_name == "DateGuard":
+                date_context = {
+                    "current_date": f"2024-{episode_num:02d}-01",
+                    "episode": episode_num,
+                }
+                run_with_retry(guard.check, date_context, episode_num)
+            elif guard_name == "AnchorGuard":
+                run_with_retry(guard.check, draft_content, episode_num)
+            elif guard_name == "RuleGuard":
+                run_with_retry(guard.check, draft_content)
+            elif guard_name == "RelationGuard":
+                run_with_retry(guard.check, episode_num)
+            elif guard_name == "PacingGuard":
+                scene_texts = [
+                    draft_content[: len(draft_content) // 3],
+                    draft_content[
+                        len(draft_content) // 3 : 2 * len(draft_content) // 3
+                    ],
+                    draft_content[2 * len(draft_content) // 3 :],
+                ]
+                run_with_retry(guard.check, scene_texts, episode_num)
+            elif guard_name == "CritiqueGuard":
+                run_with_retry(guard.check, draft_content)
+            else:
+                print(f"⚠️  Unknown guard: {guard_name}")
+                continue
+
+            print(f"✅ {guard_name} PASS")
+            guards_passed += 1
+        except RetryException as e:
+            print(f"❌ {guard_name} FAIL: {e}")
+        except Exception as e:
+            print(f"⚠️  {guard_name} ERROR: {e}")
+
+    print(f"\nGuard Results: {guards_passed}/{total_guards} passed")
+    return guards_passed == total_guards
 
 
 def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
@@ -316,7 +432,9 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
     return guards_passed == total_guards
 
 
-def run_episodes_test(start_ep: int, end_ep: int, project: str = "default") -> None:
+def run_episodes_test(
+    start_ep: int, end_ep: int, project: str = "default", use_auto_registry: bool = True
+) -> None:
     """
     Run pipeline test for episodes in the given range.
 
@@ -328,9 +446,12 @@ def run_episodes_test(start_ep: int, end_ep: int, project: str = "default") -> N
         Ending episode number (inclusive)
     project : str, optional
         Project ID for path resolution, defaults to "default"
+    use_auto_registry : bool, optional
+        Whether to use auto-registry system, defaults to True
     """
+    registry_type = "Auto-Registry" if use_auto_registry else "Manual Sequence"
     print(
-        f"🚀 Starting Pipeline Test for Episodes {start_ep}-{end_ep} (Project: {project})"
+        f"🚀 Starting Pipeline Test for Episodes {start_ep}-{end_ep} (Project: {project}, Mode: {registry_type})"
     )
     print("=" * 60)
 
@@ -338,7 +459,10 @@ def run_episodes_test(start_ep: int, end_ep: int, project: str = "default") -> N
     failed_episodes = []
 
     for episode in range(start_ep, end_ep + 1):
-        success = test_guards_sequence(episode, project)
+        if use_auto_registry:
+            success = test_guards_auto_registry(episode, project)
+        else:
+            success = test_guards_sequence(episode, project)
 
         if success:
             passed_episodes.append(episode)
@@ -433,6 +557,12 @@ Expected Output Format:
         help='Project ID for the story (defaults to "default")',
     )
 
+    parser.add_argument(
+        "--use-manual-sequence",
+        action="store_true",
+        help="Use manual guard sequence instead of auto-registry (for testing compatibility)",
+    )
+
     args = parser.parse_args()
 
     try:
@@ -442,7 +572,8 @@ Expected Output Format:
             print("❌ Error: Invalid episode range")
             sys.exit(1)
 
-        run_episodes_test(start_ep, end_ep, args.project_id)
+        use_auto_registry = not args.use_manual_sequence
+        run_episodes_test(start_ep, end_ep, args.project_id, use_auto_registry)
 
     except ValueError as e:
         print(f"❌ Error parsing episode range '{args.episodes}': {e}")

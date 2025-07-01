@@ -12,9 +12,11 @@ from pathlib import Path
 from typing import Dict, List, Any, Optional
 from src.exceptions import RetryException
 from src.utils.path_helper import data_path
+from src.core.guard_registry import BaseGuard, register_guard
 
 
-class RelationGuard:
+@register_guard(order=8)
+class RelationGuard(BaseGuard):
     """
     Relation Guard - validates character relationships don't change too abruptly.
 

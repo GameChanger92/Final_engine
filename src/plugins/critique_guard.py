@@ -14,6 +14,7 @@ from typing import Dict, Any
 from dotenv import load_dotenv
 
 from src.exceptions import RetryException
+from src.core.guard_registry import BaseGuard, register_guard
 
 # Load environment variables
 load_dotenv(".env", override=True)
@@ -21,16 +22,17 @@ load_dotenv(".env", override=True)
 logger = logging.getLogger(__name__)
 
 
-class CritiqueGuard:
+@register_guard(order=10)
+class CritiqueGuard(BaseGuard):
     """
     Self-Critique Guard - evaluates text quality using LLM-based scoring.
 
-    Uses Gemini 2.5 Pro to score text on fun (entertainment/engagement) and 
-    logic (plausibility/coherence) dimensions, raising RetryException if 
+    Uses Gemini 2.5 Pro to score text on fun (entertainment/engagement) and
+    logic (plausibility/coherence) dimensions, raising RetryException if
     scores fall below threshold.
     """
 
-    def __init__(self, min_score: float = 7.0):
+    def __init__(self, min_score: float = 7.0, project: str = "default", **kwargs):
         """
         Initialize CritiqueGuard with minimum score threshold.
 
@@ -39,8 +41,14 @@ class CritiqueGuard:
         min_score : float, optional
             Minimum score threshold (1-10), defaults to 7.0.
             Text with min(fun, logic) < min_score will trigger retry.
+        project : str, optional
+            Project ID for path resolution, defaults to "default"
+        **kwargs
+            Additional keyword arguments for compatibility
         """
+        super().__init__()
         self.min_score = min_score
+        self.project = project
 
     def _call_gemini_critique(self, text: str) -> Dict[str, Any]:
         """
@@ -74,13 +82,13 @@ class CritiqueGuard:
                     return {
                         "fun": 8.5,
                         "logic": 8.0,
-                        "comment": "Fast mode stub evaluation - passing scores"
+                        "comment": "Fast mode stub evaluation - passing scores",
                     }
-                
+
                 logger.error("google-generativeai not installed")
                 raise RetryException(
-                    "Google Generative AI library not available", 
-                    guard_name="critique_guard"
+                    "Google Generative AI library not available",
+                    guard_name="critique_guard",
                 )
 
             # Configure the API
@@ -118,40 +126,44 @@ class CritiqueGuard:
             logger.info(f"Calling {model_name} for critique evaluation...")
 
             # Generate content
-            response = model.generate_content(prompt, generation_config=generation_config)
+            response = model.generate_content(
+                prompt, generation_config=generation_config
+            )
 
             if not response.text:
                 raise RetryException(
-                    "Empty response from Gemini for critique", 
-                    guard_name="critique_guard"
+                    "Empty response from Gemini for critique",
+                    guard_name="critique_guard",
                 )
 
             # Parse JSON response
             try:
                 result = json.loads(response.text.strip())
-                
+
                 # Validate required fields
                 if not all(key in result for key in ["fun", "logic", "comment"]):
                     raise ValueError("Missing required fields in response")
-                
+
                 # Validate score ranges
                 fun_score = float(result["fun"])
                 logic_score = float(result["logic"])
-                
+
                 if not (1 <= fun_score <= 10) or not (1 <= logic_score <= 10):
                     raise ValueError("Scores must be between 1 and 10")
-                
+
                 result["fun"] = fun_score
                 result["logic"] = logic_score
-                
-                logger.info(f"Critique scores: fun={fun_score:.1f}, logic={logic_score:.1f}")
+
+                logger.info(
+                    f"Critique scores: fun={fun_score:.1f}, logic={logic_score:.1f}"
+                )
                 return result
-                
+
             except (json.JSONDecodeError, ValueError, KeyError) as e:
                 logger.error(f"Invalid JSON response from Gemini: {response.text}")
                 raise RetryException(
-                    f"Invalid critique response format: {str(e)}", 
-                    guard_name="critique_guard"
+                    f"Invalid critique response format: {str(e)}",
+                    guard_name="critique_guard",
                 )
 
         except Exception as e:
@@ -159,8 +171,7 @@ class CritiqueGuard:
                 raise
             logger.error(f"Critique LLM call failed: {e}")
             raise RetryException(
-                f"Critique evaluation failed: {str(e)}", 
-                guard_name="critique_guard"
+                f"Critique evaluation failed: {str(e)}", guard_name="critique_guard"
             )
 
     def check(self, text: str) -> Dict[str, Any]:
@@ -188,27 +199,27 @@ class CritiqueGuard:
             "logic_score": None,
             "comment": None,
             "min_score": self.min_score,
-            "flags": {}
+            "flags": {},
         }
 
         try:
             # Get critique evaluation from Gemini
             critique = self._call_gemini_critique(text)
-            
+
             fun_score = critique["fun"]
             logic_score = critique["logic"]
             comment = critique["comment"]
-            
+
             results["fun_score"] = fun_score
             results["logic_score"] = logic_score
             results["comment"] = comment
-            
+
             # Check if scores meet minimum threshold
             min_actual_score = min(fun_score, logic_score)
-            
+
             if min_actual_score < self.min_score:
                 results["passed"] = False
-                
+
                 # Create flags for RetryException
                 flags = {
                     "critique_failure": {
@@ -219,7 +230,7 @@ class CritiqueGuard:
                     }
                 }
                 results["flags"] = flags
-                
+
                 # Raise exception for retry
                 message = (
                     f"Critique scores too low: fun={fun_score:.1f}, "
@@ -227,22 +238,21 @@ class CritiqueGuard:
                     f"Comment: {comment}"
                 )
                 raise RetryException(
-                    message=message, 
-                    flags=flags, 
-                    guard_name="critique_guard"
+                    message=message, flags=flags, guard_name="critique_guard"
                 )
-            
-            logger.info(f"Self-Critique PASS (fun={fun_score:.1f},logic={logic_score:.1f})")
+
+            logger.info(
+                f"Self-Critique PASS (fun={fun_score:.1f},logic={logic_score:.1f})"
+            )
             return results
-            
+
         except RetryException:
             # Re-raise RetryException
             raise
         except Exception as e:
             logger.error(f"Unexpected error in critique guard: {e}")
             raise RetryException(
-                f"Critique guard error: {str(e)}", 
-                guard_name="critique_guard"
+                f"Critique guard error: {str(e)}", guard_name="critique_guard"
             )
 
 
@@ -255,7 +265,7 @@ def check_critique_guard(text: str, min_score: float = None) -> Dict[str, Any]:
     text : str
         Text to analyze for quality
     min_score : float, optional
-        Minimum score threshold. If None, uses environment variable 
+        Minimum score threshold. If None, uses environment variable
         MIN_CRITIQUE_SCORE or defaults to 7.0
 
     Returns
@@ -270,7 +280,7 @@ def check_critique_guard(text: str, min_score: float = None) -> Dict[str, Any]:
     """
     if min_score is None:
         min_score = float(os.getenv("MIN_CRITIQUE_SCORE", "7.0"))
-    
+
     guard = CritiqueGuard(min_score=min_score)
     return guard.check(text)
 
@@ -296,7 +306,7 @@ def critique_guard(text: str, *, min_score: float = 7.0) -> None:
     env_min_score = os.getenv("MIN_CRITIQUE_SCORE")
     if env_min_score is not None:
         min_score = float(env_min_score)
-    
+
     try:
         check_critique_guard(text, min_score)
     except RetryException:

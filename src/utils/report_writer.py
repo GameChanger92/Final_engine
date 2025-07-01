@@ -5,17 +5,16 @@ HTML report generation utility for Final Engine season reports.
 Uses Jinja2 templates to generate formatted HTML reports from KPI data.
 """
 
-import os
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any
-from jinja2 import Environment, FileSystemLoader, Template
+from jinja2 import Environment, FileSystemLoader
 
 
 def generate_season_report(kpi_data: Dict[str, Any], output_path: Path) -> None:
     """
     Generate HTML season report from KPI data.
-    
+
     Parameters:
         kpi_data: Dictionary containing KPI summary data
         output_path: Path where HTML report should be saved
@@ -24,42 +23,41 @@ def generate_season_report(kpi_data: Dict[str, Any], output_path: Path) -> None:
     script_dir = Path(__file__).parent
     project_root = script_dir.parent.parent
     templates_dir = project_root / "templates"
-    
+
     # Ensure templates directory exists
     if not templates_dir.exists():
         raise FileNotFoundError(f"Templates directory not found: {templates_dir}")
-    
+
     # Ensure output directory exists
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    
+
     # Set up Jinja2 environment
-    env = Environment(
-        loader=FileSystemLoader(str(templates_dir)),
-        autoescape=True
-    )
-    
+    env = Environment(loader=FileSystemLoader(str(templates_dir)), autoescape=True)
+
     # Load template
     template_name = "season_report.html"
     try:
         template = env.get_template(template_name)
     except Exception as e:
-        raise FileNotFoundError(f"Template '{template_name}' not found in {templates_dir}: {e}")
-    
+        raise FileNotFoundError(
+            f"Template '{template_name}' not found in {templates_dir}: {e}"
+        )
+
     # Prepare template context
     context = {
-        'kpi_data': kpi_data,
-        'generation_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        "kpi_data": kpi_data,
+        "generation_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     }
-    
+
     # Render template
     try:
         html_content = template.render(context)
     except Exception as e:
         raise RuntimeError(f"Failed to render template: {e}")
-    
+
     # Write to file
     try:
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             f.write(html_content)
     except Exception as e:
         raise RuntimeError(f"Failed to write report to {output_path}: {e}")
@@ -68,37 +66,37 @@ def generate_season_report(kpi_data: Dict[str, Any], output_path: Path) -> None:
 def validate_kpi_data(kpi_data: Dict[str, Any]) -> bool:
     """
     Validate that KPI data contains required fields.
-    
+
     Parameters:
         kpi_data: Dictionary to validate
-        
+
     Returns:
         True if valid, False otherwise
     """
     required_fields = [
-        'avg_fun',
-        'avg_logic', 
-        'guard_pass_rate',
-        'avg_chars',
-        'total_episodes',
-        'passed_episodes',
-        'failed_episodes'
+        "avg_fun",
+        "avg_logic",
+        "guard_pass_rate",
+        "avg_chars",
+        "total_episodes",
+        "passed_episodes",
+        "failed_episodes",
     ]
-    
+
     return all(field in kpi_data for field in required_fields)
 
 
 def generate_simple_html_report(kpi_data: Dict[str, Any], output_path: Path) -> None:
     """
     Generate a simple HTML report without Jinja2 templates (fallback).
-    
+
     Parameters:
         kpi_data: Dictionary containing KPI summary data
         output_path: Path where HTML report should be saved
     """
     # Ensure output directory exists
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    
+
     # Simple HTML template as string
     html_template = """<!DOCTYPE html>
 <html>
@@ -133,21 +131,21 @@ def generate_simple_html_report(kpi_data: Dict[str, Any], output_path: Path) -> 
     <p><em>Generated on {generation_time}</em></p>
 </body>
 </html>"""
-    
+
     # Format template with data
     context = {
-        'avg_fun': kpi_data.get('avg_fun', 0),
-        'avg_logic': kpi_data.get('avg_logic', 0),
-        'guard_pass_rate': kpi_data.get('guard_pass_rate', 0),
-        'avg_chars': int(kpi_data.get('avg_chars', 0)),
-        'total_episodes': kpi_data.get('total_episodes', 0),
-        'passed_episodes': kpi_data.get('passed_episodes', 0),
-        'failed_episodes': kpi_data.get('failed_episodes', 0),
-        'generation_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        "avg_fun": kpi_data.get("avg_fun", 0),
+        "avg_logic": kpi_data.get("avg_logic", 0),
+        "guard_pass_rate": kpi_data.get("guard_pass_rate", 0),
+        "avg_chars": int(kpi_data.get("avg_chars", 0)),
+        "total_episodes": kpi_data.get("total_episodes", 0),
+        "passed_episodes": kpi_data.get("passed_episodes", 0),
+        "failed_episodes": kpi_data.get("failed_episodes", 0),
+        "generation_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     }
-    
+
     html_content = html_template.format(**context)
-    
+
     # Write to file
-    with open(output_path, 'w', encoding='utf-8') as f:
+    with open(output_path, "w", encoding="utf-8") as f:
         f.write(html_content)

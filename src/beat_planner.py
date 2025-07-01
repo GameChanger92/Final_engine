@@ -3,7 +3,7 @@ beat_planner.py
 
 Beat Planner v2: 3막 · 6시퀀스 · 4비트 자동화
 - Act 1 (Setup): Seq1·Seq2
-- Act 2 (Confrontation): Seq3·Seq4  
+- Act 2 (Confrontation): Seq3·Seq4
 - Act 3 (Resolution): Seq5·Seq6
 - 각 시퀀스마다 4비트 (Turning Point 포함)
 """
@@ -12,7 +12,7 @@ import os
 import re
 import logging
 from pathlib import Path
-from typing import List, Dict
+from typing import List
 
 from dotenv import load_dotenv
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
@@ -55,9 +55,7 @@ def build_prompt(arc_goal: str, prev_beats: List[str], sequence_no: int) -> str:
 
         # Render the template with variables
         prompt = template.render(
-            arc_goal=arc_goal,
-            prev_beats=prev_beats,
-            sequence_no=sequence_no
+            arc_goal=arc_goal, prev_beats=prev_beats, sequence_no=sequence_no
         )
 
         logger.debug(f"Built beat prompt: {len(prompt)} characters")
@@ -118,7 +116,7 @@ def call_llm(prompt: str) -> str:
 beat_2: "Fast mode stub beat 2"
 beat_3: "Fast mode stub beat 3"
 beat_tp: "Fast mode stub turning point"'''
-            
+
             logger.error("google-generativeai not installed")
             raise RetryException(
                 "Google Generative AI library not available", guard_name="beat_planner"
@@ -146,7 +144,9 @@ beat_tp: "Fast mode stub turning point"'''
         }
 
         # Generate content
-        logger.info(f"⚡ Beat Planner… (temperature={temperature}, max_output_tokens=2048)")
+        logger.info(
+            f"⚡ Beat Planner… (temperature={temperature}, max_output_tokens=2048)"
+        )
         logger.info(f"Calling {model_name} for beat generation...")
         response = model.generate_content(prompt, generation_config=generation_config)
 
@@ -166,14 +166,14 @@ beat_tp: "Fast mode stub turning point"'''
 def _mock_beats(episode_num: int, flat: bool = False) -> dict:
     """
     Generate mock beats for testing or when API key is unavailable.
-    
+
     Parameters
     ----------
     episode_num : int
         Episode number
     flat : bool, optional
         If True, return flat list. If False, return nested dict.
-        
+
     Returns
     -------
     dict or list
@@ -186,25 +186,29 @@ def _mock_beats(episode_num: int, flat: bool = False) -> dict:
             seq_num = (i // 4) + 1
             beat_in_seq = (i % 4) + 1
             beat_name = "beat_tp" if beat_in_seq == 4 else f"beat_{beat_in_seq}"
-            
-            beats.append({
-                "idx": i + 1,
-                "summary": f"Episode {episode_num} - Act {get_act_number(seq_num)} Seq{seq_num} {beat_name}",
-                "anchor": False
-            })
+
+            beats.append(
+                {
+                    "idx": i + 1,
+                    "summary": f"Episode {episode_num} - Act {get_act_number(seq_num)} Seq{seq_num} {beat_name}",
+                    "anchor": False,
+                }
+            )
         return beats
     else:
         # Return nested dict structure (original format)
         episode_key = f"ep_{episode_num}"
         episode_data = {}
-        
+
         for seq_num in range(1, 7):
             episode_data[f"seq_{seq_num}"] = generate_fallback_beats(seq_num)
-            
+
         return {episode_key: episode_data}
 
 
-def plan_beats(episode_num: int, prev_beats: List[str] = None, *, return_flat: bool = False) -> dict:
+def plan_beats(
+    episode_num: int, prev_beats: List[str] = None, *, return_flat: bool = False
+) -> dict:
     """
     Generate beats for all 6 sequences of an episode using 3-Act structure.
 
@@ -229,15 +233,16 @@ def plan_beats(episode_num: int, prev_beats: List[str] = None, *, return_flat: b
     # ❶ 테스트/무키 상황: 모의 Beats 반환
     # Only use fallback if we're in unit test mode AND functions are not being mocked
     # Check if call_llm is being mocked by testing for mock attributes
-    is_call_llm_mocked = (hasattr(call_llm, '_mock_name') or 
-                         hasattr(call_llm, 'return_value') or
-                         str(type(call_llm).__name__) == 'MagicMock')
-    
-    should_use_fallback = (
-        (os.getenv("UNIT_TEST_MODE") == "1" or not os.getenv("GOOGLE_API_KEY"))
-        and not is_call_llm_mocked  # Check if call_llm is mocked
+    is_call_llm_mocked = (
+        hasattr(call_llm, "_mock_name")
+        or hasattr(call_llm, "return_value")
+        or str(type(call_llm).__name__) == "MagicMock"
     )
-    
+
+    should_use_fallback = (
+        os.getenv("UNIT_TEST_MODE") == "1" or not os.getenv("GOOGLE_API_KEY")
+    ) and not is_call_llm_mocked  # Check if call_llm is mocked
+
     if should_use_fallback:
         logger.info("⚡ Beat Planner fallback (UNIT_TEST_MODE)")
         return _mock_beats(episode_num, flat=return_flat)
@@ -265,11 +270,16 @@ def plan_beats(episode_num: int, prev_beats: List[str] = None, *, return_flat: b
                         f"Expected 4 beats, got {len(beats)}",
                         guard_name="beat_count",
                     )
-                
+
                 # Validate beats with critique guard
-                beats_text = "\n".join([f"Beat {i+1}: {list(beats.values())[i]}" for i in range(len(beats))])
+                beats_text = "\n".join(
+                    [
+                        f"Beat {i+1}: {list(beats.values())[i]}"
+                        for i in range(len(beats))
+                    ]
+                )
                 validate_beats_with_critique(beats_text)
-                
+
                 return beats
 
             beats = run_with_retry(llm_wrapper)
@@ -282,32 +292,30 @@ def plan_beats(episode_num: int, prev_beats: List[str] = None, *, return_flat: b
             logger.error(f"Failed to generate beats for sequence {seq_num}: {e}")
             # Fallback beats for this sequence
             episode_data[f"seq_{seq_num}"] = generate_fallback_beats(seq_num)
-        
+
         # Log beat generation completion for this sequence (regardless of success/failure)
         logger.info("Beat Planner… Beats generated (seq=%s)", seq_num)
 
     # Return in requested format
     beats_result = {episode_key: episode_data}
-    
+
     if return_flat:
         # Convert nested dict to flat list of beat dictionaries
         flat_beats = []
         beat_idx = 1
-        
+
         for seq_num in range(1, 7):
             seq_key = f"seq_{seq_num}"
             seq_beats = episode_data[seq_key]
-            
+
             for beat_key in ["beat_1", "beat_2", "beat_3", "beat_tp"]:
-                flat_beats.append({
-                    "idx": beat_idx,
-                    "summary": seq_beats[beat_key],
-                    "anchor": False
-                })
+                flat_beats.append(
+                    {"idx": beat_idx, "summary": seq_beats[beat_key], "anchor": False}
+                )
                 beat_idx += 1
-                
+
         return flat_beats
-    
+
     return beats_result
 
 
@@ -329,7 +337,7 @@ def validate_beats_with_critique(beats_text: str) -> None:
     if os.getenv("FAST_MODE") == "1" or os.getenv("UNIT_TEST_MODE") == "1":
         logger.info("Beat critique validation PASS (FAST_MODE)")
         return
-    
+
     try:
         critique_guard(beats_text)
         logger.info("Beat critique validation PASS")
@@ -353,15 +361,15 @@ def parse_beat_output(raw_output: str) -> dict:
         Dictionary with beat_1, beat_2, beat_3, beat_tp keys
     """
     beats = {}
-    
+
     # Define patterns for each beat type
     patterns = {
-        'beat_1': r'beat_1:\s*["\']([^"\']+)["\']',
-        'beat_2': r'beat_2:\s*["\']([^"\']+)["\']', 
-        'beat_3': r'beat_3:\s*["\']([^"\']+)["\']',
-        'beat_tp': r'beat_tp:\s*["\']([^"\']+)["\']'
+        "beat_1": r'beat_1:\s*["\']([^"\']+)["\']',
+        "beat_2": r'beat_2:\s*["\']([^"\']+)["\']',
+        "beat_3": r'beat_3:\s*["\']([^"\']+)["\']',
+        "beat_tp": r'beat_tp:\s*["\']([^"\']+)["\']',
     }
-    
+
     for beat_key, pattern in patterns.items():
         match = re.search(pattern, raw_output)
         if match:
@@ -369,7 +377,7 @@ def parse_beat_output(raw_output: str) -> dict:
         else:
             # Fallback for missing beats
             beats[beat_key] = f"Generated {beat_key} content"
-    
+
     return beats
 
 
@@ -390,9 +398,9 @@ def generate_fallback_beats(seq_num: int) -> dict:
     act_num = get_act_number(seq_num)
     return {
         "beat_1": f"Act {act_num} Seq{seq_num} - 상황 설정",
-        "beat_2": f"Act {act_num} Seq{seq_num} - 갈등 전개", 
+        "beat_2": f"Act {act_num} Seq{seq_num} - 갈등 전개",
         "beat_3": f"Act {act_num} Seq{seq_num} - 해결 시도",
-        "beat_tp": f"Act {act_num} Seq{seq_num} - 전환점 발생"
+        "beat_tp": f"Act {act_num} Seq{seq_num} - 전환점 발생",
     }
 
 
@@ -421,7 +429,7 @@ def get_act_number(seq_num: int) -> int:
 def make_beats(arc_json: dict) -> list[dict]:
     """
     Generate 10 beat dictionaries for a given story arc.
-    
+
     LEGACY FUNCTION: Maintained for backward compatibility.
 
     Parameters

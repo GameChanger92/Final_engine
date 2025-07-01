@@ -13,6 +13,7 @@ Uses collections.Counter for efficient counting instead of textstat.
 import re
 from typing import Dict
 from src.exceptions import RetryException
+from src.core.guard_registry import BaseGuard, register_guard
 
 
 def calculate_ttr(text: str) -> float:
@@ -174,3 +175,34 @@ def lexi_guard(text: str) -> bool:
     except RetryException:
         # Re-raise the exception to be handled by the caller
         raise
+
+
+@register_guard(order=1)
+class LexiGuard(BaseGuard):
+    """
+    Lexical Guard class for text quality validation.
+
+    Provides class-based interface for lexical quality checks including
+    TTR (Type-Token Ratio) and 3-gram duplication analysis.
+    """
+
+    def check(self, text: str) -> Dict[str, any]:
+        """
+        Check text for lexical quality issues.
+
+        Parameters
+        ----------
+        text : str
+            Text to analyze for lexical quality
+
+        Returns
+        -------
+        Dict[str, any]
+            Check results with metrics and pass/fail status
+
+        Raises
+        ------
+        RetryException
+            If text fails lexical quality thresholds
+        """
+        return check_lexi_guard(text)

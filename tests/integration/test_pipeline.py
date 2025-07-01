@@ -18,10 +18,10 @@ from src.main import run_pipeline
 def test_pipeline_execution_time():
     """Test that the complete pipeline executes in less than 5 seconds."""
     import os
-    
+
     # Set environment variable to enable fast mode
     os.environ["UNIT_TEST_MODE"] = "1"
-    
+
     try:
         start_time = time.time()
 
