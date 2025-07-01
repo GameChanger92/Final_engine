@@ -117,14 +117,18 @@ class TestCritiqueGuard:
         }
 
         with patch.object(guard, "_call_gemini_critique", return_value=mock_response):
-            with pytest.raises(RetryException) as exc_info:
-                guard.check("A very boring but logical story.")
+            result = guard.check("A very boring but logical story.")
 
-            exception = exc_info.value
-            assert exception.guard_name == "critique_guard"
-            assert "fun=5.0" in str(exception)
-            assert "logic=8.0" in str(exception)
-            assert exception.flags["critique_failure"]["fun_score"] == 5.0
+            assert result["passed"] is False
+            assert result["fun_score"] == 5.0
+            assert result["logic_score"] == 8.0
+            assert (
+                result["comment"]
+                == "Boring story with good logic but no entertainment value."
+            )
+            assert result["flags"]["critique_failure"]["fun_score"] == 5.0
+            assert result["flags"]["critique_failure"]["logic_score"] == 8.0
+            assert result["flags"]["critique_failure"]["min_score"] == 7.0
 
     def test_critique_guard_fails_low_logic_score(self):
         """Test that text with low logic score fails."""
@@ -137,13 +141,18 @@ class TestCritiqueGuard:
         }
 
         with patch.object(guard, "_call_gemini_critique", return_value=mock_response):
-            with pytest.raises(RetryException) as exc_info:
-                guard.check("An entertaining but nonsensical story.")
+            result = guard.check("An entertaining but nonsensical story.")
 
-            exception = exc_info.value
-            assert exception.guard_name == "critique_guard"
-            assert "logic=4.0" in str(exception)
-            assert exception.flags["critique_failure"]["logic_score"] == 4.0
+            assert result["passed"] is False
+            assert result["fun_score"] == 8.5
+            assert result["logic_score"] == 4.0
+            assert (
+                result["comment"]
+                == "Fun but completely illogical plot holes everywhere."
+            )
+            assert result["flags"]["critique_failure"]["fun_score"] == 8.5
+            assert result["flags"]["critique_failure"]["logic_score"] == 4.0
+            assert result["flags"]["critique_failure"]["min_score"] == 7.0
 
     def test_critique_guard_fails_both_scores_low(self):
         """Test that text with both low scores fails with minimum score."""
@@ -156,13 +165,15 @@ class TestCritiqueGuard:
         }
 
         with patch.object(guard, "_call_gemini_critique", return_value=mock_response):
-            with pytest.raises(RetryException) as exc_info:
-                guard.check("A poorly written story.")
+            result = guard.check("A poorly written story.")
 
-            exception = exc_info.value
-            assert "fun=3.0" in str(exception)
-            assert "logic=4.0" in str(exception)
-            # Should use the minimum of the two scores (3.0)
+            assert result["passed"] is False
+            assert result["fun_score"] == 3.0
+            assert result["logic_score"] == 4.0
+            assert result["comment"] == "Poor quality story with multiple issues."
+            assert result["flags"]["critique_failure"]["fun_score"] == 3.0
+            assert result["flags"]["critique_failure"]["logic_score"] == 4.0
+            assert result["flags"]["critique_failure"]["min_score"] == 7.0
 
     # ERROR HANDLING TESTS
 
@@ -264,8 +275,6 @@ class TestCritiqueGuard:
 
     def test_check_critique_guard_function(self):
         """Test the convenience function interface."""
-        mock_response = {"fun": 8.0, "logic": 7.5, "comment": "Good story overall."}
-
         # Create a guard and mock its _call_gemini_critique method
         with patch("src.plugins.critique_guard.CritiqueGuard") as MockGuard:
             mock_guard_instance = Mock()

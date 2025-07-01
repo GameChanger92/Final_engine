@@ -186,12 +186,8 @@ class CritiqueGuard(BaseGuard):
         Returns
         -------
         Dict[str, Any]
-            Results containing critique scores and evaluation details
-
-        Raises
-        ------
-        RetryException
-            If scores fall below minimum threshold
+            Results containing critique scores and evaluation details.
+            Always returns results dict, never raises RetryException.
         """
         results = {
             "passed": True,
@@ -220,7 +216,7 @@ class CritiqueGuard(BaseGuard):
             if min_actual_score < self.min_score:
                 results["passed"] = False
 
-                # Create flags for RetryException
+                # Create flags for failure
                 flags = {
                     "critique_failure": {
                         "fun_score": fun_score,
@@ -230,24 +226,15 @@ class CritiqueGuard(BaseGuard):
                     }
                 }
                 results["flags"] = flags
-
-                # Raise exception for retry
-                message = (
-                    f"Critique scores too low: fun={fun_score:.1f}, "
-                    f"logic={logic_score:.1f} (min={self.min_score:.1f}). "
-                    f"Comment: {comment}"
-                )
-                raise RetryException(
-                    message=message, flags=flags, guard_name="critique_guard"
+            else:
+                logger.info(
+                    f"Self-Critique PASS (fun={fun_score:.1f},logic={logic_score:.1f})"
                 )
 
-            logger.info(
-                f"Self-Critique PASS (fun={fun_score:.1f},logic={logic_score:.1f})"
-            )
             return results
 
         except RetryException:
-            # Re-raise RetryException
+            # Re-raise RetryException from _call_gemini_critique
             raise
         except Exception as e:
             logger.error(f"Unexpected error in critique guard: {e}")
@@ -308,7 +295,26 @@ def critique_guard(text: str, *, min_score: float = 7.0) -> None:
         min_score = float(env_min_score)
 
     try:
-        check_critique_guard(text, min_score)
+        result = check_critique_guard(text, min_score)
+
+        # Check if the result indicates failure
+        if not result["passed"]:
+            # Extract failure information
+            fun_score = result["fun_score"]
+            logic_score = result["logic_score"]
+            comment = result["comment"]
+            flags = result["flags"]
+
+            # Create and raise RetryException
+            message = (
+                f"Critique scores too low: fun={fun_score:.1f}, "
+                f"logic={logic_score:.1f} (min={min_score:.1f}). "
+                f"Comment: {comment}"
+            )
+            raise RetryException(
+                message=message, flags=flags, guard_name="critique_guard"
+            )
+
     except RetryException:
         # Re-raise the exception to be handled by the caller
         raise
