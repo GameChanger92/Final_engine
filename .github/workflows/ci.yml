@@ -9,13 +9,32 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install -r requirements.txt
-      - run: pip install pytest
-      - run: pytest -q
+
+      # 1) 의존성 설치 + 스타일 툴
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install black ruff            # 스타일 게이트용
+          pip install pytest                # requirements.txt 에 없으면 추가
+
+      # 2) Ruff → Black 순으로 빠르게 실패 감지
+      - name: Ruff Lint
+        run: ruff check .
+
+      - name: Black Check
+        run: black --check .
+
+      # 3) 기존 테스트 실행
+      - name: Run pytest
+        run: pytest -q
+
+      # 4) 스모크 파이프라인 (FAST_MODE 가정)
       - name: Test pipeline script
         run: python scripts/run_pipeline.py --project-id default --episodes 1-2
