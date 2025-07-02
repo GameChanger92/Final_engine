@@ -344,7 +344,7 @@ class TestAnchorGuard:
         try:
             episode_content = "배경만 설명하는 에피소드입니다."
             with pytest.raises(RetryException):
-                anchor_guard(episode_content, 1)
+                anchor_module.anchor_guard(episode_content, 1)
         finally:
             # Restore original class
             anchor_module.AnchorGuard = original_guard_class

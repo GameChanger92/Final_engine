@@ -20,8 +20,14 @@ def _get_min_score(override: float | None = None) -> float:
 # ---------- 메인 Guard ----------
 @register_guard(order=10)
 class CritiqueGuard(BaseGuard):
-    def __init__(self, min_score: float):
+    def __init__(
+        self,
+        min_score: float = 7.0,
+        project: str = "default",
+        **kwargs,
+    ):
         self.min_score = min_score
+        self.project = project
 
     # 실제 LLM 호출은 생략/모킹
     def _call_gemini_critique(self, text: str) -> Dict[str, Any]:
