@@ -2,8 +2,9 @@
 Tests for the enhanced context builder in src/context_builder.py
 """
 
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
 
 from src.context_builder import ContextBuilder, make_context
 
@@ -136,17 +137,13 @@ class TestContextBuilder:
     def test_build_context_with_previous_episode(self, context_builder, sample_scenes):
         """Test context building with previous episode."""
         previous_ep = "이전 에피소드 요약입니다."
-        context = context_builder.build_context(
-            sample_scenes, previous_episode=previous_ep
-        )
+        context = context_builder.build_context(sample_scenes, previous_episode=previous_ep)
         assert previous_ep in context
 
     def test_build_context_with_vector_text(self, context_builder, sample_scenes):
         """Test context building with specific vector search text."""
         vector_text = "특별한 벡터 검색용 텍스트"
-        context = context_builder.build_context(
-            sample_scenes, scene_text_for_vector=vector_text
-        )
+        context = context_builder.build_context(sample_scenes, scene_text_for_vector=vector_text)
         assert isinstance(context, str)
         assert len(context) > 0
 
@@ -173,9 +170,7 @@ class TestContextBuilder:
         builder.vector_store = mock_instance
 
         with patch.object(builder, "load_knowledge_graph", return_value={}):
-            with patch.object(
-                builder, "load_style_config", return_value={"platform": "test"}
-            ):
+            with patch.object(builder, "load_style_config", return_value={"platform": "test"}):
                 context = builder.build_context(sample_scenes)
 
         assert "similar_scene_1" in context

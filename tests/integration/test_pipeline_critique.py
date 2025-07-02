@@ -44,10 +44,11 @@ class TestPipelineCritique:
 
     def test_pipeline_with_critique_guard_retry(self):
         """Test that pipeline handles critique guard failures with retry."""
-        from src.exceptions import RetryException
-        from scripts.run_pipeline import test_guards_sequence
-        from unittest.mock import MagicMock
         import importlib
+        from unittest.mock import MagicMock
+
+        from scripts.run_pipeline import test_guards_sequence
+        from src.exceptions import RetryException
 
         # Test that run_with_retry properly handles RetryException with retries
         # This verifies the core functionality requested in the comment
@@ -70,9 +71,7 @@ class TestPipelineCritique:
             # Test 1: Verify retry logic with mock that fails then succeeds
             mock_critique = MagicMock()
             mock_critique.side_effect = [
-                RetryException(
-                    "Low scores: fun=5.0, logic=6.0", guard_name="critique_guard"
-                ),
+                RetryException("Low scores: fun=5.0, logic=6.0", guard_name="critique_guard"),
                 "Success",  # Second call succeeds
             ]
 
@@ -86,9 +85,7 @@ class TestPipelineCritique:
 
             # Test 2: Verify test_guards_sequence function works (integration test)
             result = test_guards_sequence(2)
-            assert isinstance(
-                result, bool
-            ), f"Expected boolean result, got {type(result)}"
+            assert isinstance(result, bool), f"Expected boolean result, got {type(result)}"
 
         finally:
             # Restore original environment state
@@ -101,8 +98,8 @@ class TestPipelineCritique:
 
     def test_pipeline_with_high_critique_threshold(self):
         """Test pipeline behavior with high critique score threshold."""
-        from src.exceptions import RetryException
         from scripts.run_pipeline import test_guards_sequence
+        from src.exceptions import RetryException
 
         # Set high threshold
         os.environ["MIN_CRITIQUE_SCORE"] = "9.0"

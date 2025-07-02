@@ -7,11 +7,12 @@ Runs episodes 1-240 with KPI tracking and HTML reporting
 """
 
 import argparse
-import sys
 import os
+import sys
 import time
 from pathlib import Path
-from typing import Dict, Any, Tuple
+from typing import Any
+
 from dotenv import load_dotenv
 
 # Add src directory to Python path
@@ -20,9 +21,9 @@ project_root = script_dir.parent
 sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(project_root / "src"))
 
-from src.main import run_pipeline  # noqa: E402
-from src.exceptions import RetryException  # noqa: E402
 from src.core.retry_controller import run_with_retry  # noqa: E402
+from src.exceptions import RetryException  # noqa: E402
+from src.main import run_pipeline  # noqa: E402
 
 # Load environment
 load_dotenv(project_root / ".env", override=True)
@@ -53,7 +54,7 @@ class KPITracker:
             }
         )
 
-    def get_summary(self) -> Dict[str, Any]:
+    def get_summary(self) -> dict[str, Any]:
         """Calculate summary KPI metrics."""
         if not self.episode_data:
             return {
@@ -88,7 +89,7 @@ class KPITracker:
 
 def check_single_episode_guards(
     episode_num: int, project: str = "default"
-) -> Tuple[bool, float, float]:
+) -> tuple[bool, float, float]:
     """
     Test all guards for a single episode and extract critique scores.
 
@@ -171,9 +172,7 @@ def check_single_episode_guards(
     return all_passed, fun_score, logic_score
 
 
-def run_episodes(
-    start_ep: int, end_ep: int, project_id: str, style: str = None
-) -> KPITracker:
+def run_episodes(start_ep: int, end_ep: int, project_id: str, style: str = None) -> KPITracker:
     """
     Run episodes in the specified range and collect KPI data.
 
@@ -186,9 +185,7 @@ def run_episodes(
     Returns:
         KPITracker with aggregated data
     """
-    print(
-        f"🚀 Starting Full Season Runner: Episodes {start_ep}-{end_ep} (Project: {project_id})"
-    )
+    print(f"🚀 Starting Full Season Runner: Episodes {start_ep}-{end_ep} (Project: {project_id})")
     if style:
         print(f"📝 Style: {style}")
     print("=" * 60)
@@ -208,14 +205,10 @@ def run_episodes(
             char_count = len(draft)
 
             # Test guards and get critique scores
-            all_passed, fun_score, logic_score = check_single_episode_guards(
-                episode, project_id
-            )
+            all_passed, fun_score, logic_score = check_single_episode_guards(episode, project_id)
 
             # Add to KPI tracker
-            kpi_tracker.add_episode(
-                episode, fun_score, logic_score, all_passed, char_count
-            )
+            kpi_tracker.add_episode(episode, fun_score, logic_score, all_passed, char_count)
 
             # Show episode result
             status = "✅ PASS" if all_passed else "❌ FAIL"
@@ -235,7 +228,7 @@ def run_episodes(
     return kpi_tracker
 
 
-def parse_episode_range(episodes_str: str) -> Tuple[int, int]:
+def parse_episode_range(episodes_str: str) -> tuple[int, int]:
     """Parse episode range string like '1-240' or '1,5,7' into start, end."""
     try:
         if "," in episodes_str:

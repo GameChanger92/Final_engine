@@ -7,15 +7,14 @@ into a final prompt string using Jinja2 templates.
 """
 
 import json
-from pathlib import Path
-from typing import Dict, List, Tuple, Any, Optional
 import logging
+from pathlib import Path
+from typing import Any
 
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 
 from src.embedding.vector_store import VectorStore
 from src.utils.path_helper import data_path
-
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +41,7 @@ class ContextBuilder:
         template_dir = Path(__file__).parent.parent / "templates"
         self.jinja_env = Environment(loader=FileSystemLoader(str(template_dir)))
 
-    def load_knowledge_graph(self) -> Dict[str, Any]:
+    def load_knowledge_graph(self) -> dict[str, Any]:
         """
         Load knowledge graph from projects/{id}/data/knowledge_graph.json.
 
@@ -57,13 +56,13 @@ class ContextBuilder:
                 logger.warning(f"Knowledge graph not found: {kg_path}")
                 return {}
 
-            with open(kg_path, "r", encoding="utf-8") as f:
+            with open(kg_path, encoding="utf-8") as f:
                 return json.load(f)
         except (json.JSONDecodeError, OSError) as e:
             logger.error(f"Error loading knowledge graph: {e}")
             return {}
 
-    def load_style_config(self) -> Dict[str, Any]:
+    def load_style_config(self) -> dict[str, Any]:
         """
         Load style configuration from projects/{id}/data/style_config.json.
 
@@ -82,7 +81,7 @@ class ContextBuilder:
                     "word_count_target": 2000,
                 }
 
-            with open(style_path, "r", encoding="utf-8") as f:
+            with open(style_path, encoding="utf-8") as f:
                 return json.load(f)
         except (json.JSONDecodeError, OSError) as e:
             logger.error(f"Error loading style config: {e}")
@@ -92,9 +91,7 @@ class ContextBuilder:
                 "word_count_target": 2000,
             }
 
-    def get_similar_scenes(
-        self, scene_text: str, top_k: int = 5
-    ) -> List[Tuple[str, float]]:
+    def get_similar_scenes(self, scene_text: str, top_k: int = 5) -> list[tuple[str, float]]:
         """
         Get similar scenes using vector search.
 
@@ -121,9 +118,9 @@ class ContextBuilder:
 
     def build_context(
         self,
-        scenes: List[str],
-        previous_episode: Optional[str] = None,
-        scene_text_for_vector: Optional[str] = None,
+        scenes: list[str],
+        previous_episode: str | None = None,
+        scene_text_for_vector: str | None = None,
     ) -> str:
         """
         Build complete context string using Jinja2 template.
@@ -177,9 +174,7 @@ class ContextBuilder:
             logger.error(f"Error rendering template: {e}")
             return self._fallback_context(scenes, similar_scenes)
 
-    def _fallback_context(
-        self, scenes: List[str], similar_scenes: List[Tuple[str, float]]
-    ) -> str:
+    def _fallback_context(self, scenes: list[str], similar_scenes: list[tuple[str, float]]) -> str:
         """
         Fallback context generation when template fails.
 
@@ -217,7 +212,7 @@ class ContextBuilder:
 
 
 # Backward compatibility function
-def make_context(scenes: List[str]) -> str:
+def make_context(scenes: list[str]) -> str:
     """
     Backward compatibility function for existing code.
 

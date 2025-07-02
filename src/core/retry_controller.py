@@ -7,10 +7,11 @@ Provides retry functionality for guards that raise RetryException, with
 exponential backoff and error message collection.
 """
 
+import logging
 import os
 import time
-import logging
 from typing import Any
+
 from src.exceptions import RetryException
 
 logger = logging.getLogger(__name__)
@@ -67,9 +68,7 @@ def run_with_retry(func, *args, max_retry=2, **kwargs) -> Any:
             return func(*args, **kwargs)
         except RetryException as e:
             messages.append(str(e))
-            logger.info(
-                f"Retry Controller: {func_name} retry {attempt + 1}/{max_retry + 1}: {e}"
-            )
+            logger.info(f"Retry Controller: {func_name} retry {attempt + 1}/{max_retry + 1}: {e}")
 
             if attempt == max_retry:
                 # Final attempt failed - raise combined exception
@@ -95,7 +94,5 @@ def run_with_retry(func, *args, max_retry=2, **kwargs) -> Any:
             time.sleep(sleep_time)
         except Exception as e:
             # Non-RetryException errors are not retried
-            logger.error(
-                f"Retry Controller: {func_name} failed with non-retry error: {e}"
-            )
+            logger.error(f"Retry Controller: {func_name} failed with non-retry error: {e}")
             raise

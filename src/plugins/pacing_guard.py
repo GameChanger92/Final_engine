@@ -7,14 +7,14 @@ Monitors scene content for action verbs, quoted dialog, and internal monolog
 to detect ratio deviations from rolling average and raise RetryException when needed.
 """
 
-import re
 import json
+import re
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any
+
+from src.core.guard_registry import BaseGuard, register_guard
 from src.exceptions import RetryException
 from src.utils.path_helper import data_path
-from src.core.guard_registry import BaseGuard, register_guard
-
 
 # Korean action verb keywords
 ACTION_KEYWORDS = [
@@ -117,7 +117,7 @@ class PacingGuard(BaseGuard):
         self.config_path = data_path("pacing_config.json", project)
         self.config = self._load_config()
 
-    def _load_config(self) -> Dict[str, Any]:
+    def _load_config(self) -> dict[str, Any]:
         """
         Load pacing configuration from JSON file.
 
@@ -128,9 +128,7 @@ class PacingGuard(BaseGuard):
         """
         # Handle both Path objects and string paths for flexibility in testing
         config_path = (
-            Path(self.config_path)
-            if isinstance(self.config_path, str)
-            else self.config_path
+            Path(self.config_path) if isinstance(self.config_path, str) else self.config_path
         )
 
         if not config_path.exists():
@@ -138,7 +136,7 @@ class PacingGuard(BaseGuard):
             return {"tolerance": 0.25, "window": 10}
 
         try:
-            with open(config_path, "r", encoding="utf-8") as f:
+            with open(config_path, encoding="utf-8") as f:
                 config = json.load(f)
 
             # Validate config structure and provide defaults
@@ -150,7 +148,7 @@ class PacingGuard(BaseGuard):
             # Return default config on file errors
             return {"tolerance": 0.25, "window": 10}
 
-    def _analyze_text_content(self, text: str) -> Dict[str, float]:
+    def _analyze_text_content(self, text: str) -> dict[str, float]:
         """
         Analyze text content for action/dialog/monolog ratios.
 
@@ -215,8 +213,8 @@ class PacingGuard(BaseGuard):
         }
 
     def _get_rolling_average(
-        self, current_episode: int, scene_texts: List[str]
-    ) -> Dict[str, float]:
+        self, current_episode: int, scene_texts: list[str]
+    ) -> dict[str, float]:
         """
         Calculate rolling average ratios for the specified window.
 
@@ -246,9 +244,7 @@ class PacingGuard(BaseGuard):
             analyzed_scenes = 0
 
             # Analyze a subset of scenes to simulate historical data
-            for i, scene_text in enumerate(
-                scene_texts[: min(len(scene_texts), window_size)]
-            ):
+            for i, scene_text in enumerate(scene_texts[: min(len(scene_texts), window_size)]):
                 if scene_text.strip():
                     ratios = self._analyze_text_content(scene_text)
                     current_ratios["action"] += ratios["action"]
@@ -264,14 +260,12 @@ class PacingGuard(BaseGuard):
                 # Blend with baseline (70% baseline, 30% current) for stability
                 blended_ratios = {}
                 for key in baseline_ratios:
-                    blended_ratios[key] = (
-                        baseline_ratios[key] * 0.7 + current_ratios[key] * 0.3
-                    )
+                    blended_ratios[key] = baseline_ratios[key] * 0.7 + current_ratios[key] * 0.3
                 return blended_ratios
 
         return baseline_ratios
 
-    def check(self, scene_texts: List[str], episode_num: int) -> Dict[str, Any]:
+    def check(self, scene_texts: list[str], episode_num: int) -> dict[str, Any]:
         """
         Check scene content for pacing violations.
 
@@ -371,16 +365,14 @@ class PacingGuard(BaseGuard):
             first_violation = violations[0]
             message = f"Pacing violation: {first_violation['message']}"
 
-            raise RetryException(
-                message=message, flags=flags, guard_name="pacing_guard"
-            )
+            raise RetryException(message=message, flags=flags, guard_name="pacing_guard")
 
         return results
 
 
 def check_pacing_guard(
-    scene_texts: List[str], episode_num: int, project: str = "default"
-) -> Dict[str, Any]:
+    scene_texts: list[str], episode_num: int, project: str = "default"
+) -> dict[str, Any]:
     """
     Convenience function to run pacing guard check.
 
@@ -407,9 +399,7 @@ def check_pacing_guard(
     return guard.check(scene_texts, episode_num)
 
 
-def pacing_guard(
-    scene_texts: List[str], episode_num: int, project: str = "default"
-) -> bool:
+def pacing_guard(scene_texts: list[str], episode_num: int, project: str = "default") -> bool:
     """
     Main entry point for pacing guard check.
 

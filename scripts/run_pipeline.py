@@ -7,9 +7,9 @@ Tests episodes 1-20 with guard validation sequence
 """
 
 import argparse
+import json
 import sys
 from pathlib import Path
-import json
 
 # Add src directory to Python path
 script_dir = Path(__file__).parent
@@ -17,10 +17,10 @@ project_root = script_dir.parent
 sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(project_root / "src"))
 
+from src.core.guard_registry import get_sorted_guards  # noqa: E402
+from src.core.retry_controller import run_with_retry  # noqa: E402
 from src.exceptions import RetryException  # noqa: E402
 from src.utils.path_helper import data_path  # noqa: E402
-from src.core.retry_controller import run_with_retry  # noqa: E402
-from src.core.guard_registry import get_sorted_guards  # noqa: E402
 
 # TODO: from src.main import run_pipeline  # Not used in current implementation
 
@@ -45,16 +45,16 @@ def test_guards_auto_registry(episode_num: int, project: str = "default") -> boo
         True if all guards pass, False otherwise
     """
     # Import all guards to trigger registration
-    import src.plugins.lexi_guard  # noqa: F401
-    import src.plugins.emotion_guard  # noqa: F401
-    import src.plugins.schedule_guard  # noqa: F401
-    import src.plugins.immutable_guard  # noqa: F401
-    import src.plugins.date_guard  # noqa: F401
     import src.plugins.anchor_guard  # noqa: F401
-    import src.plugins.rule_guard  # noqa: F401
-    import src.plugins.relation_guard  # noqa: F401
-    import src.plugins.pacing_guard  # noqa: F401
     import src.plugins.critique_guard  # noqa: F401
+    import src.plugins.date_guard  # noqa: F401
+    import src.plugins.emotion_guard  # noqa: F401
+    import src.plugins.immutable_guard  # noqa: F401
+    import src.plugins.lexi_guard  # noqa: F401
+    import src.plugins.pacing_guard  # noqa: F401
+    import src.plugins.relation_guard  # noqa: F401
+    import src.plugins.rule_guard  # noqa: F401
+    import src.plugins.schedule_guard  # noqa: F401
 
     # Get registered guards in order
     guard_classes = get_sorted_guards()
@@ -90,7 +90,7 @@ def test_guards_auto_registry(episode_num: int, project: str = "default") -> boo
                 # Load or create sample character data
                 char_path = data_path("characters.json", project)
                 try:
-                    with open(char_path, "r", encoding="utf-8") as f:
+                    with open(char_path, encoding="utf-8") as f:
                         characters = json.load(f)
                 except FileNotFoundError:
                     characters = {
@@ -117,9 +117,7 @@ def test_guards_auto_registry(episode_num: int, project: str = "default") -> boo
             elif guard_name == "PacingGuard":
                 scene_texts = [
                     draft_content[: len(draft_content) // 3],
-                    draft_content[
-                        len(draft_content) // 3 : 2 * len(draft_content) // 3
-                    ],
+                    draft_content[len(draft_content) // 3 : 2 * len(draft_content) // 3],
                     draft_content[2 * len(draft_content) // 3 :],
                 ]
                 run_with_retry(guard.check, scene_texts, episode_num)
@@ -256,7 +254,7 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
         # Load or create sample character data with proper structure
         char_path = data_path("characters.json", project)
         try:
-            with open(char_path, "r", encoding="utf-8") as f:
+            with open(char_path, encoding="utf-8") as f:
                 characters = json.load(f)
         except FileNotFoundError:
             # Create minimal character data for testing with immutable field
@@ -340,9 +338,7 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
         # Create scene texts for pacing analysis
         scene_texts = [
             draft_content[: len(draft_content) // 3],  # First third
-            draft_content[
-                len(draft_content) // 3 : 2 * len(draft_content) // 3
-            ],  # Middle third
+            draft_content[len(draft_content) // 3 : 2 * len(draft_content) // 3],  # Middle third
             draft_content[2 * len(draft_content) // 3 :],  # Last third
         ]
 
@@ -412,9 +408,7 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
 
         if len(draft) >= 500:
             guards_status = (
-                "guards PASS (Gemini)"
-                if "fallback" not in draft
-                else "guards PASS (Fallback)"
+                "guards PASS (Gemini)" if "fallback" not in draft else "guards PASS (Fallback)"
             )
             print("✅ Draft Generator PASS")
             print(f"📝 Draft generated {len(draft)}+ chars, {guards_status}")

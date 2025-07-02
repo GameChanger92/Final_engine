@@ -6,18 +6,17 @@ Connects Arc Outliner → Beat Planner → Scene Maker → Context Builder → D
 """
 
 import typer
-from typing import Dict
 
 from .beat_planner import plan_beats
-from .scene_maker import make_scenes
 from .context_builder import make_context
+from .core.guard_registry import get_sorted_guards
 from .draft_generator import generate_draft
 from .exceptions import RetryException
-from .utils.path_helper import data_path, out_path, ensure_project_dirs
-from .core.guard_registry import get_sorted_guards
+from .scene_maker import make_scenes
+from .utils.path_helper import data_path, ensure_project_dirs, out_path
 
 
-def create_arc_outline(episode_num: int) -> Dict:
+def create_arc_outline(episode_num: int) -> dict:
     """
     Simple Arc Outliner - creates a basic arc structure for the episode.
 
@@ -38,9 +37,7 @@ def create_arc_outline(episode_num: int) -> Dict:
     }
 
 
-def run_guards_auto_registry(
-    draft: str, episode_num: int, project: str = "default"
-) -> None:
+def run_guards_auto_registry(draft: str, episode_num: int, project: str = "default") -> None:
     """
     Run all guards using auto-registry system.
 
@@ -54,16 +51,16 @@ def run_guards_auto_registry(
         Project ID for path resolution, defaults to "default"
     """
     # Import all guards to trigger registration
-    import src.plugins.lexi_guard  # noqa: F401
-    import src.plugins.emotion_guard  # noqa: F401
-    import src.plugins.schedule_guard  # noqa: F401
-    import src.plugins.immutable_guard  # noqa: F401
-    import src.plugins.date_guard  # noqa: F401
     import src.plugins.anchor_guard  # noqa: F401
-    import src.plugins.rule_guard  # noqa: F401
-    import src.plugins.relation_guard  # noqa: F401
-    import src.plugins.pacing_guard  # noqa: F401
     import src.plugins.critique_guard  # noqa: F401
+    import src.plugins.date_guard  # noqa: F401
+    import src.plugins.emotion_guard  # noqa: F401
+    import src.plugins.immutable_guard  # noqa: F401
+    import src.plugins.lexi_guard  # noqa: F401
+    import src.plugins.pacing_guard  # noqa: F401
+    import src.plugins.relation_guard  # noqa: F401
+    import src.plugins.rule_guard  # noqa: F401
+    import src.plugins.schedule_guard  # noqa: F401
 
     # Get registered guards in order
     guard_classes = get_sorted_guards()
@@ -89,7 +86,7 @@ def run_guards_auto_registry(
 
                 try:
                     characters_path = data_path("characters.json", project)
-                    with open(characters_path, "r", encoding="utf-8") as f:
+                    with open(characters_path, encoding="utf-8") as f:
                         characters = json.load(f)
                     guard.check(characters)
                 except FileNotFoundError:
@@ -206,9 +203,7 @@ app = typer.Typer(help="Final Engine - Integration Pipeline", no_args_is_help=Tr
 @app.command()
 def run(
     episode: int = typer.Option(1, "--episode", help="Episode number to generate"),
-    project_id: str = typer.Option(
-        "default", "--project-id", help="Project ID for the story"
-    ),
+    project_id: str = typer.Option("default", "--project-id", help="Project ID for the story"),
 ):
     """
     Run the complete pipeline to generate an episode.

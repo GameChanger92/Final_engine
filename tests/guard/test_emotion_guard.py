@@ -5,18 +5,18 @@ Tests for the Emotion Guard - comprehensive test suite
 Tests emotion classification and delta calculation functionality.
 """
 
-import pytest
 import numpy as np
-from src.plugins.emotion_guard import (
-    classify_emotions,
-    emotions_to_vector,
-    cosine_delta,
-    calculate_emotion_delta,
-    emotion_guard,
-    check_emotion_guard,
-)
-from src.exceptions import RetryException
+import pytest
 
+from src.exceptions import RetryException
+from src.plugins.emotion_guard import (
+    calculate_emotion_delta,
+    check_emotion_guard,
+    classify_emotions,
+    cosine_delta,
+    emotion_guard,
+    emotions_to_vector,
+)
 
 # Test cases that should PASS (normal emotion transitions)
 

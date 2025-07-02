@@ -9,10 +9,11 @@ RetryException when violations are detected.
 
 import json
 import os
-from typing import Dict, Any
+from typing import Any
+
+from src.core.guard_registry import BaseGuard, register_guard
 from src.exceptions import RetryException
 from src.utils.path_helper import data_path
-from src.core.guard_registry import BaseGuard, register_guard
 
 
 @register_guard(order=4)
@@ -49,7 +50,7 @@ class ImmutableGuard(BaseGuard):
         else:
             self.snapshot_path = snapshot_path
 
-    def _load_characters(self, characters_path: str = None) -> Dict[str, Any]:
+    def _load_characters(self, characters_path: str = None) -> dict[str, Any]:
         """
         Load character data from JSON file.
 
@@ -68,14 +69,14 @@ class ImmutableGuard(BaseGuard):
             characters_path = data_path("characters.json", self.project)
 
         try:
-            with open(characters_path, "r", encoding="utf-8") as f:
+            with open(characters_path, encoding="utf-8") as f:
                 return json.load(f)
         except FileNotFoundError:
             return {}
         except json.JSONDecodeError:
             return {}
 
-    def _load_snapshot(self) -> Dict[str, Dict[str, Any]]:
+    def _load_snapshot(self) -> dict[str, dict[str, Any]]:
         """
         Load immutable field snapshot.
 
@@ -85,14 +86,14 @@ class ImmutableGuard(BaseGuard):
             Snapshot of immutable fields by character
         """
         try:
-            with open(self.snapshot_path, "r", encoding="utf-8") as f:
+            with open(self.snapshot_path, encoding="utf-8") as f:
                 return json.load(f)
         except FileNotFoundError:
             return {}
         except json.JSONDecodeError:
             return {}
 
-    def _save_snapshot(self, snapshot: Dict[str, Dict[str, Any]]) -> None:
+    def _save_snapshot(self, snapshot: dict[str, dict[str, Any]]) -> None:
         """
         Save immutable field snapshot to disk.
 
@@ -107,9 +108,7 @@ class ImmutableGuard(BaseGuard):
         with open(self.snapshot_path, "w", encoding="utf-8") as f:
             json.dump(snapshot, f, ensure_ascii=False, indent=2)
 
-    def _extract_immutable_fields(
-        self, characters: Dict[str, Any]
-    ) -> Dict[str, Dict[str, Any]]:
+    def _extract_immutable_fields(self, characters: dict[str, Any]) -> dict[str, dict[str, Any]]:
         """
         Extract immutable field values from character data.
 
@@ -143,7 +142,7 @@ class ImmutableGuard(BaseGuard):
 
         return immutable_data
 
-    def check(self, current_chars: Dict[str, Any]) -> Dict[str, Any]:
+    def check(self, current_chars: dict[str, Any]) -> dict[str, Any]:
         """
         Check for immutable field violations.
 
@@ -233,20 +232,16 @@ class ImmutableGuard(BaseGuard):
                     f"{v['character']}.{v['field']}: {v['original_value']} → {v['current_value']}"
                 )
 
-            error_message = "Immutable field violations: " + "; ".join(
-                violation_details
-            )
+            error_message = "Immutable field violations: " + "; ".join(violation_details)
 
-            raise RetryException(
-                message=error_message, flags=flags, guard_name="immutable_guard"
-            )
+            raise RetryException(message=error_message, flags=flags, guard_name="immutable_guard")
 
         return results
 
 
 def check_immutable_guard(
-    current_chars: Dict[str, Any], project: str = "default"
-) -> Dict[str, Any]:
+    current_chars: dict[str, Any], project: str = "default"
+) -> dict[str, Any]:
     """
     Check immutable guard with current character data.
 
@@ -271,7 +266,7 @@ def check_immutable_guard(
     return guard.check(current_chars)
 
 
-def immutable_guard(current_chars: Dict[str, Any], project: str = "default") -> bool:
+def immutable_guard(current_chars: dict[str, Any], project: str = "default") -> bool:
     """
     Main entry point for immutable guard check.
 

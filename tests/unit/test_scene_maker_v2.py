@@ -6,9 +6,11 @@ LLM integration, and VectorStore metadata storage.
 """
 
 import os
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
-from src.scene_maker import make_scenes, build_prompt, parse_scene_yaml, TEMP_SCENE
+
+from src.scene_maker import TEMP_SCENE, build_prompt, make_scenes, parse_scene_yaml
 
 
 class TestSceneMakerV2:
@@ -62,6 +64,7 @@ class TestSceneMakerV2:
         with patch.dict(os.environ, {"TEMP_SCENE": "0.8"}):
             # Re-import to get the new value
             from importlib import reload
+
             import src.scene_maker
 
             reload(src.scene_maker)
@@ -101,9 +104,10 @@ class TestSceneMakerV2:
         mock_vector_store_class.return_value = mock_store
 
         # Mock LLM to return valid scenes (bypass the LLM failure path)
-        with patch("src.scene_maker.call_llm") as mock_llm, patch(
-            "src.scene_maker.parse_scene_yaml"
-        ) as mock_parse:
+        with (
+            patch("src.scene_maker.call_llm") as mock_llm,
+            patch("src.scene_maker.parse_scene_yaml") as mock_parse,
+        ):
 
             # Mock LLM and parser to return valid scenes
             mock_llm.return_value = "mocked yaml"
@@ -136,18 +140,14 @@ class TestSceneMakerV2:
 
             # Check the calls to add method
             calls = mock_store.add.call_args_list
-            assert len(calls) == len(
-                scenes
-            ), f"Expected {len(scenes)} calls to VectorStore.add"
+            assert len(calls) == len(scenes), f"Expected {len(scenes)} calls to VectorStore.add"
 
             for call in calls:
                 args, kwargs = call
                 scene_id, text, metadata = args
 
                 # Check scene_id format
-                assert scene_id.startswith(
-                    "beat_2_scene_"
-                ), f"Invalid scene_id format: {scene_id}"
+                assert scene_id.startswith("beat_2_scene_"), f"Invalid scene_id format: {scene_id}"
 
                 # Check metadata structure
                 assert isinstance(metadata, dict), "Metadata must be a dictionary"

@@ -6,13 +6,13 @@ Tests TTR and 3-gram duplication rate functionality.
 """
 
 import pytest
+
+from src.exceptions import RetryException
 from src.plugins.lexi_guard import (
-    calculate_ttr,
     calculate_3gram_duplication_rate,
+    calculate_ttr,
     lexi_guard,
 )
-from src.exceptions import RetryException
-
 
 # Test cases that should PASS (5 tests)
 

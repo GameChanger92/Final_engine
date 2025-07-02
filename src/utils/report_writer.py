@@ -7,11 +7,12 @@ Uses Jinja2 templates to generate formatted HTML reports from KPI data.
 
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any
+
 from jinja2 import Environment, FileSystemLoader
 
 
-def generate_season_report(kpi_data: Dict[str, Any], output_path: Path) -> None:
+def generate_season_report(kpi_data: dict[str, Any], output_path: Path) -> None:
     """
     Generate HTML season report from KPI data.
 
@@ -39,9 +40,7 @@ def generate_season_report(kpi_data: Dict[str, Any], output_path: Path) -> None:
     try:
         template = env.get_template(template_name)
     except Exception as e:
-        raise FileNotFoundError(
-            f"Template '{template_name}' not found in {templates_dir}: {e}"
-        )
+        raise FileNotFoundError(f"Template '{template_name}' not found in {templates_dir}: {e}")
 
     # Prepare template context
     context = {
@@ -63,7 +62,7 @@ def generate_season_report(kpi_data: Dict[str, Any], output_path: Path) -> None:
         raise RuntimeError(f"Failed to write report to {output_path}: {e}")
 
 
-def validate_kpi_data(kpi_data: Dict[str, Any]) -> bool:
+def validate_kpi_data(kpi_data: dict[str, Any]) -> bool:
     """
     Validate that KPI data contains required fields.
 
@@ -86,7 +85,7 @@ def validate_kpi_data(kpi_data: Dict[str, Any]) -> bool:
     return all(field in kpi_data for field in required_fields)
 
 
-def generate_simple_html_report(kpi_data: Dict[str, Any], output_path: Path) -> None:
+def generate_simple_html_report(kpi_data: dict[str, Any], output_path: Path) -> None:
     """
     Generate a simple HTML report without Jinja2 templates (fallback).
 

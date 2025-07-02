@@ -5,11 +5,12 @@ Integration tests for the Full Season Runner.
 Tests end-to-end functionality of episode batch processing and KPI reporting.
 """
 
-import pytest
-import time
 import sys
+import time
 from pathlib import Path
 from unittest.mock import patch
+
+import pytest
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent
@@ -19,9 +20,9 @@ sys.path.insert(0, str(project_root / "src"))
 # Import modules we need to test
 from scripts.run_full_season import (  # noqa: E402
     KPITracker,
-    run_episodes,
-    parse_episode_range,
     check_single_episode_guards,
+    parse_episode_range,
+    run_episodes,
 )
 from src.utils.report_writer import (  # noqa: E402
     generate_season_report,
@@ -84,9 +85,7 @@ class TestFullSeasonRunner:
         # Verify values are reasonable
         assert 0 <= summary["avg_fun"] <= 10, "avg_fun should be between 0-10"
         assert 0 <= summary["avg_logic"] <= 10, "avg_logic should be between 0-10"
-        assert (
-            0 <= summary["guard_pass_rate"] <= 100
-        ), "guard_pass_rate should be between 0-100"
+        assert 0 <= summary["guard_pass_rate"] <= 100, "guard_pass_rate should be between 0-100"
         assert summary["avg_chars"] >= 0, "avg_chars should be non-negative"
 
     def test_guard_pass_90_percent_no_errors(self):
@@ -123,9 +122,7 @@ class TestFullSeasonRunner:
         execution_time = end_time - start_time
 
         # Verify execution time is reasonable
-        assert (
-            execution_time < 30.0
-        ), f"Execution took {execution_time:.1f}s, should be < 30s"
+        assert execution_time < 30.0, f"Execution took {execution_time:.1f}s, should be < 30s"
 
         # Verify we processed all episodes
         summary = kpi_tracker.get_summary()
@@ -239,16 +236,12 @@ class TestFullSeasonRunner:
     def test_single_episode_guard_testing(self):
         """Test the single episode guard testing functionality."""
         # This should work even without API keys (uses fallback)
-        all_passed, fun_score, logic_score = check_single_episode_guards(
-            1, self.test_project
-        )
+        all_passed, fun_score, logic_score = check_single_episode_guards(1, self.test_project)
 
         # Verify we get reasonable values
         assert isinstance(all_passed, bool)
         assert 1.0 <= fun_score <= 10.0, f"Fun score {fun_score} should be between 1-10"
-        assert (
-            1.0 <= logic_score <= 10.0
-        ), f"Logic score {logic_score} should be between 1-10"
+        assert 1.0 <= logic_score <= 10.0, f"Logic score {logic_score} should be between 1-10"
 
 
 if __name__ == "__main__":

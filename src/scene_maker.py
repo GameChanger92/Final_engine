@@ -5,21 +5,22 @@ Scene Maker v2 - LLM-powered scene point generation.
 Generates 8-12 detailed scene points per beat with pov, purpose, desc, and tags.
 """
 
+import logging
 import os
 import re
-import logging
-import yaml
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any
+
 import typer
+import yaml
 from dotenv import load_dotenv
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 
 from src.core.retry_controller import run_with_retry
-from src.exceptions import RetryException
-from src.prompt_loader import load_style
 from src.embedding.vector_store import VectorStore
+from src.exceptions import RetryException
 from src.plugins.critique_guard import critique_guard
+from src.prompt_loader import load_style
 
 # Load environment variables
 load_dotenv(".env", override=True)
@@ -75,13 +76,9 @@ def build_prompt(beat_desc: str, beat_no: int = 1) -> str:
         return prompt
 
     except TemplateNotFound:
-        raise RetryException(
-            "Scene prompt template not found", guard_name="template_load"
-        )
+        raise RetryException("Scene prompt template not found", guard_name="template_load")
     except Exception as e:
-        raise RetryException(
-            f"Failed to build scene prompt: {str(e)}", guard_name="template_load"
-        )
+        raise RetryException(f"Failed to build scene prompt: {str(e)}", guard_name="template_load")
 
 
 def call_llm(prompt: str) -> str:
@@ -182,9 +179,7 @@ scene_8:
         }
 
         # Generate content
-        logger.info(
-            f"🎬 Scene Maker… (temperature={TEMP_SCENE}, max_output_tokens=8000)"
-        )
+        logger.info(f"🎬 Scene Maker… (temperature={TEMP_SCENE}, max_output_tokens=8000)")
         logger.info(f"Calling {model_name} for scene generation...")
         response = model.generate_content(prompt, generation_config=generation_config)
 
@@ -201,7 +196,7 @@ scene_8:
         raise RetryException(f"LLM generation failed: {str(e)}", guard_name="llm_call")
 
 
-def parse_scene_yaml(yaml_content: str) -> List[Dict[str, Any]]:
+def parse_scene_yaml(yaml_content: str) -> list[dict[str, Any]]:
     """
     Parse YAML scene content from LLM response.
 
@@ -267,9 +262,7 @@ def parse_scene_yaml(yaml_content: str) -> List[Dict[str, Any]]:
 
             # Extract scene number from scene_key
             scene_num_match = re.search(r"scene_(\d+)", scene_key)
-            scene_idx = (
-                int(scene_num_match.group(1)) if scene_num_match else len(scenes) + 1
-            )
+            scene_idx = int(scene_num_match.group(1)) if scene_num_match else len(scenes) + 1
 
             scene_dict = {
                 "idx": scene_idx,
@@ -367,9 +360,7 @@ def make_scenes(beat_json: dict) -> list[dict]:
                 scene["beat_id"] = beat_idx
 
             # Validate scenes with critique guard
-            scenes_text = "\n".join(
-                [f"Scene {scene['idx']}: {scene['desc']}" for scene in scenes]
-            )
+            scenes_text = "\n".join([f"Scene {scene['idx']}: {scene['desc']}" for scene in scenes])
             validate_scenes_with_critique(scenes_text)
 
             return scenes
@@ -520,7 +511,7 @@ def _generate_fallback_scenes(beat_idx: int, beat_desc: str) -> list[dict]:
     return scenes
 
 
-def generate_scene_points(beat_id: str) -> List[Dict]:
+def generate_scene_points(beat_id: str) -> list[dict]:
     """
     Generate scene points for a specific beat ID.
 
@@ -541,17 +532,11 @@ def generate_scene_points(beat_id: str) -> List[Dict]:
 
 
 # CLI setup
-app = typer.Typer(
-    help="Scene Maker - Generate scene points for beats", no_args_is_help=True
-)
+app = typer.Typer(help="Scene Maker - Generate scene points for beats", no_args_is_help=True)
 
 
 @app.command()
-def run(
-    beat_id: str = typer.Option(
-        "TEST", "--beat-id", help="Beat ID to generate scenes for"
-    )
-):
+def run(beat_id: str = typer.Option("TEST", "--beat-id", help="Beat ID to generate scenes for")):
     """
     Generate and display scene points for a given beat ID.
     """
@@ -571,9 +556,7 @@ def run(
     main_scenes = sum(1 for s in scene_points if s.get("pov") == "main")
     side_scenes = sum(1 for s in scene_points if s.get("pov") == "side")
     typer.echo("Scene generation completed successfully.")
-    typer.echo(
-        f"Total: {len(scene_points)} scenes (main: {main_scenes}, side: {side_scenes})"
-    )
+    typer.echo(f"Total: {len(scene_points)} scenes (main: {main_scenes}, side: {side_scenes})")
 
 
 @app.command()

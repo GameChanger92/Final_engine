@@ -11,12 +11,13 @@ import tempfile
 from unittest.mock import patch
 
 import pytest
+
+from src.exceptions import RetryException
 from src.plugins.schedule_guard import (
     ScheduleGuard,
     check_schedule_guard,
     schedule_guard,
 )
-from src.exceptions import RetryException
 
 
 class TestScheduleGuard:
@@ -202,9 +203,7 @@ class TestScheduleGuard:
         assert len(exception.flags["overdue_foreshadows"]["details"]) == 2
 
         # Check that the overdue ones are correct
-        overdue_ids = [
-            d["id"] for d in exception.flags["overdue_foreshadows"]["details"]
-        ]
+        overdue_ids = [d["id"] for d in exception.flags["overdue_foreshadows"]["details"]]
         assert "f001" in overdue_ids
         assert "f002" in overdue_ids
         assert "f003" not in overdue_ids
@@ -229,7 +228,7 @@ class TestScheduleGuard:
         assert result is True
 
         # Verify the file was updated
-        with open(self.test_file, "r", encoding="utf-8") as f:
+        with open(self.test_file, encoding="utf-8") as f:
             data = json.load(f)
 
         assert data["foreshadows"][0]["payoff"] == 12
@@ -273,7 +272,7 @@ class TestScheduleGuard:
         assert result is False
 
         # Verify payoff didn't change
-        with open(self.test_file, "r", encoding="utf-8") as f:
+        with open(self.test_file, encoding="utf-8") as f:
             data = json.load(f)
 
         assert data["foreshadows"][0]["payoff"] == 10  # Original value
@@ -410,7 +409,5 @@ class TestScheduleGuard:
             schedule_guard(20)
 
         exception = exc_info.value
-        assert str(exception).startswith(
-            "[schedule_guard] Foreshadow schedule violations"
-        )
+        assert str(exception).startswith("[schedule_guard] Foreshadow schedule violations")
         assert "1 foreshadow(s) past due episode" in str(exception)

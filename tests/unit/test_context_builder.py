@@ -1,5 +1,6 @@
 from unittest.mock import patch
-from src.context_builder import make_context, ContextBuilder
+
+from src.context_builder import ContextBuilder, make_context
 
 
 def test_make_context_with_korean_scenes():

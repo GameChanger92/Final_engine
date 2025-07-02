@@ -5,16 +5,18 @@ Tests for the Immutable Guard - comprehensive test suite
 Tests immutable field monitoring and violation detection functionality.
 """
 
-import pytest
 import json
-import tempfile
 import os
+import tempfile
+
+import pytest
+
+from src.exceptions import RetryException
 from src.plugins.immutable_guard import (
     ImmutableGuard,
     check_immutable_guard,
     immutable_guard,
 )
-from src.exceptions import RetryException
 
 
 class TestImmutableGuard:
@@ -54,7 +56,7 @@ class TestImmutableGuard:
         assert os.path.exists(self.snapshot_path)
 
         # Verify snapshot content
-        with open(self.snapshot_path, "r", encoding="utf-8") as f:
+        with open(self.snapshot_path, encoding="utf-8") as f:
             snapshot = json.load(f)
 
         assert "MC" in snapshot
@@ -235,7 +237,7 @@ class TestImmutableGuard:
         assert len(result["violations"]) == 0
 
         # Verify new character is in snapshot
-        with open(self.snapshot_path, "r", encoding="utf-8") as f:
+        with open(self.snapshot_path, encoding="utf-8") as f:
             snapshot = json.load(f)
 
         assert "Alice" in snapshot
@@ -264,7 +266,7 @@ class TestImmutableGuard:
         assert result["passed"] is True
 
         # Verify only MC is in snapshot
-        with open(self.snapshot_path, "r", encoding="utf-8") as f:
+        with open(self.snapshot_path, encoding="utf-8") as f:
             snapshot = json.load(f)
 
         assert "MC" in snapshot
@@ -294,7 +296,7 @@ class TestImmutableGuard:
         assert result["passed"] is True
 
         # Only Alice should be in snapshot
-        with open(self.snapshot_path, "r", encoding="utf-8") as f:
+        with open(self.snapshot_path, encoding="utf-8") as f:
             snapshot = json.load(f)
 
         assert "MC" not in snapshot
@@ -317,7 +319,7 @@ class TestImmutableGuard:
         assert result["passed"] is True
 
         # Only birth should be in snapshot
-        with open(self.snapshot_path, "r", encoding="utf-8") as f:
+        with open(self.snapshot_path, encoding="utf-8") as f:
             snapshot = json.load(f)
 
         assert "MC" in snapshot
@@ -446,7 +448,5 @@ class TestImmutableGuard:
             guard.check(characters)
 
         exception = exc_info.value
-        assert str(exception).startswith(
-            "[immutable_guard] Immutable field violations:"
-        )
+        assert str(exception).startswith("[immutable_guard] Immutable field violations:")
         assert "MC.birth: 2002-07-15 → 2003-07-15" in str(exception)

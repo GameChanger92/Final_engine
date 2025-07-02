@@ -1,7 +1,9 @@
 import os
-import pytest
 from unittest.mock import patch
-from src.draft_generator import generate_draft, build_prompt, call_llm, post_edit
+
+import pytest
+
+from src.draft_generator import build_prompt, call_llm, generate_draft, post_edit
 
 
 def test_generate_draft_returns_string():
@@ -96,8 +98,7 @@ def test_guards_simulation_pass():
     # Long enough draft should pass basic checks (need multiline and sufficient length)
     long_draft = (
         "This is a test draft that is long enough to pass the basic validation checks.\n"
-        + "It has multiple lines and sufficient content to meet all requirements.\n"
-        * 20
+        + "It has multiple lines and sufficient content to meet all requirements.\n" * 20
     )
     result = simulate_guards_validation(long_draft, 1)
     assert result is True
@@ -208,7 +209,7 @@ def test_draft_generator_integration():
 
 def test_retry_on_short_output(monkeypatch):
     """Test retry mechanism when LLM output is too short."""
-    from src.draft_generator import generate_draft, RetryException
+    from src.draft_generator import RetryException, generate_draft
 
     # Mock call_llm to return short content
     monkeypatch.setattr("src.draft_generator.call_llm", lambda *a, **k: "abc")

@@ -10,11 +10,11 @@ Emotion categories: joy, sadness, anger, fear, surprise, disgust, neutral
 """
 
 import re
-import numpy as np
-from typing import Dict
-from src.exceptions import RetryException
-from src.core.guard_registry import BaseGuard, register_guard
 
+import numpy as np
+
+from src.core.guard_registry import BaseGuard, register_guard
+from src.exceptions import RetryException
 
 # Emotion keyword mapping for simple classification
 EMOTION_KEYWORDS = {
@@ -241,7 +241,7 @@ EMOTION_KEYWORDS = {
 }
 
 
-def classify_emotions(text: str) -> Dict[str, float]:
+def classify_emotions(text: str) -> dict[str, float]:
     """
     Classify emotions in text using keyword-based approach.
 
@@ -316,7 +316,7 @@ def classify_emotions(text: str) -> Dict[str, float]:
     return smoothed_scores
 
 
-def emotions_to_vector(emotion_scores: Dict[str, float]) -> np.ndarray:
+def emotions_to_vector(emotion_scores: dict[str, float]) -> np.ndarray:
     """
     Convert emotion scores dictionary to numpy vector.
 
@@ -435,7 +435,7 @@ def calculate_emotion_delta(prev_text: str, curr_text: str) -> float:
     return delta
 
 
-def check_emotion_guard(prev_text: str, curr_text: str) -> Dict[str, any]:
+def check_emotion_guard(prev_text: str, curr_text: str) -> dict[str, any]:
     """
     Run emotion guard checks on text segments.
 
@@ -488,9 +488,7 @@ def check_emotion_guard(prev_text: str, curr_text: str) -> Dict[str, any]:
 
     if flags:
         results["passed"] = False
-        raise RetryException(
-            message="Emotion jump", flags=flags, guard_name="emotion_guard"
-        )
+        raise RetryException(message="Emotion jump", flags=flags, guard_name="emotion_guard")
 
     return results
 
@@ -533,7 +531,7 @@ class EmotionGuard(BaseGuard):
     text segments using emotion classification and delta analysis.
     """
 
-    def check(self, prev_text: str, curr_text: str) -> Dict[str, any]:
+    def check(self, prev_text: str, curr_text: str) -> dict[str, any]:
         """
         Check for emotional transition violations.
 

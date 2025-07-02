@@ -6,7 +6,6 @@ Provides text embedding functionality using OpenAI's text-embedding models.
 """
 
 import os
-from typing import List
 
 try:
     import openai
@@ -14,7 +13,7 @@ except ModuleNotFoundError:
     openai = None
 
 
-def embed_scene(text: str, model: str = "text-embedding-3-small") -> List[float]:
+def embed_scene(text: str, model: str = "text-embedding-3-small") -> list[float]:
     """
     Generate embeddings for scene text using OpenAI.
 

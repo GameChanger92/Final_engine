@@ -6,7 +6,9 @@ Tests retry functionality, backoff intervals, and error handling.
 """
 
 from unittest.mock import Mock, patch
+
 import pytest
+
 from src.core.retry_controller import run_with_retry
 from src.exceptions import RetryException
 
@@ -145,9 +147,7 @@ class TestRetryController:
         """Test with max_retry=0 (only one attempt)."""
         mock_func = Mock()
         mock_func.__name__ = "test_func"
-        mock_func.side_effect = RetryException(
-            "Only attempt failed", guard_name="test_guard"
-        )
+        mock_func.side_effect = RetryException("Only attempt failed", guard_name="test_guard")
 
         with pytest.raises(RetryException):
             run_with_retry(mock_func, max_retry=0)

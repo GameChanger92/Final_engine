@@ -5,16 +5,18 @@ Tests for the Rule Guard - comprehensive test suite (10+ tests)
 Tests forbidden pattern detection and rule violation functionality.
 """
 
-import pytest
 import json
-import tempfile
 import os
+import tempfile
+
+import pytest
+
+from src.exceptions import RetryException
 from src.plugins.rule_guard import (
     RuleGuard,
     check_rule_guard,
     rule_guard,
 )
-from src.exceptions import RetryException
 
 
 class TestRuleGuard:
@@ -260,9 +262,7 @@ class TestRuleGuard:
         # Should only process the valid rule
         exception = exc_info.value
         assert exception.flags["rule_violation"]["rule_id"] == "VALID"
-        assert guard.rules == [
-            {"id": "VALID", "pattern": "유효", "message": "Valid rule!"}
-        ]
+        assert guard.rules == [{"id": "VALID", "pattern": "유효", "message": "Valid rule!"}]
 
     def test_rule_guard_handles_non_list_rules_json(self):
         """Test that non-list rules JSON is handled gracefully."""

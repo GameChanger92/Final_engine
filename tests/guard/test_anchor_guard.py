@@ -5,16 +5,18 @@ Tests for the Anchor Guard - comprehensive test suite
 Tests anchor event validation and episode range checking functionality.
 """
 
-import pytest
 import json
-import tempfile
 import os
+import tempfile
+
+import pytest
+
+from src.exceptions import RetryException
 from src.plugins.anchor_guard import (
     AnchorGuard,
-    check_anchor_guard,
     anchor_guard,
+    check_anchor_guard,
 )
-from src.exceptions import RetryException
 
 
 class TestAnchorGuard:
@@ -120,9 +122,7 @@ class TestAnchorGuard:
         """Test keyword search functionality."""
         guard = AnchorGuard(self.anchors_path)
 
-        content = (
-            "이 에피소드에서 주인공이 처음으로 등장합니다. 그의 이름은 김현우입니다."
-        )
+        content = "이 에피소드에서 주인공이 처음으로 등장합니다. 그의 이름은 김현우입니다."
 
         # Test successful search
         assert guard._search_keywords_in_content(content, ["주인공", "등장"]) is True

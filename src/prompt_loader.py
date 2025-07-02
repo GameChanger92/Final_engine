@@ -9,12 +9,12 @@ import json
 import logging
 import os
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-def load_style(platform: Optional[str] = None) -> Dict[str, Any]:
+def load_style(platform: str | None = None) -> dict[str, Any]:
     """
     Load style configuration for the specified platform.
 
@@ -40,7 +40,7 @@ def load_style(platform: Optional[str] = None) -> Dict[str, Any]:
     # Try to load the requested platform style
     if style_file_path.exists():
         try:
-            with open(style_file_path, "r", encoding="utf-8") as f:
+            with open(style_file_path, encoding="utf-8") as f:
                 style_config = json.load(f)
                 logger.info(f"Loaded style: {platform}")
                 return style_config
@@ -55,7 +55,7 @@ def load_style(platform: Optional[str] = None) -> Dict[str, Any]:
         fallback_path = style_configs_dir / f"{fallback_platform}.json"
         if fallback_path.exists():
             try:
-                with open(fallback_path, "r", encoding="utf-8") as f:
+                with open(fallback_path, encoding="utf-8") as f:
                     style_config = json.load(f)
                     logger.info(f"Loaded fallback style: {fallback_platform}")
                     return style_config
