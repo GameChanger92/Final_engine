@@ -1,5 +1,6 @@
 """CritiqueGuard – 재미/개연성 점수 검사"""
 
+import sys
 import os
 from src.exceptions import RetryException
 from src.core.guard_registry import BaseGuard, register_guard
@@ -29,8 +30,13 @@ class CritiqueGuard(BaseGuard):
         1) UNIT_TEST_MODE 또는 FAST_MODE 면 즉시 스텁 반환
         2) 실사용 시: 라이브러리 import → API-key 체크
         """
-        if os.getenv("UNIT_TEST_MODE") == "1" or os.getenv("FAST_MODE") == "1":
-            return {"fun": 8.5, "logic": 8.0, "comment": "Fast-stub"}
+        # ---- 1) 테스트 스텁 경로 -------------------------------------
+        if os.getenv("UNIT_TEST_MODE") == "1":
+            return {
+                "fun": 8.0,
+                "logic": 7.5,
+                "comment": "Unit‑test stub",
+            }
 
         try:
             import google.generativeai  # noqa: F401
@@ -80,7 +86,11 @@ class CritiqueGuard(BaseGuard):
 # ---------- 래퍼 함수 2개 ----------
 def check_critique_guard(text: str, min_score: float | None = None) -> Dict[str, Any]:
     """테스트·외부 호출용 래퍼 – CritiqueGuard.check 그대로 반환"""
-    result = CritiqueGuard(min_score=_get_min_score(min_score)).check(text)
+    result = (
+        sys.modules[__name__]
+        .CritiqueGuard(min_score=_get_min_score(min_score))
+        .check(text)
+    )
 
     # If the result indicates failure, raise RetryException
     if not result["passed"]:
@@ -106,7 +116,7 @@ def critique_guard(text: str, min_score: float | None = None) -> None:
     """메인 파이프라인에서 사용하는 함수 – 래퍼를 한 줄로 호출"""
     # Read environment variable and pass it explicitly
     final_min_score = _get_min_score(min_score)
-    check_critique_guard(text, final_min_score)
+    sys.modules[__name__].check_critique_guard(text, final_min_score)
 
 
 # ---------- re‑export ----------
