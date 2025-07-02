@@ -72,14 +72,16 @@ def run_with_retry(func, *args, max_retry=2, **kwargs) -> Any:
 
             if attempt == max_retry:
                 # Final attempt failed - raise combined exception
-                combined_message = "; ".join(messages)
-                logger.error(
-                    f"Retry Controller: {func_name} failed after {max_retry + 1} attempts: {combined_message}"
-                )
-                # Use guard_name from exception if available, otherwise use function name
+                # Create a summary message instead of joining all messages
                 guard_name = getattr(e, "guard_name", None) or func_name
+                summary_message = f"{guard_name} failed after {max_retry + 1} attempts"
+                
+                logger.error(
+                    f"Retry Controller: {func_name} failed after {max_retry + 1} attempts: {'; '.join(messages)}"
+                )
+                
                 raise RetryException(
-                    message=combined_message,
+                    message=summary_message,
                     flags=getattr(e, "flags", {}),
                     guard_name=guard_name,
                 ) from e
