@@ -24,34 +24,21 @@ class CritiqueGuard(BaseGuard):
 
     # 실제 LLM 호출은 생략/모킹
     def _call_gemini_critique(self, text: str) -> Dict[str, Any]:
-        # Check for test modes and API key handling
+        """
+        Gemini 호출 / 테스트 스텁
+        1) UNIT_TEST_MODE 또는 FAST_MODE 면 즉시 스텁 반환
+        2) 실사용 시: 라이브러리 import → API-key 체크
+        """
+        if os.getenv("UNIT_TEST_MODE") == "1" or os.getenv("FAST_MODE") == "1":
+            return {"fun": 8.5, "logic": 8.0, "comment": "Fast-stub"}
+
         try:
-            # Test mode flag for unit tests
-            if os.getenv("UNIT_TEST_MODE") == "1":
-                raise ImportError("Forced import error for unit test")
             import google.generativeai  # noqa: F401
         except ImportError:
-            # In unit test mode, provide stub response
-            if os.getenv("UNIT_TEST_MODE") == "1":
-                return {
-                    "fun": 8.5,
-                    "logic": 8.0,
-                    "comment": "Unit test stub evaluation - passing scores",
-                }
-            # Check if API key is missing (for test cases)
-            if not os.getenv("GOOGLE_API_KEY"):
-                raise RetryException(
-                    "API key not configured", guard_name="critique_guard"
-                )
-            # Fast mode for unit tests - return stub immediately (but only after import check)
-            if os.getenv("FAST_MODE") == "1":
-                return {
-                    "fun": 8.5,
-                    "logic": 8.0,
-                    "comment": "Fast mode stub evaluation - passing scores",
-                }
+            raise RetryException(
+                "google-generativeai not installed", guard_name="critique_guard"
+            )
 
-        # Check if API key is missing even if import succeeds
         if not os.getenv("GOOGLE_API_KEY"):
             raise RetryException("API key not configured", guard_name="critique_guard")
 
