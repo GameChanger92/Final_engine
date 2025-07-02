@@ -22,6 +22,15 @@ load_dotenv(".env", override=True)
 logger = logging.getLogger(__name__)
 
 
+def _get_min_score(override: float | None = None) -> float:
+    """Get minimum score, reading from environment variable on each call."""
+    return (
+        float(override)
+        if override is not None
+        else float(os.getenv("MIN_CRITIQUE_SCORE", 7.0))
+    )
+
+
 @register_guard(order=10)
 class CritiqueGuard(BaseGuard):
     """
@@ -214,7 +223,7 @@ class CritiqueGuard(BaseGuard):
             logger.info(
                 f"Self-Critique PASS (fun={result['fun']:.1f},logic={result['logic']:.1f})"
             )
-            # Return success dict
+            # Return success dict without modification
             return {
                 "passed": True,
                 "fun_score": result["fun"],
@@ -229,13 +238,9 @@ class CritiqueGuard(BaseGuard):
 def check_critique_guard(text: str, min_score: float | None = None) -> dict:
     """
     Wrapper for tests & other modules.
-    Returns *exactly* the dict from CritiqueGuard.check().
+    Calls CritiqueGuard.check() and raises RetryException on failure.
     """
-    if min_score is None:
-        min_score = float(os.getenv("MIN_CRITIQUE_SCORE", "7.0"))
-
-    guard = CritiqueGuard(min_score=min_score)
-    result = guard.check(text)
+    result = CritiqueGuard(min_score=_get_min_score(min_score)).check(text)
 
     # If the result indicates failure, raise RetryException
     if not result["passed"]:
@@ -243,12 +248,13 @@ def check_critique_guard(text: str, min_score: float | None = None) -> dict:
         fun_score = result["fun_score"]
         logic_score = result["logic_score"]
         comment = result["comment"]
+        min_score_val = result["min_score"]
         flags = result["flags"]
 
         # Create and raise RetryException
         message = (
             f"Critique scores too low: fun={fun_score}, "
-            f"logic={logic_score} (min={min_score}). "
+            f"logic={logic_score} (min={min_score_val}). "
             f"Comment: {comment}"
         )
         raise RetryException(message=message, flags=flags, guard_name="critique_guard")
@@ -261,15 +267,9 @@ def critique_guard(text: str, min_score: float | None = None) -> None:
     Pipeline entry.
     Simply delegates to check_critique_guard() so that mocks in tests catch it.
     """
-    # Use environment variable if available, otherwise use provided min_score
-    if min_score is None:
-        env_min_score = os.getenv("MIN_CRITIQUE_SCORE")
-        if env_min_score is not None:
-            min_score = float(env_min_score)
-        else:
-            min_score = 7.0
-    # Do NOT catch RetryException here; let it bubble up.
-    check_critique_guard(text, min_score)
+    # Get the min_score, reading from environment if not provided
+    final_min_score = _get_min_score(min_score)
+    check_critique_guard(text, final_min_score)
 
 
 # Re-export functions for top-level access
