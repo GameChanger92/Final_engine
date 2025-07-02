@@ -296,3 +296,17 @@ python scripts/run_pipeline.py --project-id default --episodes 1-20
 python scripts/run_pipeline.py --project-id demo_novel --episodes 5      # Single episode
 python scripts/run_pipeline.py --project-id default --episodes 10-15     # Episode range
 ```
+
+## Local Style Checking
+
+Before submitting a PR, check your code style locally:
+
+```bash
+# 전체 검사
+ruff check .
+black --check --diff .
+
+# 자동 수정
+ruff check . --fix
+black .
+```
