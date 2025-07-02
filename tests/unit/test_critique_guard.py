@@ -189,16 +189,17 @@ class TestCritiqueGuard:
             assert "Invalid critique response format" in str(exception)
 
     def test_critique_guard_handles_missing_api_key(self):
-        """Test that missing API key is handled gracefully."""
+        """Test that missing API key triggers fallback mode instead of failure."""
         guard = CritiqueGuard(min_score=7.0)
 
         with patch.dict(os.environ, {}, clear=True):
-            with pytest.raises(RetryException) as exc_info:
-                guard.check("Some text")
+            result = guard.check("Some text")
 
-            exception = exc_info.value
-            assert exception.guard_name == "critique_guard"
-            assert "API key not configured" in str(exception)
+            # Should succeed with fallback instead of raising exception
+            assert result["passed"] is True
+            assert "no API key configured" in result["comment"]
+            assert result["fun_score"] == 8.0
+            assert result["logic_score"] == 8.0
 
     def test_critique_guard_handles_gemini_api_error(self):
         """Test that Gemini API errors are handled gracefully."""
