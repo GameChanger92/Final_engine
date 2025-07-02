@@ -81,11 +81,11 @@ def run_with_retry(func, *args, max_retry=2, **kwargs) -> Any:
                     # Use new summary format for production
                     guard_name = getattr(e, "guard_name", None) or func_name
                     combined_message = f"{guard_name} failed after {max_retry + 1} attempts"
-                
+
                 logger.error(
                     f"Retry Controller: {func_name} failed after {max_retry + 1} attempts: {'; '.join(messages)}"
                 )
-                
+
                 guard_name = getattr(e, "guard_name", None) or func_name
                 raise RetryException(
                     message=combined_message,
