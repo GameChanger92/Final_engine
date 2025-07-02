@@ -76,9 +76,13 @@ def build_prompt(beat_desc: str, beat_no: int = 1) -> str:
         return prompt
 
     except TemplateNotFound:
-        raise RetryException("Scene prompt template not found", guard_name="template_load")
+        raise RetryException(
+            "Scene prompt template not found", guard_name="template_load"
+        ) from None
     except Exception as e:
-        raise RetryException(f"Failed to build scene prompt: {str(e)}", guard_name="template_load")
+        raise RetryException(
+            f"Failed to build scene prompt: {str(e)}", guard_name="template_load"
+        ) from e
 
 
 def call_llm(prompt: str) -> str:
@@ -156,7 +160,7 @@ scene_8:
             logger.error("google-generativeai not installed")
             raise RetryException(
                 "Google Generative AI library not available", guard_name="llm_call"
-            )
+            ) from None
 
         # Configure the API
         api_key = os.getenv("GOOGLE_API_KEY")
@@ -193,7 +197,7 @@ scene_8:
         if isinstance(e, RetryException):
             raise
         logger.error(f"LLM call failed: {e}")
-        raise RetryException(f"LLM generation failed: {str(e)}", guard_name="llm_call")
+        raise RetryException(f"LLM generation failed: {str(e)}", guard_name="llm_call") from e
 
 
 def parse_scene_yaml(yaml_content: str) -> list[dict[str, Any]]:
@@ -287,11 +291,11 @@ def parse_scene_yaml(yaml_content: str) -> list[dict[str, Any]]:
         return scenes
 
     except yaml.YAMLError as e:
-        raise RetryException(f"YAML parsing error: {str(e)}", guard_name="yaml_parse")
+        raise RetryException(f"YAML parsing error: {str(e)}", guard_name="yaml_parse") from e
     except Exception as e:
         if isinstance(e, RetryException):
             raise
-        raise RetryException(f"Scene parsing failed: {str(e)}", guard_name="yaml_parse")
+        raise RetryException(f"Scene parsing failed: {str(e)}", guard_name="yaml_parse") from e
 
 
 def make_scenes(beat_json: dict) -> list[dict]:

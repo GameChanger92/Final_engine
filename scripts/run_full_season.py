@@ -103,14 +103,14 @@ def check_single_episode_guards(
     draft_content = f"""
     Episode {episode_num} begins with our protagonist facing unprecedented challenges.
     주인공이 달렸다. "어디로 가야 하지?" 그는 생각했다. The protagonist makes their first appearance.
-    
+
     The morning sun illuminated the bustling marketplace. 상인이 물건을 꺼냈다.
     "좋은 아침입니다!" 그가 외쳤다. Children laughed gleefully while playing nearby fountains.
     아이들이 뛰어갔다. "재미있다!" 그들이 말했다. 행복하다고 느꼈다.
-    
+
     Suddenly, mysterious shadows emerged from ancient alleyways. 그림자가 움직였다.
     Citizens gathered nervously. "무슨 일이지?" 그들이 걱정했다. 두렵다고 생각했다.
-    
+
     Our brave heroes must navigate complex political intrigue. 영웅들이 싸웠다.
     "우리가 해야 할 일이 무엇인가?" 대장이 물었다. 각자 다짐했다.
     Each character demonstrates unique abilities. 치료사가 치유했다.
@@ -247,7 +247,7 @@ def parse_episode_range(episodes_str: str) -> tuple[int, int]:
             return ep, ep
     except ValueError as e:
         if "invalid literal" in str(e):
-            raise ValueError(f"Invalid episode format: {episodes_str}")
+            raise ValueError(f"Invalid episode format: {episodes_str}") from e
         raise  # Re-raise validation errors
 
 

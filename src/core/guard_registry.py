@@ -22,9 +22,7 @@ class BaseGuard(ABC):
     Provides common interface that all guards must implement.
     """
 
-    def __init__(self, *args, **kwargs):
-        """Initialize the guard with any required parameters."""
-        pass
+    # BaseGuard does not require custom initialization - concrete implementations can add their own __init__ if needed
 
     @abstractmethod
     def check(self, *args, **kwargs) -> dict[str, Any]:

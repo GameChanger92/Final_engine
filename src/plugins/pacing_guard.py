@@ -244,7 +244,7 @@ class PacingGuard(BaseGuard):
             analyzed_scenes = 0
 
             # Analyze a subset of scenes to simulate historical data
-            for i, scene_text in enumerate(scene_texts[: min(len(scene_texts), window_size)]):
+            for _i, scene_text in enumerate(scene_texts[: min(len(scene_texts), window_size)]):
                 if scene_text.strip():
                     ratios = self._analyze_text_content(scene_text)
                     current_ratios["action"] += ratios["action"]

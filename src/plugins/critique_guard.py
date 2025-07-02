@@ -44,7 +44,9 @@ class CritiqueGuard(BaseGuard):
         try:
             import google.generativeai  # noqa: F401
         except ImportError:
-            raise RetryException("google-generativeai not installed", guard_name="critique_guard")
+            raise RetryException(
+                "google-generativeai not installed", guard_name="critique_guard"
+            ) from None
 
         if not os.getenv("GOOGLE_API_KEY"):
             raise RetryException("API key not configured", guard_name="critique_guard")

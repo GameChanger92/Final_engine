@@ -117,7 +117,7 @@ The draft concludes with a satisfying resolution that ties together the themes."
             logger.error("google-generativeai not installed")
             raise RetryException(
                 "Google Generative AI library not available", guard_name="call_llm"
-            )
+            ) from None
 
         # Configure the API
         api_key = os.getenv("GOOGLE_API_KEY")
@@ -155,7 +155,7 @@ The draft concludes with a satisfying resolution that ties together the themes."
         if isinstance(e, RetryException):
             raise
         logger.error(f"LLM call failed: {e}")
-        raise RetryException(f"LLM generation failed: {str(e)}", guard_name="llm_call")
+        raise RetryException(f"LLM generation failed: {str(e)}", guard_name="llm_call") from e
 
 
 def post_edit(text: str) -> str:

@@ -69,7 +69,7 @@ Previous beats: {prev_beats}
 
 Output format:
 beat_1: "첫 번째 비트"
-beat_2: "두 번째 비트"  
+beat_2: "두 번째 비트"
 beat_3: "세 번째 비트"
 beat_tp: "전환점 비트"
 """
@@ -117,7 +117,7 @@ beat_tp: "Fast mode stub turning point"'''
             logger.error("google-generativeai not installed")
             raise RetryException(
                 "Google Generative AI library not available", guard_name="beat_planner"
-            )
+            ) from None
 
         # Configure the API
         api_key = os.getenv("GOOGLE_API_KEY")
@@ -155,7 +155,7 @@ beat_tp: "Fast mode stub turning point"'''
         if isinstance(e, RetryException):
             raise
         logger.error(f"LLM call failed: {e}")
-        raise RetryException(f"LLM generation failed: {str(e)}", guard_name="llm_call")
+        raise RetryException(f"LLM generation failed: {str(e)}", guard_name="llm_call") from e
 
 
 def _mock_beats(episode_num: int, flat: bool = False) -> dict:
@@ -256,7 +256,7 @@ def plan_beats(
             prompt = build_prompt(arc_goal, prev_beats, seq_num)
 
             # Call LLM with retry mechanism and critique validation
-            def llm_wrapper():
+            def llm_wrapper(prompt=prompt):
                 raw_output = call_llm(prompt)
                 # Parse and validate the output
                 beats = parse_beat_output(raw_output)

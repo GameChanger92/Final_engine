@@ -62,4 +62,4 @@ def embed_scene(text: str, model: str = "text-embedding-3-small") -> list[float]
         return response.data[0].embedding
 
     except Exception as e:
-        raise RuntimeError(f"Failed to generate embedding: {e}")
+        raise RuntimeError(f"Failed to generate embedding: {e}") from e

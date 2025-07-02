@@ -40,7 +40,9 @@ def generate_season_report(kpi_data: dict[str, Any], output_path: Path) -> None:
     try:
         template = env.get_template(template_name)
     except Exception as e:
-        raise FileNotFoundError(f"Template '{template_name}' not found in {templates_dir}: {e}")
+        raise FileNotFoundError(
+            f"Template '{template_name}' not found in {templates_dir}: {e}"
+        ) from e
 
     # Prepare template context
     context = {
@@ -52,14 +54,14 @@ def generate_season_report(kpi_data: dict[str, Any], output_path: Path) -> None:
     try:
         html_content = template.render(context)
     except Exception as e:
-        raise RuntimeError(f"Failed to render template: {e}")
+        raise RuntimeError(f"Failed to render template: {e}") from e
 
     # Write to file
     try:
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(html_content)
     except Exception as e:
-        raise RuntimeError(f"Failed to write report to {output_path}: {e}")
+        raise RuntimeError(f"Failed to write report to {output_path}: {e}") from e
 
 
 def validate_kpi_data(kpi_data: dict[str, Any]) -> bool:
@@ -112,7 +114,7 @@ def generate_simple_html_report(kpi_data: dict[str, Any], output_path: Path) -> 
 </head>
 <body>
     <h1>🏆 Final Engine - Season KPI Report</h1>
-    
+
     <div class="metric">
         <h3>📊 Key Performance Indicators</h3>
         <table>
@@ -126,7 +128,7 @@ def generate_simple_html_report(kpi_data: dict[str, Any], output_path: Path) -> 
             <tr><td>Failed Episodes</td><td>{failed_episodes}</td></tr>
         </table>
     </div>
-    
+
     <p><em>Generated on {generation_time}</em></p>
 </body>
 </html>"""

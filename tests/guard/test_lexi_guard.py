@@ -20,10 +20,10 @@ from src.plugins.lexi_guard import (
 def test_lexi_guard_passes_diverse_text():
     """Test that diverse text with good TTR and low 3-gram duplication passes."""
     text = """
-    The brave knight ventured through the mysterious forest, encountering 
-    various magical creatures along his journey. Each step brought new 
-    challenges and unexpected discoveries. Ancient trees whispered secrets 
-    of forgotten civilizations, while colorful birds sang melodies that 
+    The brave knight ventured through the mysterious forest, encountering
+    various magical creatures along his journey. Each step brought new
+    challenges and unexpected discoveries. Ancient trees whispered secrets
+    of forgotten civilizations, while colorful birds sang melodies that
     seemed to guide him forward through the winding path.
     """
 

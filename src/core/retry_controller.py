@@ -82,7 +82,7 @@ def run_with_retry(func, *args, max_retry=2, **kwargs) -> Any:
                     message=combined_message,
                     flags=getattr(e, "flags", {}),
                     guard_name=guard_name,
-                )
+                ) from e
 
             # Wait before next retry with exponential backoff
             # Use shorter delays in fast mode

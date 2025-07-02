@@ -7,7 +7,6 @@ Monitors foreshadows that are past their due episode without resolution (payoff=
 Raises RetryException when overdue foreshadows are detected.
 """
 
-
 from src.core.guard_registry import BaseGuard, register_guard
 from src.exceptions import RetryException
 from src.plugins.foreshadow_scheduler import (
