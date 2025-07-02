@@ -3,17 +3,18 @@ Unit tests for beat_planner.py - Beat Planner v2 functionality
 """
 
 import os
-import pytest
 from unittest.mock import patch
+
+import pytest
 
 from src.beat_planner import (
     build_prompt,
     call_llm,
-    plan_beats,
-    parse_beat_output,
     generate_fallback_beats,
     get_act_number,
     make_beats,
+    parse_beat_output,
+    plan_beats,
 )
 from src.exceptions import RetryException
 
@@ -146,8 +147,7 @@ class TestBeatPlannerV2:
             call_llm("test prompt")
 
         assert (
-            "library not available" in str(excinfo.value)
-            or "import" in str(excinfo.value).lower()
+            "library not available" in str(excinfo.value) or "import" in str(excinfo.value).lower()
         )
 
     def test_call_llm_missing_api_key(self, monkeypatch):

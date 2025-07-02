@@ -6,6 +6,7 @@ ensuring ScenePoint structure is compatible and end-to-end functionality works.
 """
 
 from unittest.mock import patch
+
 from src.scene_maker import make_scenes
 
 
@@ -79,18 +80,10 @@ class TestPipelineSceneIntegration:
             # Verify all scenes have the v2 schema
             for scene in scenes:
                 # Required v2 fields
-                assert (
-                    "pov" in scene
-                ), f"Scene {scene.get('idx', '?')} missing 'pov' field"
-                assert (
-                    "purpose" in scene
-                ), f"Scene {scene.get('idx', '?')} missing 'purpose' field"
-                assert (
-                    "tags" in scene
-                ), f"Scene {scene.get('idx', '?')} missing 'tags' field"
-                assert (
-                    "desc" in scene
-                ), f"Scene {scene.get('idx', '?')} missing 'desc' field"
+                assert "pov" in scene, f"Scene {scene.get('idx', '?')} missing 'pov' field"
+                assert "purpose" in scene, f"Scene {scene.get('idx', '?')} missing 'purpose' field"
+                assert "tags" in scene, f"Scene {scene.get('idx', '?')} missing 'tags' field"
+                assert "desc" in scene, f"Scene {scene.get('idx', '?')} missing 'desc' field"
 
                 # Legacy compatibility fields needed by pipeline
                 assert "idx" in scene, "Scene missing 'idx' field"
@@ -109,16 +102,12 @@ class TestPipelineSceneIntegration:
         all_scenes = []
         for beat in test_beats:
             scenes = make_scenes(beat)
-            all_scenes.extend(
-                scenes[:4]
-            )  # Pipeline takes first 4 scenes from each beat
+            all_scenes.extend(scenes[:4])  # Pipeline takes first 4 scenes from each beat
 
         # This should work without errors
         scene_descriptions = [scene["desc"] for scene in all_scenes]
 
-        assert (
-            len(scene_descriptions) == 12
-        ), "Pipeline should extract 12 scene descriptions"
+        assert len(scene_descriptions) == 12, "Pipeline should extract 12 scene descriptions"
         for desc in scene_descriptions:
             assert isinstance(desc, str), "Scene description must be string"
             assert len(desc.strip()) > 0, "Scene description must not be empty"
@@ -137,15 +126,11 @@ class TestPipelineSceneIntegration:
             scenes = make_scenes(beat)
 
             # Validate each beat produces valid v2 scenes
-            assert (
-                8 <= len(scenes) <= 12
-            ), f"Beat {beat['idx']} produced {len(scenes)} scenes"
+            assert 8 <= len(scenes) <= 12, f"Beat {beat['idx']} produced {len(scenes)} scenes"
 
             # Check diversity in POV
             povs = [scene["pov"] for scene in scenes]
-            assert (
-                "main" in povs or "side" in povs
-            ), f"Beat {beat['idx']} should have varied POVs"
+            assert "main" in povs or "side" in povs, f"Beat {beat['idx']} should have varied POVs"
 
             # Check that all scenes reference the beat
             for scene in scenes:
@@ -175,9 +160,7 @@ class TestPipelineSceneIntegration:
             side_count = sum(1 for s in scenes if s.get("pov") == "side")
 
             assert main_count + side_count == len(scenes), "All scenes should have POV"
-            assert (
-                main_count > 0 or side_count > 0
-            ), "Should have at least some scenes with POV"
+            assert main_count > 0 or side_count > 0, "Should have at least some scenes with POV"
 
     def test_backwards_compatibility_with_existing_pipeline(self):
         """Test that Scene Maker v2 maintains backwards compatibility."""

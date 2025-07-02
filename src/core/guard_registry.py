@@ -8,8 +8,9 @@ discovery and execution without manual sequence management.
 """
 
 import logging
-from typing import List, Dict, Any, Callable, Type
 from abc import ABC, abstractmethod
+from collections.abc import Callable
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -21,12 +22,10 @@ class BaseGuard(ABC):
     Provides common interface that all guards must implement.
     """
 
-    def __init__(self, *args, **kwargs):
-        """Initialize the guard with any required parameters."""
-        pass
+    # BaseGuard does not require custom initialization - concrete implementations can add their own __init__ if needed
 
     @abstractmethod
-    def check(self, *args, **kwargs) -> Dict[str, Any]:
+    def check(self, *args, **kwargs) -> dict[str, Any]:
         """
         Check guard conditions and return results.
 
@@ -51,9 +50,9 @@ class GuardRegistry:
     """
 
     def __init__(self):
-        self._guards: Dict[int, Type[BaseGuard]] = {}
+        self._guards: dict[int, type[BaseGuard]] = {}
 
-    def register(self, order: int, guard_class: Type[BaseGuard]) -> None:
+    def register(self, order: int, guard_class: type[BaseGuard]) -> None:
         """
         Register a guard class with its execution order.
 
@@ -79,7 +78,7 @@ class GuardRegistry:
         self._guards[order] = guard_class
         logger.debug(f"Registered guard {guard_class.__name__} with order {order}")
 
-    def get_sorted_guards(self) -> List[Type[BaseGuard]]:
+    def get_sorted_guards(self) -> list[type[BaseGuard]]:
         """
         Get all registered guards sorted by execution order.
 
@@ -106,7 +105,7 @@ class GuardRegistry:
         """Clear all registered guards (primarily for testing)."""
         self._guards.clear()
 
-    def get_registered_orders(self) -> List[int]:
+    def get_registered_orders(self) -> list[int]:
         """
         Get all registered execution orders.
 
@@ -122,7 +121,7 @@ class GuardRegistry:
 _registry = GuardRegistry()
 
 
-def register_guard(order: int) -> Callable[[Type[BaseGuard]], Type[BaseGuard]]:
+def register_guard(order: int) -> Callable[[type[BaseGuard]], type[BaseGuard]]:
     """
     Decorator to register a guard class with the global registry.
 
@@ -144,14 +143,14 @@ def register_guard(order: int) -> Callable[[Type[BaseGuard]], Type[BaseGuard]]:
     ...         return {"passed": True}
     """
 
-    def decorator(guard_class: Type[BaseGuard]) -> Type[BaseGuard]:
+    def decorator(guard_class: type[BaseGuard]) -> type[BaseGuard]:
         _registry.register(order, guard_class)
         return guard_class
 
     return decorator
 
 
-def get_sorted_guards() -> List[Type[BaseGuard]]:
+def get_sorted_guards() -> list[type[BaseGuard]]:
     """
     Get all registered guards sorted by execution order.
 
@@ -208,7 +207,7 @@ def clear_registry() -> None:
             sys.modules.pop(module_name)
 
 
-def get_registered_orders() -> List[int]:
+def get_registered_orders() -> list[int]:
     """
     Get all registered execution orders.
 

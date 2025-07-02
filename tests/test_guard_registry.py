@@ -6,14 +6,15 @@ Tests registration, ordering, and auto-discovery functionality.
 """
 
 import pytest
+
 from src.core.guard_registry import (
     BaseGuard,
     GuardRegistry,
-    register_guard,
-    get_sorted_guards,
-    get_guard_count,
     clear_registry,
+    get_guard_count,
     get_registered_orders,
+    get_sorted_guards,
+    register_guard,
 )
 
 
@@ -199,16 +200,16 @@ class TestGuardRegistry:
 
         # Import actual guards to trigger registration
         # Note: These imports are necessary for the test, not unused
-        import src.plugins.lexi_guard  # noqa: F401
-        import src.plugins.emotion_guard  # noqa: F401
-        import src.plugins.schedule_guard  # noqa: F401
-        import src.plugins.immutable_guard  # noqa: F401
-        import src.plugins.date_guard  # noqa: F401
         import src.plugins.anchor_guard  # noqa: F401
-        import src.plugins.rule_guard  # noqa: F401
-        import src.plugins.relation_guard  # noqa: F401
-        import src.plugins.pacing_guard  # noqa: F401
         import src.plugins.critique_guard  # noqa: F401
+        import src.plugins.date_guard  # noqa: F401
+        import src.plugins.emotion_guard  # noqa: F401
+        import src.plugins.immutable_guard  # noqa: F401
+        import src.plugins.lexi_guard  # noqa: F401
+        import src.plugins.pacing_guard  # noqa: F401
+        import src.plugins.relation_guard  # noqa: F401
+        import src.plugins.rule_guard  # noqa: F401
+        import src.plugins.schedule_guard  # noqa: F401
 
         # Verify all 10 guards are registered
         assert get_guard_count() == 10

@@ -14,7 +14,6 @@ Exit codes:
 
 import sys
 from pathlib import Path
-from typing import Dict, List, Set
 
 # Add src directory to Python path
 script_dir = Path(__file__).parent
@@ -22,8 +21,8 @@ project_root = script_dir.parent
 sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(project_root / "src"))
 
-from src.plugins.anchor_guard import AnchorGuard  # noqa: E402
 from src.main import run_pipeline  # noqa: E402
+from src.plugins.anchor_guard import AnchorGuard  # noqa: E402
 
 
 def simulate_episode_content(episode_num: int) -> str:
@@ -102,16 +101,14 @@ def run_anchor_flow_test(anchors_path: str = None, project: str = "default") -> 
 
     print(f"📋 Loaded {len(anchor_guard.anchors)} anchor events:")
     for anchor in anchor_guard.anchors:
-        print(
-            f"   • {anchor['id']}: '{anchor['goal']}' (Episode {anchor['anchor_ep']})"
-        )
+        print(f"   • {anchor['id']}: '{anchor['goal']}' (Episode {anchor['anchor_ep']})")
 
     print("\n🎬 Simulating 20 episodes...")
     print("-" * 40)
 
     # Track anchor validation results
-    found_anchors: Set[str] = set()
-    validation_results: List[Dict] = []
+    found_anchors: set[str] = set()
+    validation_results: list[dict] = []
 
     # Test each episode
     for episode_num in range(1, 21):
@@ -127,9 +124,7 @@ def run_anchor_flow_test(anchors_path: str = None, project: str = "default") -> 
             # Track results
             episode_found = len(result.get("anchors_checked", []))
             if episode_found > 0:
-                anchor_ids = [
-                    a["id"] for a in result["anchors_checked"] if a.get("found", False)
-                ]
+                anchor_ids = [a["id"] for a in result["anchors_checked"] if a.get("found", False)]
                 found_anchors.update(anchor_ids)
                 print(f"✅ Found {episode_found} anchor(s): {', '.join(anchor_ids)}")
             else:
@@ -177,9 +172,7 @@ def run_anchor_flow_test(anchors_path: str = None, project: str = "default") -> 
     if success:
         print("   All anchor events were found in their expected episodes!")
     else:
-        print(
-            f"   {len(missing_anchor_ids)} anchor event(s) missing from expected episodes."
-        )
+        print(f"   {len(missing_anchor_ids)} anchor event(s) missing from expected episodes.")
 
     return success
 

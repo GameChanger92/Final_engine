@@ -3,6 +3,7 @@ Tests for LLM temperature environment variable integration
 """
 
 import os
+
 import pytest
 
 
@@ -50,9 +51,7 @@ class TestTemperatureEnvironment:
         # Set custom temperature
         monkeypatch.setenv("TEMP_DRAFT", "0.9")
         monkeypatch.setenv("GOOGLE_API_KEY", "test_key")
-        monkeypatch.setenv(
-            "UNIT_TEST_MODE", "1"
-        )  # This triggers import error gracefully
+        monkeypatch.setenv("UNIT_TEST_MODE", "1")  # This triggers import error gracefully
 
         # Call should fail with RetryException but temperature parsing should work
         with pytest.raises(RetryException):

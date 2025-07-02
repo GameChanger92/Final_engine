@@ -11,10 +11,11 @@ anchor events are missing from expected episodes.
 import json
 import re
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any
+
+from src.core.guard_registry import BaseGuard, register_guard
 from src.exceptions import RetryException
 from src.utils.path_helper import data_path
-from src.core.guard_registry import BaseGuard, register_guard
 
 
 @register_guard(order=6)
@@ -52,7 +53,7 @@ class AnchorGuard(BaseGuard):
             self.anchors_path = Path(anchors_path)
         self.anchors = self._load_anchors()
 
-    def _load_anchors(self) -> List[Dict[str, Any]]:
+    def _load_anchors(self) -> list[dict[str, Any]]:
         """
         Load anchors from JSON file.
 
@@ -69,12 +70,10 @@ class AnchorGuard(BaseGuard):
             If anchors file is invalid JSON
         """
         try:
-            with open(self.anchors_path, "r", encoding="utf-8") as f:
+            with open(self.anchors_path, encoding="utf-8") as f:
                 anchors = json.load(f)
                 if not isinstance(anchors, list):
-                    raise ValueError(
-                        "anchors.json must contain a list of anchor objects"
-                    )
+                    raise ValueError("anchors.json must contain a list of anchor objects")
                 return anchors
         except FileNotFoundError:
             # Return empty list if no anchors file exists
@@ -98,7 +97,7 @@ class AnchorGuard(BaseGuard):
         """
         return abs(episode_num - anchor_ep) <= 1
 
-    def _extract_keywords_from_goal(self, goal: str) -> List[str]:
+    def _extract_keywords_from_goal(self, goal: str) -> list[str]:
         """
         Extract meaningful keywords from anchor goal for searching.
 
@@ -139,9 +138,7 @@ class AnchorGuard(BaseGuard):
         cleaned_words = []
         for word in words:
             # Remove common Korean particles/suffixes
-            cleaned_word = re.sub(
-                r"(이|가|를|을|의|에|와|과|로|으로|는|은|다)$", "", word
-            )
+            cleaned_word = re.sub(r"(이|가|를|을|의|에|와|과|로|으로|는|은|다)$", "", word)
             if len(cleaned_word) >= 2 and cleaned_word not in stop_words:
                 cleaned_words.append(cleaned_word)
 
@@ -151,7 +148,7 @@ class AnchorGuard(BaseGuard):
 
         return cleaned_words
 
-    def _search_keywords_in_content(self, content: str, keywords: List[str]) -> bool:
+    def _search_keywords_in_content(self, content: str, keywords: list[str]) -> bool:
         """
         Search for keywords in episode content.
 
@@ -179,7 +176,7 @@ class AnchorGuard(BaseGuard):
 
         return False
 
-    def check(self, episode_content: str, episode_num: int) -> Dict[str, Any]:
+    def check(self, episode_content: str, episode_num: int) -> dict[str, Any]:
         """
         Check anchor compliance for the given episode.
 
@@ -258,16 +255,14 @@ class AnchorGuard(BaseGuard):
                 f"{', '.join(missing_details)}"
             )
 
-            raise RetryException(
-                message=error_message, flags=flags, guard_name="anchor_guard"
-            )
+            raise RetryException(message=error_message, flags=flags, guard_name="anchor_guard")
 
         return results
 
 
 def check_anchor_guard(
     episode_content: str, episode_num: int, project: str = "default"
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Check anchor guard with episode content and number.
 
@@ -294,9 +289,7 @@ def check_anchor_guard(
     return guard.check(episode_content, episode_num)
 
 
-def anchor_guard(
-    episode_content: str, episode_num: int, project: str = "default"
-) -> None:
+def anchor_guard(episode_content: str, episode_num: int, project: str = "default") -> None:
     """
     Main anchor guard function - validates anchor events in episode content.
 

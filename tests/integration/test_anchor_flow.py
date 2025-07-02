@@ -16,9 +16,7 @@ class TestAnchorFlow:
 
     def setup_method(self):
         """Set up test environment."""
-        self.script_path = (
-            Path(__file__).parent.parent.parent / "scripts" / "run_anchor_flow.py"
-        )
+        self.script_path = Path(__file__).parent.parent.parent / "scripts" / "run_anchor_flow.py"
         self.temp_dir = tempfile.mkdtemp()
 
     def teardown_method(self):
@@ -96,9 +94,7 @@ class TestAnchorFlow:
     def test_anchor_flow_script_exists_and_executable(self):
         """Test that the script file exists and is executable."""
         assert self.script_path.exists(), f"Script not found at {self.script_path}"
-        assert os.access(
-            self.script_path, os.X_OK
-        ), f"Script not executable: {self.script_path}"
+        assert os.access(self.script_path, os.X_OK), f"Script not executable: {self.script_path}"
 
     def test_anchor_flow_help_option(self):
         """Test that the script provides help information."""

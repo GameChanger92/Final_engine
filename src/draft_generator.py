@@ -5,11 +5,11 @@ Gemini 2.5 Pro integrated Draft Generator.
 Generates episode drafts using Google's Gemini 2.5 Pro model with guard validation.
 """
 
+import logging
 import os
 import re
-import logging
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any
 
 import typer
 from dotenv import load_dotenv
@@ -25,7 +25,7 @@ load_dotenv(".env", override=True)
 logger = logging.getLogger(__name__)
 
 
-def build_prompt(context: str, style: Optional[Dict[str, Any]] = None) -> str:
+def build_prompt(context: str, style: dict[str, Any] | None = None) -> str:
     """
     Build a prompt for draft generation using Jinja2 template.
 
@@ -117,7 +117,7 @@ The draft concludes with a satisfying resolution that ties together the themes."
             logger.error("google-generativeai not installed")
             raise RetryException(
                 "Google Generative AI library not available", guard_name="call_llm"
-            )
+            ) from None
 
         # Configure the API
         api_key = os.getenv("GOOGLE_API_KEY")
@@ -141,9 +141,7 @@ The draft concludes with a satisfying resolution that ties together the themes."
         }
 
         # Generate content
-        logger.info(
-            f"✍️  Draft Generator… (temperature={temperature}, max_output_tokens=60000)"
-        )
+        logger.info(f"✍️  Draft Generator… (temperature={temperature}, max_output_tokens=60000)")
         logger.info(f"Calling {model_name} for draft generation...")
         response = model.generate_content(prompt, generation_config=generation_config)
 
@@ -157,7 +155,7 @@ The draft concludes with a satisfying resolution that ties together the themes."
         if isinstance(e, RetryException):
             raise
         logger.error(f"LLM call failed: {e}")
-        raise RetryException(f"LLM generation failed: {str(e)}", guard_name="llm_call")
+        raise RetryException(f"LLM generation failed: {str(e)}", guard_name="llm_call") from e
 
 
 def post_edit(text: str) -> str:
@@ -232,9 +230,7 @@ def generate_draft(context: str, episode_num: int) -> str:
         if len(draft) < 500:
             logger.warning(f"Draft too short: {len(draft)} characters")
             # Pad with context information if needed
-            draft += (
-                f"\n\n[Episode {episode_num} context: {len(context)} characters used]"
-            )
+            draft += f"\n\n[Episode {episode_num} context: {len(context)} characters used]"
 
         # Validate draft with guard chain including critique guard
         guards_passed = validate_with_guard_chain(draft, episode_num)
@@ -388,9 +384,7 @@ def info():
     Display information about the draft generator.
     """
     typer.echo("Draft Generator v2.0 - Gemini 2.5 Pro Integration")
-    typer.echo(
-        "Generates episode drafts using Google's Gemini 2.5 Pro with guard validation"
-    )
+    typer.echo("Generates episode drafts using Google's Gemini 2.5 Pro with guard validation")
     typer.echo("Features: LLM integration, retry mechanism, post-processing")
 
 

@@ -299,6 +299,23 @@ python scripts/run_pipeline.py --project-id default --episodes 10-15     # Episo
 
 ## Local Style Checking
 
+### Pre-commit Hooks (Recommended)
+
+Install pre-commit hooks to automatically format code on each commit:
+
+```bash
+# Install pre-commit (one-time setup)
+pip install pre-commit
+
+# Install the git hook scripts
+pre-commit install
+
+# Optionally, run against all files
+pre-commit run --all-files
+```
+
+### Manual Style Checking
+
 Before submitting a PR, check your code style locally:
 
 ```bash

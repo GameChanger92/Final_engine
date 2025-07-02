@@ -79,10 +79,7 @@ class TestPipelineBeatIntegration:
                     assert len(beat_desc.strip()) > 0
 
                     # Check Korean content (as per spec)
-                    assert any(
-                        ord(char) >= 0xAC00 and ord(char) <= 0xD7AF
-                        for char in beat_desc
-                    )
+                    assert any(ord(char) >= 0xAC00 and ord(char) <= 0xD7AF for char in beat_desc)
 
     def test_pipeline_beat_act_sequence_distribution(self):
         """Test that pipeline correctly distributes beats across 3-Act structure."""
@@ -136,7 +133,7 @@ class TestPipelineBeatIntegration:
                 plan_beats(1, [])
 
                 # Check that expected log messages were called
-                info_calls = [call for call in mock_logger.info.call_args_list]
+                info_calls = list(mock_logger.info.call_args_list)
 
                 # Should log beat generation for each sequence
                 act_seq_logs = [

@@ -5,18 +5,18 @@ Tests for the Emotion Guard - comprehensive test suite
 Tests emotion classification and delta calculation functionality.
 """
 
-import pytest
 import numpy as np
-from src.plugins.emotion_guard import (
-    classify_emotions,
-    emotions_to_vector,
-    cosine_delta,
-    calculate_emotion_delta,
-    emotion_guard,
-    check_emotion_guard,
-)
-from src.exceptions import RetryException
+import pytest
 
+from src.exceptions import RetryException
+from src.plugins.emotion_guard import (
+    calculate_emotion_delta,
+    check_emotion_guard,
+    classify_emotions,
+    cosine_delta,
+    emotion_guard,
+    emotions_to_vector,
+)
 
 # Test cases that should PASS (normal emotion transitions)
 
@@ -72,15 +72,15 @@ def test_emotion_guard_passes_consistent_tone():
 def test_emotion_guard_fails_joy_to_anger():
     """Test that sudden change from joy to anger fails."""
     prev_text = """
-    I was absolutely thrilled and ecstatic about winning the award! 
-    The joy and happiness filled my heart completely. What a wonderful, 
-    amazing, fantastic day this has been! I'm so delighted and pleased 
+    I was absolutely thrilled and ecstatic about winning the award!
+    The joy and happiness filled my heart completely. What a wonderful,
+    amazing, fantastic day this has been! I'm so delighted and pleased
     with this incredible achievement.
     """
     curr_text = """
-    I am absolutely furious and enraged about this situation! 
-    The anger and hatred consume me completely. What a terrible, 
-    awful, horrible mess this has become! I'm so mad and livid 
+    I am absolutely furious and enraged about this situation!
+    The anger and hatred consume me completely. What a terrible,
+    awful, horrible mess this has become! I'm so mad and livid
     about this outrageous betrayal.
     """
 
@@ -96,14 +96,14 @@ def test_emotion_guard_fails_joy_to_anger():
 def test_emotion_guard_fails_neutral_to_terror():
     """Test that sudden change from neutral to extreme fear fails."""
     prev_text = """
-    The meeting agenda includes reviewing quarterly reports 
-    and discussing standard operational procedures. Regular 
+    The meeting agenda includes reviewing quarterly reports
+    and discussing standard operational procedures. Regular
     updates will be provided as usual.
     """
     curr_text = """
-    I am absolutely terrified and horrified by the nightmare! 
-    The fear and panic overwhelm me completely. This dreadful, 
-    frightening situation fills me with terror and horror. 
+    I am absolutely terrified and horrified by the nightmare!
+    The fear and panic overwhelm me completely. This dreadful,
+    frightening situation fills me with terror and horror.
     I'm so scared and afraid of the dangerous threat.
     """
 
@@ -119,13 +119,13 @@ def test_emotion_guard_fails_neutral_to_terror():
 def test_emotion_guard_fails_sadness_to_extreme_joy():
     """Test that sudden change from sadness to extreme joy fails."""
     prev_text = """
-    I feel so heartbroken and miserable about the loss. 
-    The sadness and grief overwhelm me. Tears of sorrow 
+    I feel so heartbroken and miserable about the loss.
+    The sadness and grief overwhelm me. Tears of sorrow
     flow as I mourn this devastating situation.
     """
     curr_text = """
-    I am absolutely ecstatic and euphoric about this fantastic news! 
-    The joy and happiness explode within me! This is the most 
+    I am absolutely ecstatic and euphoric about this fantastic news!
+    The joy and happiness explode within me! This is the most
     wonderful, amazing, brilliant thing that could happen!
     """
 
@@ -141,13 +141,13 @@ def test_emotion_guard_fails_sadness_to_extreme_joy():
 def test_emotion_guard_fails_disgust_to_surprise():
     """Test that sudden change from disgust to surprise fails."""
     prev_text = """
-    This is absolutely disgusting and revolting! I'm nauseated 
-    and repulsed by this vile, foul, gross situation. The 
+    This is absolutely disgusting and revolting! I'm nauseated
+    and repulsed by this vile, foul, gross situation. The
     horrible, awful smell makes me sick to my stomach.
     """
     curr_text = """
-    I am completely astonished and amazed by this incredible 
-    discovery! How surprising and unexpected this remarkable 
+    I am completely astonished and amazed by this incredible
+    discovery! How surprising and unexpected this remarkable
     finding is! What a mysterious and wonderful revelation!
     """
 
@@ -163,13 +163,13 @@ def test_emotion_guard_fails_disgust_to_surprise():
 def test_emotion_guard_fails_fear_to_anger():
     """Test that sudden change from fear to anger fails."""
     prev_text = """
-    I'm absolutely terrified and frightened by the approaching storm. 
-    The fear and anxiety make me tremble with worry. This dangerous 
+    I'm absolutely terrified and frightened by the approaching storm.
+    The fear and anxiety make me tremble with worry. This dangerous
     situation fills me with dread and panic.
     """
     curr_text = """
-    I am furious and enraged about this incompetent response! 
-    The anger and rage consume me completely. This is absolutely 
+    I am furious and enraged about this incompetent response!
+    The anger and rage consume me completely. This is absolutely
     outrageous and infuriating! I hate this situation!
     """
 

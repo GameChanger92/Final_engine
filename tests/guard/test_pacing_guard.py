@@ -5,16 +5,18 @@ Tests for the Pacing Guard - comprehensive test suite (10+ tests)
 Tests action/dialog/monolog ratio analysis and pacing violation detection.
 """
 
-import pytest
 import json
-import tempfile
 import os
+import tempfile
+
+import pytest
+
+from src.exceptions import RetryException
 from src.plugins.pacing_guard import (
     PacingGuard,
     check_pacing_guard,
     pacing_guard,
 )
-from src.exceptions import RetryException
 
 
 class TestPacingGuard:

@@ -1,4 +1,4 @@
-from src.scene_maker import make_scenes, generate_scene_points
+from src.scene_maker import generate_scene_points, make_scenes
 
 dummy_beat = {"idx": 1, "summary": "Test Beat", "anchor": False}
 

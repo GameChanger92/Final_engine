@@ -5,11 +5,12 @@ Global test configuration for Final Engine test suite.
 Provides shared fixtures and test project configuration.
 """
 
-import pytest
-from pathlib import Path
 import json
 import sys
 import types
+from pathlib import Path
+
+import pytest
 
 # Mock OpenAI for testing
 dummy = types.ModuleType("openai")
@@ -73,9 +74,7 @@ def setup_test_project():
     # rules.json
     rules_file = data_dir / "rules.json"
     if not rules_file.exists():
-        rules_data = [
-            {"pattern": "forbidden_word", "message": "Forbidden word detected"}
-        ]
+        rules_data = [{"pattern": "forbidden_word", "message": "Forbidden word detected"}]
         with open(rules_file, "w", encoding="utf-8") as f:
             json.dump(rules_data, f, ensure_ascii=False, indent=2)
 

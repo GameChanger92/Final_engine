@@ -5,16 +5,18 @@ Tests for the Date Guard - comprehensive test suite
 Tests date progression monitoring and backstep detection functionality.
 """
 
-import pytest
 import json
-import tempfile
 import os
+import tempfile
+
+import pytest
+
+from src.exceptions import RetryException
 from src.plugins.date_guard import (
     DateGuard,
     check_date_guard,
     date_guard,
 )
-from src.exceptions import RetryException
 
 
 class TestDateGuard:
@@ -49,7 +51,7 @@ class TestDateGuard:
         assert os.path.exists(self.date_log_path)
 
         # Verify log content
-        with open(self.date_log_path, "r", encoding="utf-8") as f:
+        with open(self.date_log_path, encoding="utf-8") as f:
             log = json.load(f)
 
         assert "1" in log
@@ -350,9 +352,8 @@ class TestDateGuard:
 
         exception = exc_info.value
         assert str(exception).startswith("[date_guard] Date backstep:")
-        assert (
-            "Episode 2 (2024-01-03) goes back 2 days from Episode 1 (2024-01-05)"
-            in str(exception)
+        assert "Episode 2 (2024-01-03) goes back 2 days from Episode 1 (2024-01-05)" in str(
+            exception
         )
 
     def test_date_guard_handles_string_episode_numbers_in_log(self):

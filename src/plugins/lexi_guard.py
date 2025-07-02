@@ -11,9 +11,9 @@ Uses collections.Counter for efficient counting instead of textstat.
 """
 
 import re
-from typing import Dict
-from src.exceptions import RetryException
+
 from src.core.guard_registry import BaseGuard, register_guard
+from src.exceptions import RetryException
 
 
 def calculate_ttr(text: str) -> float:
@@ -90,7 +90,7 @@ def calculate_3gram_duplication_rate(text: str) -> float:
     return duplication_rate
 
 
-def check_lexi_guard(text: str) -> Dict[str, any]:
+def check_lexi_guard(text: str) -> dict[str, any]:
     """
     Run lexical quality checks on the given text.
 
@@ -143,9 +143,7 @@ def check_lexi_guard(text: str) -> Dict[str, any]:
         flag_messages = [flag_data["message"] for flag_data in flags.values()]
         error_message = "Lexical quality issues detected: " + "; ".join(flag_messages)
 
-        raise RetryException(
-            message=error_message, flags=flags, guard_name="lexi_guard"
-        )
+        raise RetryException(message=error_message, flags=flags, guard_name="lexi_guard")
 
     return results
 
@@ -186,7 +184,7 @@ class LexiGuard(BaseGuard):
     TTR (Type-Token Ratio) and 3-gram duplication analysis.
     """
 
-    def check(self, text: str) -> Dict[str, any]:
+    def check(self, text: str) -> dict[str, any]:
         """
         Check text for lexical quality issues.
 

@@ -7,13 +7,14 @@ Monitors rules.json for pattern violations using regex search.
 Raises RetryException on first violation found.
 """
 
-import re
 import json
+import re
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any
+
+from src.core.guard_registry import BaseGuard, register_guard
 from src.exceptions import RetryException
 from src.utils.path_helper import data_path
-from src.core.guard_registry import BaseGuard, register_guard
 
 
 @register_guard(order=7)
@@ -43,7 +44,7 @@ class RuleGuard(BaseGuard):
             self.rule_path = Path(rule_path)
         self.rules = self._load_rules()
 
-    def _load_rules(self) -> List[Dict[str, str]]:
+    def _load_rules(self) -> list[dict[str, str]]:
         """
         Load rules from JSON file.
 
@@ -64,7 +65,7 @@ class RuleGuard(BaseGuard):
             return []
 
         try:
-            with open(self.rule_path, "r", encoding="utf-8") as f:
+            with open(self.rule_path, encoding="utf-8") as f:
                 rules = json.load(f)
 
             # Validate rules structure
@@ -88,7 +89,7 @@ class RuleGuard(BaseGuard):
             # Return empty rules on file errors (graceful handling)
             return []
 
-    def check(self, text: str) -> Dict[str, Any]:
+    def check(self, text: str) -> dict[str, Any]:
         """
         Check text against all rules and raise exception on first violation.
 
@@ -153,9 +154,7 @@ class RuleGuard(BaseGuard):
                     results["flags"] = flags
 
                     # Raise exception on first violation (as per spec)
-                    raise RetryException(
-                        message=message, flags=flags, guard_name="rule_guard"
-                    )
+                    raise RetryException(message=message, flags=flags, guard_name="rule_guard")
 
             except re.error:
                 # Invalid regex pattern - skip this rule
@@ -164,9 +163,7 @@ class RuleGuard(BaseGuard):
         return results
 
 
-def check_rule_guard(
-    text: str, rule_path: str = None, project: str = "default"
-) -> Dict[str, Any]:
+def check_rule_guard(text: str, rule_path: str = None, project: str = "default") -> dict[str, Any]:
     """
     Convenience function to run rule guard check.
 

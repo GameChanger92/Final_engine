@@ -9,10 +9,11 @@ and raises RetryException if relationships flip too quickly (within tolerance_ep
 
 import json
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Any
+
+from src.core.guard_registry import BaseGuard, register_guard
 from src.exceptions import RetryException
 from src.utils.path_helper import data_path
-from src.core.guard_registry import BaseGuard, register_guard
 
 
 @register_guard(order=8)
@@ -24,9 +25,7 @@ class RelationGuard(BaseGuard):
     if relationships flip from opposing states (친구 ↔ 적) within tolerance window.
     """
 
-    def __init__(
-        self, relation_path: str = None, project: str = "default", tolerance_ep: int = 3
-    ):
+    def __init__(self, relation_path: str = None, project: str = "default", tolerance_ep: int = 3):
         """
         Initialize RelationGuard with relation matrix file path.
 
@@ -48,7 +47,7 @@ class RelationGuard(BaseGuard):
         self.tolerance_ep = tolerance_ep
         self.relations = self._load_relations()
 
-    def _load_relations(self) -> List[Dict[str, Any]]:
+    def _load_relations(self) -> list[dict[str, Any]]:
         """
         Load relations from JSON file.
 
@@ -65,7 +64,7 @@ class RelationGuard(BaseGuard):
             If relation matrix file is invalid JSON
         """
         try:
-            with open(self.relation_path, "r", encoding="utf-8") as f:
+            with open(self.relation_path, encoding="utf-8") as f:
                 relations = json.load(f)
                 if not isinstance(relations, list):
                     # Return empty list on invalid structure (graceful handling)
@@ -100,7 +99,7 @@ class RelationGuard(BaseGuard):
         ]
         return (rel1, rel2) in opposing_pairs
 
-    def _find_relation_at_episode(self, char_pair: str, episode: int) -> Optional[str]:
+    def _find_relation_at_episode(self, char_pair: str, episode: int) -> str | None:
         """
         Find relationship between character pair at specific episode.
 
@@ -147,7 +146,7 @@ class RelationGuard(BaseGuard):
 
         return best_relation
 
-    def check(self, episode_num: int) -> Dict[str, Any]:
+    def check(self, episode_num: int) -> dict[str, Any]:
         """
         Check for relationship violations at given episode.
 
@@ -261,7 +260,7 @@ def check_relation_guard(
     relation_path: str = None,
     project: str = "default",
     tolerance_ep: int = 3,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Check relation guard for specific episode.
 

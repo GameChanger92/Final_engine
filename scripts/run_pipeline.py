@@ -7,9 +7,9 @@ Tests episodes 1-20 with guard validation sequence
 """
 
 import argparse
+import json
 import sys
 from pathlib import Path
-import json
 
 # Add src directory to Python path
 script_dir = Path(__file__).parent
@@ -17,10 +17,10 @@ project_root = script_dir.parent
 sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(project_root / "src"))
 
+from src.core.guard_registry import get_sorted_guards  # noqa: E402
+from src.core.retry_controller import run_with_retry  # noqa: E402
 from src.exceptions import RetryException  # noqa: E402
 from src.utils.path_helper import data_path  # noqa: E402
-from src.core.retry_controller import run_with_retry  # noqa: E402
-from src.core.guard_registry import get_sorted_guards  # noqa: E402
 
 # TODO: from src.main import run_pipeline  # Not used in current implementation
 
@@ -45,16 +45,16 @@ def test_guards_auto_registry(episode_num: int, project: str = "default") -> boo
         True if all guards pass, False otherwise
     """
     # Import all guards to trigger registration
-    import src.plugins.lexi_guard  # noqa: F401
-    import src.plugins.emotion_guard  # noqa: F401
-    import src.plugins.schedule_guard  # noqa: F401
-    import src.plugins.immutable_guard  # noqa: F401
-    import src.plugins.date_guard  # noqa: F401
     import src.plugins.anchor_guard  # noqa: F401
-    import src.plugins.rule_guard  # noqa: F401
-    import src.plugins.relation_guard  # noqa: F401
-    import src.plugins.pacing_guard  # noqa: F401
     import src.plugins.critique_guard  # noqa: F401
+    import src.plugins.date_guard  # noqa: F401
+    import src.plugins.emotion_guard  # noqa: F401
+    import src.plugins.immutable_guard  # noqa: F401
+    import src.plugins.lexi_guard  # noqa: F401
+    import src.plugins.pacing_guard  # noqa: F401
+    import src.plugins.relation_guard  # noqa: F401
+    import src.plugins.rule_guard  # noqa: F401
+    import src.plugins.schedule_guard  # noqa: F401
 
     # Get registered guards in order
     guard_classes = get_sorted_guards()
@@ -65,14 +65,14 @@ def test_guards_auto_registry(episode_num: int, project: str = "default") -> boo
     draft_content = f"""
     Episode {episode_num}: A mysterious story unfolds as our protagonist discovers
     hidden secrets in the ancient library. The detective carefully examined the evidence,
-    piece by piece, connecting seemingly unrelated clues. 
+    piece by piece, connecting seemingly unrelated clues.
     "모든 것이 연결되어 있었다!" 탐정이 발견했다. 놀랐다고 이해했다.
     Setting up future storylines that will explore themes of redemption and justice.
     """
 
     print(f"Testing {total_guards} guards using auto-registry...")
 
-    for i, guard_class in enumerate(guard_classes, 1):
+    for _i, guard_class in enumerate(guard_classes, 1):
         guard_name = guard_class.__name__
         try:
             # Create guard instance
@@ -90,7 +90,7 @@ def test_guards_auto_registry(episode_num: int, project: str = "default") -> boo
                 # Load or create sample character data
                 char_path = data_path("characters.json", project)
                 try:
-                    with open(char_path, "r", encoding="utf-8") as f:
+                    with open(char_path, encoding="utf-8") as f:
                         characters = json.load(f)
                 except FileNotFoundError:
                     characters = {
@@ -117,9 +117,7 @@ def test_guards_auto_registry(episode_num: int, project: str = "default") -> boo
             elif guard_name == "PacingGuard":
                 scene_texts = [
                     draft_content[: len(draft_content) // 3],
-                    draft_content[
-                        len(draft_content) // 3 : 2 * len(draft_content) // 3
-                    ],
+                    draft_content[len(draft_content) // 3 : 2 * len(draft_content) // 3],
                     draft_content[2 * len(draft_content) // 3 :],
                 ]
                 run_with_retry(guard.check, scene_texts, episode_num)
@@ -174,34 +172,34 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
     draft_content = f"""
     Episode {episode_num} begins with our protagonist facing unprecedented challenges.
     주인공이 달렸다. "어디로 가야 하지?" 그는 생각했다. The protagonist makes their first appearance.
-    
+
     The morning sun illuminated the bustling marketplace. 상인이 물건을 꺼냈다.
     "좋은 아침입니다!" 그가 외쳤다. Children laughed gleefully while playing nearby fountains.
     아이들이 뛰어갔다. "재미있다!" 그들이 말했다. 행복하다고 느꼈다.
-    
+
     Suddenly, mysterious shadows emerged from ancient alleyways. 그림자가 움직였다.
     Citizens gathered nervously. "무슨 일이지?" 그들이 걱정했다. 두렵다고 생각했다.
-    
+
     Our brave heroes must navigate complex political intrigue. 영웅들이 싸웠다.
     "우리가 해야 할 일이 무엇인가?" 대장이 물었다. 각자 다짐했다.
     Each character demonstrates unique abilities. 치료사가 치유했다.
-    
+
     The antagonist reveals sinister motivations. 악역이 공격했다.
     "너희는 이해하지 못한다!" 그가 소리쳤다. 분노했다고 깨달았다.
     Family loyalties clash against moral obligations. 가족이 갈등했다.
-    
+
     Romance blooms unexpectedly between unlikely partners. 연인들이 만났다.
     "당신을 사랑합니다." 그녀가 고백했다. 기쁘다고 알았다.
     Their relationship develops gradually through shared hardships.
-    
+
     Technological innovations transform traditional combat methods. 전사들이 훈련했다.
     "새로운 무기를 배워야 한다." 교관이 설명했다. 어렵다고 판단했다.
     Veterans struggle adapting while younger fighters embrace new approaches.
-    
+
     Environmental disasters threaten agricultural sustainability. 농민들이 일했다.
     "비가 오지 않는다." 그들이 한탄했다. 절망했다고 받아들였다.
     Resource scarcity exacerbates existing social tensions.
-    
+
     The episode concludes with surprising revelations. 진실이 드러났다.
     "모든 것이 연결되어 있었다!" 탐정이 발견했다. 놀랐다고 이해했다.
     Setting up future storylines that will explore themes of redemption and justice.
@@ -256,7 +254,7 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
         # Load or create sample character data with proper structure
         char_path = data_path("characters.json", project)
         try:
-            with open(char_path, "r", encoding="utf-8") as f:
+            with open(char_path, encoding="utf-8") as f:
                 characters = json.load(f)
         except FileNotFoundError:
             # Create minimal character data for testing with immutable field
@@ -340,9 +338,7 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
         # Create scene texts for pacing analysis
         scene_texts = [
             draft_content[: len(draft_content) // 3],  # First third
-            draft_content[
-                len(draft_content) // 3 : 2 * len(draft_content) // 3
-            ],  # Middle third
+            draft_content[len(draft_content) // 3 : 2 * len(draft_content) // 3],  # Middle third
             draft_content[2 * len(draft_content) // 3 :],  # Last third
         ]
 
@@ -412,9 +408,7 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
 
         if len(draft) >= 500:
             guards_status = (
-                "guards PASS (Gemini)"
-                if "fallback" not in draft
-                else "guards PASS (Fallback)"
+                "guards PASS (Gemini)" if "fallback" not in draft else "guards PASS (Fallback)"
             )
             print("✅ Draft Generator PASS")
             print(f"📝 Draft generated {len(draft)}+ chars, {guards_status}")

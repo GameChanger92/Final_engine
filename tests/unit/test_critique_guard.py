@@ -5,15 +5,17 @@ Tests for the Self-Critique Guard - comprehensive test suite (8+ tests)
 Tests LLM-based fun and logic evaluation with retry functionality.
 """
 
-import pytest
 import os
 from unittest.mock import Mock, patch
+
+import pytest
+
+from src.exceptions import RetryException
 from src.plugins.critique_guard import (
     CritiqueGuard,
     check_critique_guard,
     critique_guard,
 )
-from src.exceptions import RetryException
 
 
 class TestCritiqueGuard:
@@ -46,17 +48,12 @@ class TestCritiqueGuard:
         }
 
         with patch.object(guard, "_call_gemini_critique", return_value=mock_response):
-            result = guard.check(
-                "A well-written story with excellent pacing and logic."
-            )
+            result = guard.check("A well-written story with excellent pacing and logic.")
 
             assert result["passed"] is True
             assert result["fun_score"] == 8.5
             assert result["logic_score"] == 9.0
-            assert (
-                result["comment"]
-                == "Excellent story with great flow and believable plot."
-            )
+            assert result["comment"] == "Excellent story with great flow and believable plot."
 
     def test_critique_guard_passes_exactly_at_threshold(self):
         """Test that text with scores exactly at threshold passes."""
@@ -122,10 +119,7 @@ class TestCritiqueGuard:
             assert result["passed"] is False
             assert result["fun_score"] == 5.0
             assert result["logic_score"] == 8.0
-            assert (
-                result["comment"]
-                == "Boring story with good logic but no entertainment value."
-            )
+            assert result["comment"] == "Boring story with good logic but no entertainment value."
             assert result["flags"]["critique_failure"]["fun_score"] == 5.0
             assert result["flags"]["critique_failure"]["logic_score"] == 8.0
             assert result["flags"]["critique_failure"]["min_score"] == 7.0
@@ -146,10 +140,7 @@ class TestCritiqueGuard:
             assert result["passed"] is False
             assert result["fun_score"] == 8.5
             assert result["logic_score"] == 4.0
-            assert (
-                result["comment"]
-                == "Fun but completely illogical plot holes everywhere."
-            )
+            assert result["comment"] == "Fun but completely illogical plot holes everywhere."
             assert result["flags"]["critique_failure"]["fun_score"] == 8.5
             assert result["flags"]["critique_failure"]["logic_score"] == 4.0
             assert result["flags"]["critique_failure"]["min_score"] == 7.0
@@ -189,9 +180,7 @@ class TestCritiqueGuard:
                 guard_name="critique_guard",
             )
 
-        with patch.object(
-            guard, "_call_gemini_critique", side_effect=mock_critique_call
-        ):
+        with patch.object(guard, "_call_gemini_critique", side_effect=mock_critique_call):
             with pytest.raises(RetryException) as exc_info:
                 guard.check("Some text")
 
@@ -221,9 +210,7 @@ class TestCritiqueGuard:
                 "Critique evaluation failed: API Error", guard_name="critique_guard"
             )
 
-        with patch.object(
-            guard, "_call_gemini_critique", side_effect=mock_critique_call
-        ):
+        with patch.object(guard, "_call_gemini_critique", side_effect=mock_critique_call):
             with pytest.raises(RetryException) as exc_info:
                 guard.check("Some text")
 
@@ -242,9 +229,7 @@ class TestCritiqueGuard:
                 guard_name="critique_guard",
             )
 
-        with patch.object(
-            guard, "_call_gemini_critique", side_effect=mock_critique_call
-        ):
+        with patch.object(guard, "_call_gemini_critique", side_effect=mock_critique_call):
             with pytest.raises(RetryException) as exc_info:
                 guard.check("Some text")
 
@@ -262,9 +247,7 @@ class TestCritiqueGuard:
                 guard_name="critique_guard",
             )
 
-        with patch.object(
-            guard, "_call_gemini_critique", side_effect=mock_critique_call
-        ):
+        with patch.object(guard, "_call_gemini_critique", side_effect=mock_critique_call):
             with pytest.raises(RetryException) as exc_info:
                 guard.check("Some text")
 
@@ -336,9 +319,7 @@ class TestCritiqueGuard:
         # Mock the internal method to capture the call
         mock_response = {"fun": 8.0, "logic": 8.0, "comment": "Good."}
 
-        with patch.object(
-            guard, "_call_gemini_critique", return_value=mock_response
-        ) as mock_call:
+        with patch.object(guard, "_call_gemini_critique", return_value=mock_response) as mock_call:
             guard.check("Test text")
 
             # Verify the method was called

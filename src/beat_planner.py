@@ -8,11 +8,10 @@ Beat Planner v2: 3막 · 6시퀀스 · 4비트 자동화
 - 각 시퀀스마다 4비트 (Turning Point 포함)
 """
 
+import logging
 import os
 import re
-import logging
 from pathlib import Path
-from typing import List
 
 from dotenv import load_dotenv
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
@@ -27,7 +26,7 @@ load_dotenv(".env", override=True)
 logger = logging.getLogger(__name__)
 
 
-def build_prompt(arc_goal: str, prev_beats: List[str], sequence_no: int) -> str:
+def build_prompt(arc_goal: str, prev_beats: list[str], sequence_no: int) -> str:
     """
     Build a prompt for beat generation using Jinja2 template.
 
@@ -54,9 +53,7 @@ def build_prompt(arc_goal: str, prev_beats: List[str], sequence_no: int) -> str:
         template = jinja_env.get_template("beat_prompt.j2")
 
         # Render the template with variables
-        prompt = template.render(
-            arc_goal=arc_goal, prev_beats=prev_beats, sequence_no=sequence_no
-        )
+        prompt = template.render(arc_goal=arc_goal, prev_beats=prev_beats, sequence_no=sequence_no)
 
         logger.debug(f"Built beat prompt: {len(prompt)} characters")
         return prompt
@@ -72,7 +69,7 @@ Previous beats: {prev_beats}
 
 Output format:
 beat_1: "첫 번째 비트"
-beat_2: "두 번째 비트"  
+beat_2: "두 번째 비트"
 beat_3: "세 번째 비트"
 beat_tp: "전환점 비트"
 """
@@ -120,7 +117,7 @@ beat_tp: "Fast mode stub turning point"'''
             logger.error("google-generativeai not installed")
             raise RetryException(
                 "Google Generative AI library not available", guard_name="beat_planner"
-            )
+            ) from None
 
         # Configure the API
         api_key = os.getenv("GOOGLE_API_KEY")
@@ -144,9 +141,7 @@ beat_tp: "Fast mode stub turning point"'''
         }
 
         # Generate content
-        logger.info(
-            f"⚡ Beat Planner… (temperature={temperature}, max_output_tokens=2048)"
-        )
+        logger.info(f"⚡ Beat Planner… (temperature={temperature}, max_output_tokens=2048)")
         logger.info(f"Calling {model_name} for beat generation...")
         response = model.generate_content(prompt, generation_config=generation_config)
 
@@ -160,7 +155,7 @@ beat_tp: "Fast mode stub turning point"'''
         if isinstance(e, RetryException):
             raise
         logger.error(f"LLM call failed: {e}")
-        raise RetryException(f"LLM generation failed: {str(e)}", guard_name="llm_call")
+        raise RetryException(f"LLM generation failed: {str(e)}", guard_name="llm_call") from e
 
 
 def _mock_beats(episode_num: int, flat: bool = False) -> dict:
@@ -207,7 +202,7 @@ def _mock_beats(episode_num: int, flat: bool = False) -> dict:
 
 
 def plan_beats(
-    episode_num: int, prev_beats: List[str] = None, *, return_flat: bool = False
+    episode_num: int, prev_beats: list[str] = None, *, return_flat: bool = False
 ) -> dict:
     """
     Generate beats for all 6 sequences of an episode using 3-Act structure.
@@ -261,7 +256,7 @@ def plan_beats(
             prompt = build_prompt(arc_goal, prev_beats, seq_num)
 
             # Call LLM with retry mechanism and critique validation
-            def llm_wrapper():
+            def llm_wrapper(prompt=prompt):
                 raw_output = call_llm(prompt)
                 # Parse and validate the output
                 beats = parse_beat_output(raw_output)
@@ -273,10 +268,7 @@ def plan_beats(
 
                 # Validate beats with critique guard
                 beats_text = "\n".join(
-                    [
-                        f"Beat {i+1}: {list(beats.values())[i]}"
-                        for i in range(len(beats))
-                    ]
+                    [f"Beat {i+1}: {list(beats.values())[i]}" for i in range(len(beats))]
                 )
                 validate_beats_with_critique(beats_text)
 

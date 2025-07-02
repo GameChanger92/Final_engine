@@ -4,10 +4,11 @@ Integration tests for the complete pipeline.
 Tests the end-to-end functionality from Arc Outliner through Draft Generator.
 """
 
-import pytest
+import sys
 import time
 from pathlib import Path
-import sys
+
+import pytest
 
 # Add src to path so we can import modules
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
@@ -75,9 +76,7 @@ def test_output_file_creation():
     assert result.returncode == 0, f"Command failed: {result.stderr}"
 
     # Verify output file exists
-    assert (
-        output_file.exists()
-    ), "projects/default/outputs/episode_1.txt was not created"
+    assert output_file.exists(), "projects/default/outputs/episode_1.txt was not created"
 
     # Read and verify file content
     content = output_file.read_text(encoding="utf-8")
@@ -161,9 +160,7 @@ def test_different_episode_numbers():
         assert f"Episode {ep_num}" in result, f"Should contain episode number {ep_num}"
 
         # Verify basic content is present
-        assert (
-            "PLACEHOLDER" in result
-        ), f"Episode {ep_num} should contain placeholder content"
+        assert "PLACEHOLDER" in result, f"Episode {ep_num} should contain placeholder content"
         assert len(result) > 0, f"Episode {ep_num} should not be empty"
 
 

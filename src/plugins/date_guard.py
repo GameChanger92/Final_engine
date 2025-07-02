@@ -10,10 +10,11 @@ chronological consistency in the story timeline.
 import json
 import os
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Any
+
+from src.core.guard_registry import BaseGuard, register_guard
 from src.exceptions import RetryException
 from src.utils.path_helper import data_path
-from src.core.guard_registry import BaseGuard, register_guard
 
 
 @register_guard(order=5)
@@ -49,7 +50,7 @@ class DateGuard(BaseGuard):
         else:
             self.date_log_path = date_log_path
 
-    def _load_date_log(self) -> Dict[int, str]:
+    def _load_date_log(self) -> dict[int, str]:
         """
         Load episode date log.
 
@@ -59,7 +60,7 @@ class DateGuard(BaseGuard):
             Dictionary mapping episode numbers to dates
         """
         try:
-            with open(self.date_log_path, "r", encoding="utf-8") as f:
+            with open(self.date_log_path, encoding="utf-8") as f:
                 data = json.load(f)
                 # Convert string keys back to integers
                 return {int(k): v for k, v in data.items()}
@@ -70,7 +71,7 @@ class DateGuard(BaseGuard):
         except ValueError:
             return {}
 
-    def _save_date_log(self, date_log: Dict[int, str]) -> None:
+    def _save_date_log(self, date_log: dict[int, str]) -> None:
         """
         Save episode date log to disk.
 
@@ -88,7 +89,7 @@ class DateGuard(BaseGuard):
         with open(self.date_log_path, "w", encoding="utf-8") as f:
             json.dump(string_log, f, ensure_ascii=False, indent=2)
 
-    def _parse_date(self, date_str: str) -> Optional[datetime]:
+    def _parse_date(self, date_str: str) -> datetime | None:
         """
         Parse date string to datetime object.
 
@@ -114,9 +115,7 @@ class DateGuard(BaseGuard):
             except ValueError:
                 return None
 
-    def _extract_episode_date(
-        self, context: Dict[str, Any], episode_num: int
-    ) -> Optional[str]:
+    def _extract_episode_date(self, context: dict[str, Any], episode_num: int) -> str | None:
         """
         Extract date from context or metadata.
 
@@ -148,7 +147,7 @@ class DateGuard(BaseGuard):
 
         return None
 
-    def check(self, context: Dict[str, Any], episode_num: int) -> Dict[str, Any]:
+    def check(self, context: dict[str, Any], episode_num: int) -> dict[str, Any]:
         """
         Check for date progression violations.
 
@@ -248,9 +247,7 @@ class DateGuard(BaseGuard):
 
             error_message = f"Date backstep: Episode {episode_num} ({current_date_str}) goes back {days_backward} days from Episode {previous_episode} ({previous_date_str})"
 
-            raise RetryException(
-                message=error_message, flags=flags, guard_name="date_guard"
-            )
+            raise RetryException(message=error_message, flags=flags, guard_name="date_guard")
 
         # Date is valid - update log
         date_log[episode_num] = current_date_str
@@ -260,8 +257,8 @@ class DateGuard(BaseGuard):
 
 
 def check_date_guard(
-    context: Dict[str, Any], episode_num: int, project: str = "default"
-) -> Dict[str, Any]:
+    context: dict[str, Any], episode_num: int, project: str = "default"
+) -> dict[str, Any]:
     """
     Check date guard with current episode context and number.
 
@@ -288,9 +285,7 @@ def check_date_guard(
     return guard.check(context, episode_num)
 
 
-def date_guard(
-    context: Dict[str, Any], episode_num: int, project: str = "default"
-) -> bool:
+def date_guard(context: dict[str, Any], episode_num: int, project: str = "default") -> bool:
     """
     Main entry point for date guard check.
 

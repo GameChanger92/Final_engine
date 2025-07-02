@@ -7,11 +7,12 @@ Uses Jinja2 templates to generate formatted HTML reports from KPI data.
 
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any
+
 from jinja2 import Environment, FileSystemLoader
 
 
-def generate_season_report(kpi_data: Dict[str, Any], output_path: Path) -> None:
+def generate_season_report(kpi_data: dict[str, Any], output_path: Path) -> None:
     """
     Generate HTML season report from KPI data.
 
@@ -41,7 +42,7 @@ def generate_season_report(kpi_data: Dict[str, Any], output_path: Path) -> None:
     except Exception as e:
         raise FileNotFoundError(
             f"Template '{template_name}' not found in {templates_dir}: {e}"
-        )
+        ) from e
 
     # Prepare template context
     context = {
@@ -53,17 +54,17 @@ def generate_season_report(kpi_data: Dict[str, Any], output_path: Path) -> None:
     try:
         html_content = template.render(context)
     except Exception as e:
-        raise RuntimeError(f"Failed to render template: {e}")
+        raise RuntimeError(f"Failed to render template: {e}") from e
 
     # Write to file
     try:
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(html_content)
     except Exception as e:
-        raise RuntimeError(f"Failed to write report to {output_path}: {e}")
+        raise RuntimeError(f"Failed to write report to {output_path}: {e}") from e
 
 
-def validate_kpi_data(kpi_data: Dict[str, Any]) -> bool:
+def validate_kpi_data(kpi_data: dict[str, Any]) -> bool:
     """
     Validate that KPI data contains required fields.
 
@@ -86,7 +87,7 @@ def validate_kpi_data(kpi_data: Dict[str, Any]) -> bool:
     return all(field in kpi_data for field in required_fields)
 
 
-def generate_simple_html_report(kpi_data: Dict[str, Any], output_path: Path) -> None:
+def generate_simple_html_report(kpi_data: dict[str, Any], output_path: Path) -> None:
     """
     Generate a simple HTML report without Jinja2 templates (fallback).
 
@@ -113,7 +114,7 @@ def generate_simple_html_report(kpi_data: Dict[str, Any], output_path: Path) -> 
 </head>
 <body>
     <h1>🏆 Final Engine - Season KPI Report</h1>
-    
+
     <div class="metric">
         <h3>📊 Key Performance Indicators</h3>
         <table>
@@ -127,7 +128,7 @@ def generate_simple_html_report(kpi_data: Dict[str, Any], output_path: Path) -> 
             <tr><td>Failed Episodes</td><td>{failed_episodes}</td></tr>
         </table>
     </div>
-    
+
     <p><em>Generated on {generation_time}</em></p>
 </body>
 </html>"""

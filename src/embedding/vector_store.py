@@ -8,12 +8,13 @@ Provides scene point similarity search functionality.
 import json
 import os
 from pathlib import Path
-from typing import List, Tuple, Dict, Any
+from typing import Any
+
 import chromadb
 from chromadb.config import Settings
 
-from src.utils.path_helper import data_path
 from src.embedding.embedder import embed_scene
+from src.utils.path_helper import data_path
 
 
 class VectorStore:
@@ -48,7 +49,7 @@ class VectorStore:
             name=f"scenes_{project}", metadata={"hnsw:space": "cosine"}
         )
 
-    def _load_config(self) -> Dict[str, Any]:
+    def _load_config(self) -> dict[str, Any]:
         """
         Load embedding configuration from JSON file.
 
@@ -75,7 +76,7 @@ class VectorStore:
             return default_config
 
         try:
-            with open(config_path, "r", encoding="utf-8") as f:
+            with open(config_path, encoding="utf-8") as f:
                 config = json.load(f)
 
             # Provide defaults for missing keys
@@ -158,7 +159,7 @@ class VectorStore:
         except Exception:
             return False
 
-    def similar(self, query: str, top_k: int = 5) -> List[Tuple[str, float]]:
+    def similar(self, query: str, top_k: int = 5) -> list[tuple[str, float]]:
         """
         Find similar scenes using cosine similarity.
 
@@ -196,7 +197,7 @@ class VectorStore:
                 # ChromaDB returns cosine distances, so similarity = 1 - distance
                 similarities = [1.0 - distance for distance in distances]
 
-                return list(zip(scene_ids, similarities))
+                return list(zip(scene_ids, similarities, strict=False))
 
             return []
 

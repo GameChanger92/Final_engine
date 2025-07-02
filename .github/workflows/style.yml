@@ -20,7 +20,10 @@ jobs:
       - name: Install formatters
         run: |
           pip install --upgrade pip
-          pip install black==25.1.0 ruff==0.4.7
+          pip install black==25.1.0 ruff==0.4.7 pre-commit
+
+      - name: Pre-commit hooks
+        run: pre-commit run --all-files
 
       - name: Ruff Lint
         run: ruff check .

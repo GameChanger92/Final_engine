@@ -1,20 +1,17 @@
 """CritiqueGuard – 재미/개연성 점수 검사"""
 
-import sys
 import os
-from src.exceptions import RetryException
+import sys
+from typing import Any
+
 from src.core.guard_registry import BaseGuard, register_guard
-from typing import Any, Dict
+from src.exceptions import RetryException
 
 
 # ---------- 내부 헬퍼 ----------
 def _get_min_score(override: float | None = None) -> float:
     """매 호출마다 MIN_CRITIQUE_SCORE env를 읽어 최신값을 얻는다."""
-    return (
-        float(override)
-        if override is not None
-        else float(os.getenv("MIN_CRITIQUE_SCORE", 7.0))
-    )
+    return float(override) if override is not None else float(os.getenv("MIN_CRITIQUE_SCORE", 7.0))
 
 
 # ---------- 메인 Guard ----------
@@ -30,7 +27,7 @@ class CritiqueGuard(BaseGuard):
         self.project = project
 
     # 실제 LLM 호출은 생략/모킹
-    def _call_gemini_critique(self, text: str) -> Dict[str, Any]:
+    def _call_gemini_critique(self, text: str) -> dict[str, Any]:
         """
         Gemini 호출 / 테스트 스텁
         1) UNIT_TEST_MODE 또는 FAST_MODE 면 즉시 스텁 반환
@@ -49,7 +46,7 @@ class CritiqueGuard(BaseGuard):
         except ImportError:
             raise RetryException(
                 "google-generativeai not installed", guard_name="critique_guard"
-            )
+            ) from None
 
         if not os.getenv("GOOGLE_API_KEY"):
             raise RetryException("API key not configured", guard_name="critique_guard")
@@ -57,7 +54,7 @@ class CritiqueGuard(BaseGuard):
         # 예시 응답 – 실무에선 Gemini 호출
         return {"fun": 8.2, "logic": 8.1, "comment": "LLM placeholder comment."}
 
-    def check(self, text: str) -> Dict[str, Any]:
+    def check(self, text: str) -> dict[str, Any]:
         result = self._call_gemini_critique(text)
         passed = result["fun"] >= self.min_score and result["logic"] >= self.min_score
 
@@ -90,13 +87,9 @@ class CritiqueGuard(BaseGuard):
 
 
 # ---------- 래퍼 함수 2개 ----------
-def check_critique_guard(text: str, min_score: float | None = None) -> Dict[str, Any]:
+def check_critique_guard(text: str, min_score: float | None = None) -> dict[str, Any]:
     """테스트·외부 호출용 래퍼 – CritiqueGuard.check 그대로 반환"""
-    result = (
-        sys.modules[__name__]
-        .CritiqueGuard(min_score=_get_min_score(min_score))
-        .check(text)
-    )
+    result = sys.modules[__name__].CritiqueGuard(min_score=_get_min_score(min_score)).check(text)
 
     # If the result indicates failure, raise RetryException
     if not result["passed"]:

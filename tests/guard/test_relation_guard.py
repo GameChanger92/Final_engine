@@ -5,16 +5,18 @@ Tests for the Relation Guard - comprehensive test suite
 Tests relationship change detection and tolerance window functionality.
 """
 
-import pytest
 import json
-import tempfile
 import os
+import tempfile
+
+import pytest
+
+from src.exceptions import RetryException
 from src.plugins.relation_guard import (
     RelationGuard,
     check_relation_guard,
     relation_guard,
 )
-from src.exceptions import RetryException
 
 
 class TestRelationGuard:

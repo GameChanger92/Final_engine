@@ -6,8 +6,7 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-
-from src.prompt_loader import load_style, get_available_platforms
+from src.prompt_loader import get_available_platforms, load_style
 
 
 class TestLoadStyle:
@@ -173,9 +172,7 @@ class TestIntegration:
             style = load_style(platform)
             for field in required_fields:
                 assert field in style, f"Missing field '{field}' in {platform} style"
-                assert (
-                    style[field] is not None
-                ), f"Field '{field}' is None in {platform} style"
+                assert style[field] is not None, f"Field '{field}' is None in {platform} style"
                 assert isinstance(
                     style[field], str
                 ), f"Field '{field}' is not string in {platform} style"

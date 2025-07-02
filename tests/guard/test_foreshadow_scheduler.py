@@ -11,14 +11,14 @@ import tempfile
 from unittest.mock import patch
 
 from src.plugins.foreshadow_scheduler import (
+    _calculate_due_episode,
+    _generate_unique_id,
+    _load_foreshadows,
+    get_foreshadows,
+    get_overdue_foreshadows,
+    get_unresolved_foreshadows,
     schedule_foreshadow,
     track_payoff,
-    get_foreshadows,
-    get_unresolved_foreshadows,
-    get_overdue_foreshadows,
-    _generate_unique_id,
-    _calculate_due_episode,
-    _load_foreshadows,
 )
 
 
@@ -32,9 +32,7 @@ class TestForeshadowScheduler:
         self.test_file = os.path.join(self.temp_dir, "foreshadow.json")
 
         # Patch the file path to use our temporary file
-        self.file_path_patcher = patch(
-            "src.plugins.foreshadow_scheduler._get_foreshadow_file_path"
-        )
+        self.file_path_patcher = patch("src.plugins.foreshadow_scheduler._get_foreshadow_file_path")
         self.mock_file_path = self.file_path_patcher.start()
         self.mock_file_path.return_value = self.test_file
 
@@ -84,7 +82,7 @@ class TestForeshadowScheduler:
         # Verify file exists and contains both foreshadows
         assert os.path.exists(self.test_file)
 
-        with open(self.test_file, "r", encoding="utf-8") as f:
+        with open(self.test_file, encoding="utf-8") as f:
             data = json.load(f)
 
         assert "foreshadows" in data
@@ -120,9 +118,7 @@ class TestForeshadowScheduler:
         foreshadow_id = foreshadow["id"]
 
         # Create content with resolution pattern
-        content = (
-            f"마침내 진실이 밝혀졌다. [RESOLVED:{foreshadow_id}] 모든 것이 명확해졌다."
-        )
+        content = f"마침내 진실이 밝혀졌다. [RESOLVED:{foreshadow_id}] 모든 것이 명확해졌다."
 
         # Track payoff
         result = track_payoff(25, content)
@@ -223,9 +219,7 @@ class TestForeshadowScheduler:
     def test_get_overdue_foreshadows(self):
         """Test getting overdue foreshadows."""
         # Create foreshadows with different due episodes
-        with patch(
-            "src.plugins.foreshadow_scheduler._calculate_due_episode"
-        ) as mock_calc:
+        with patch("src.plugins.foreshadow_scheduler._calculate_due_episode") as mock_calc:
             # Mock specific due episodes
             mock_calc.side_effect = [15, 25, 35]  # Different due episodes
 
@@ -298,7 +292,7 @@ class TestForeshadowScheduler:
         assert os.path.exists(self.test_file)
 
         # Verify file contents
-        with open(self.test_file, "r", encoding="utf-8") as f:
+        with open(self.test_file, encoding="utf-8") as f:
             saved_data = json.load(f)
         assert len(saved_data["foreshadows"]) == 1
         assert saved_data["foreshadows"][0]["id"] == foreshadow["id"]
@@ -317,7 +311,7 @@ class TestForeshadowScheduler:
         foreshadow = schedule_foreshadow("복구된 복선", 5)
 
         # Verify file is now valid
-        with open(self.test_file, "r", encoding="utf-8") as f:
+        with open(self.test_file, encoding="utf-8") as f:
             saved_data = json.load(f)
         assert len(saved_data["foreshadows"]) == 1
         assert saved_data["foreshadows"][0]["id"] == foreshadow["id"]
