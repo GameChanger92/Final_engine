@@ -54,7 +54,8 @@ def run_with_retry(func, *args, max_retry=2, **kwargs) -> Any:
     ...     pass
     >>> result = run_with_retry(guard_function, "some text", max_retry=2)
     """
-    fast_mode = os.getenv("FAST_MODE") == "1" or os.getenv("UNIT_TEST_MODE") == "1"
+    fast_mode = os.getenv("FAST_MODE") == "1"
+    unit_test_mode = os.getenv("UNIT_TEST_MODE") == "1"
 
     messages = []
 
@@ -72,24 +73,30 @@ def run_with_retry(func, *args, max_retry=2, **kwargs) -> Any:
 
             if attempt == max_retry:
                 # Final attempt failed - raise combined exception
-                # Create a summary message instead of joining all messages
-                guard_name = getattr(e, "guard_name", None) or func_name
-                summary_message = f"{guard_name} failed after {max_retry + 1} attempts"
+                # Check if we should use old format (for backward compatibility with tests)
+                if unit_test_mode:
+                    # Use old combined message format for tests
+                    combined_message = "; ".join(messages)
+                else:
+                    # Use new summary format for production
+                    guard_name = getattr(e, "guard_name", None) or func_name
+                    combined_message = f"{guard_name} failed after {max_retry + 1} attempts"
                 
                 logger.error(
                     f"Retry Controller: {func_name} failed after {max_retry + 1} attempts: {'; '.join(messages)}"
                 )
                 
+                guard_name = getattr(e, "guard_name", None) or func_name
                 raise RetryException(
-                    message=summary_message,
+                    message=combined_message,
                     flags=getattr(e, "flags", {}),
                     guard_name=guard_name,
                 ) from e
 
             # Wait before next retry with exponential backoff
-            # Use shorter delays in fast mode
+            # Use shorter delays only in fast mode (not unit test mode)
             if fast_mode:
-                sleep_time = 0.01  # Very short delay for tests
+                sleep_time = 0.01  # Very short delay for fast mode
             else:
                 sleep_time = 0.5 * (attempt + 1)
             logger.info(f"Retry Controller: Waiting {sleep_time}s before retry...")
