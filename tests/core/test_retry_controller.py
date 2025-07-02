@@ -5,6 +5,7 @@ Tests for the Retry Controller - comprehensive test suite.
 Tests retry functionality, backoff intervals, and error handling.
 """
 
+import os
 from unittest.mock import Mock, patch
 
 import pytest
@@ -58,25 +59,30 @@ class TestRetryController:
 
     def test_run_with_retry_all_attempts_fail(self):
         """Test that all 3 attempts fail and final exception is raised."""
-        mock_func = Mock()
-        mock_func.__name__ = "test_func"
-        mock_func.side_effect = [
-            RetryException("First attempt failed", guard_name="test_guard"),
-            RetryException("Second attempt failed", guard_name="test_guard"),
-            RetryException("Third attempt failed", guard_name="test_guard"),
-        ]
+        os.environ["UNIT_TEST_MODE"] = "1"
+        try:
+            mock_func = Mock()
+            mock_func.__name__ = "test_func"
+            mock_func.side_effect = [
+                RetryException("First attempt failed", guard_name="test_guard"),
+                RetryException("Second attempt failed", guard_name="test_guard"),
+                RetryException("Third attempt failed", guard_name="test_guard"),
+            ]
 
-        with pytest.raises(RetryException) as exc_info:
-            run_with_retry(mock_func, max_retry=2)
+            with pytest.raises(RetryException) as exc_info:
+                run_with_retry(mock_func, max_retry=2)
 
-        assert mock_func.call_count == 3
-        exception = exc_info.value
-        # The exception messages include guard name formatting, so check that all messages are present
-        exception_str = str(exception)
-        assert "First attempt failed" in exception_str
-        assert "Second attempt failed" in exception_str
-        assert "Third attempt failed" in exception_str
-        assert exception.guard_name == "test_guard"
+            assert mock_func.call_count == 3
+            exception = exc_info.value
+            # The exception messages include guard name formatting, so check that all messages are present
+            exception_str = str(exception)
+            assert "First attempt failed" in exception_str
+            assert "Second attempt failed" in exception_str
+            assert "Third attempt failed" in exception_str
+            assert exception.guard_name == "test_guard"
+        finally:
+            if "UNIT_TEST_MODE" in os.environ:
+                del os.environ["UNIT_TEST_MODE"]
 
     def test_run_with_retry_preserves_exception_flags(self):
         """Test that exception flags are preserved in final exception."""
