@@ -1,0 +1,29 @@
+name: style
+
+on:
+  pull_request:           # PR 생성·업데이트 시
+    paths:
+      - "**/*.py"
+  push:                   # main 직접 푸시 보호용
+    branches: [main]
+
+jobs:
+  style:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install formatters
+        run: |
+          pip install --upgrade pip
+          pip install black==25.1.0 ruff==0.4.7
+
+      - name: Ruff Lint
+        run: ruff check .
+
+      - name: Black Check
+        run: black --check --diff .

@@ -37,7 +37,7 @@ class TestPipelineCritique:
             mock_critique.return_value = None  # Success case
 
             # Run the guard sequence which includes critique guard
-            result = test_guards_sequence(2)
+            test_guards_sequence(2)
 
             # Verify critique guard was called in the guard sequence
             assert mock_critique.call_count >= 1
@@ -114,7 +114,7 @@ class TestPipelineCritique:
             )
 
             # Guard sequence should handle the failure appropriately
-            result = test_guards_sequence(2)
+            test_guards_sequence(2)
 
             # Verify critique guard was called
             assert mock_critique.call_count >= 1

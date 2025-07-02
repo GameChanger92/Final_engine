@@ -22,8 +22,8 @@ project_root = script_dir.parent
 sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(project_root / "src"))
 
-from src.plugins.anchor_guard import AnchorGuard
-from src.main import run_pipeline
+from src.plugins.anchor_guard import AnchorGuard  # noqa: E402
+from src.main import run_pipeline  # noqa: E402
 
 
 def simulate_episode_content(episode_num: int) -> str:

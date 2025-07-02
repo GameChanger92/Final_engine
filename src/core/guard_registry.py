@@ -180,29 +180,29 @@ def clear_registry() -> None:
     Clear all registered guards.
 
     Primarily used for testing to ensure clean state.
-    Also removes guard modules from sys.modules cache to ensure 
+    Also removes guard modules from sys.modules cache to ensure
     decorators are re-executed on subsequent imports.
     """
     import sys
-    
+
     # Clear the registry
     _registry.clear()
-    
+
     # Remove guard modules from sys.modules cache to force re-import
     # This ensures decorators are re-executed when modules are imported again
     guard_module_names = [
-        'src.plugins.lexi_guard',
-        'src.plugins.emotion_guard', 
-        'src.plugins.schedule_guard',
-        'src.plugins.immutable_guard',
-        'src.plugins.date_guard',
-        'src.plugins.anchor_guard',
-        'src.plugins.rule_guard',
-        'src.plugins.relation_guard',
-        'src.plugins.pacing_guard',
-        'src.plugins.critique_guard',
+        "src.plugins.lexi_guard",
+        "src.plugins.emotion_guard",
+        "src.plugins.schedule_guard",
+        "src.plugins.immutable_guard",
+        "src.plugins.date_guard",
+        "src.plugins.anchor_guard",
+        "src.plugins.rule_guard",
+        "src.plugins.relation_guard",
+        "src.plugins.pacing_guard",
+        "src.plugins.critique_guard",
     ]
-    
+
     for module_name in guard_module_names:
         if module_name in sys.modules:
             sys.modules.pop(module_name)
