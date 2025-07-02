@@ -14,7 +14,6 @@ Exit codes:
 
 import sys
 from pathlib import Path
-from typing import Dict, List, Set
 
 # Add src directory to Python path
 script_dir = Path(__file__).parent
@@ -22,8 +21,8 @@ project_root = script_dir.parent
 sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(project_root / "src"))
 
-from src.plugins.anchor_guard import AnchorGuard  # noqa: E402
 from src.main import run_pipeline  # noqa: E402
+from src.plugins.anchor_guard import AnchorGuard  # noqa: E402
 
 
 def simulate_episode_content(episode_num: int) -> str:
@@ -110,8 +109,8 @@ def run_anchor_flow_test(anchors_path: str = None, project: str = "default") -> 
     print("-" * 40)
 
     # Track anchor validation results
-    found_anchors: Set[str] = set()
-    validation_results: List[Dict] = []
+    found_anchors: set[str] = set()
+    validation_results: list[dict] = []
 
     # Test each episode
     for episode_num in range(1, 21):

@@ -1,0 +1,5 @@
+# Development dependencies
+pre-commit>=3.0.0
+black==25.1.0
+ruff==0.4.7
+pytest
