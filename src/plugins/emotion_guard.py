@@ -257,15 +257,15 @@ def classify_emotions(text: str) -> dict[str, float]:
     """
     if not text.strip():
         # Empty text is considered neutral
-        return {emotion: 0.0 for emotion in EMOTION_KEYWORDS.keys()}
+        return dict.fromkeys(EMOTION_KEYWORDS.keys(), 0.0)
 
     # Clean and tokenize text
     words = re.findall(r"\b\w+\b", text.lower())
     if not words:
-        return {emotion: 0.0 for emotion in EMOTION_KEYWORDS.keys()}
+        return dict.fromkeys(EMOTION_KEYWORDS.keys(), 0.0)
 
     # Count emotion keywords
-    emotion_counts = {emotion: 0 for emotion in EMOTION_KEYWORDS.keys()}
+    emotion_counts = dict.fromkeys(EMOTION_KEYWORDS.keys(), 0)
     total_words = len(words)
 
     for word in words:
@@ -290,7 +290,7 @@ def classify_emotions(text: str) -> dict[str, float]:
 
     # If no emotional content found, make it fully neutral
     if sum(emotion_scores[e] for e in emotion_scores if e != "neutral") == 0:
-        emotion_scores = {emotion: 0.0 for emotion in EMOTION_KEYWORDS.keys()}
+        emotion_scores = dict.fromkeys(EMOTION_KEYWORDS.keys(), 0.0)
         emotion_scores["neutral"] = 1.0
         return emotion_scores
 
