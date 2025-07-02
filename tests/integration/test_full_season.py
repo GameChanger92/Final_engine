@@ -17,13 +17,16 @@ sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(project_root / "src"))
 
 # Import modules we need to test
-from scripts.run_full_season import (
+from scripts.run_full_season import (  # noqa: E402
     KPITracker,
     run_episodes,
     parse_episode_range,
     check_single_episode_guards,
 )
-from src.utils.report_writer import generate_season_report, validate_kpi_data
+from src.utils.report_writer import (  # noqa: E402
+    generate_season_report,
+    validate_kpi_data,
+)
 
 
 class TestFullSeasonRunner:
@@ -223,7 +226,7 @@ class TestFullSeasonRunner:
             "passed_episodes": 9,
             "failed_episodes": 1,
         }
-        assert validate_kpi_data(valid_data) == True
+        assert validate_kpi_data(valid_data)
 
         # Invalid data (missing field)
         invalid_data = {
@@ -231,7 +234,7 @@ class TestFullSeasonRunner:
             "avg_logic": 8.0,
             # Missing other required fields
         }
-        assert validate_kpi_data(invalid_data) == False
+        assert not validate_kpi_data(invalid_data)
 
     def test_single_episode_guard_testing(self):
         """Test the single episode guard testing functionality."""
