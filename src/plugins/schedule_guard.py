@@ -14,9 +14,11 @@ from src.plugins.foreshadow_scheduler import (
     _save_foreshadows,
     get_overdue_foreshadows,
 )
+from src.core.guard_registry import BaseGuard, register_guard
 
 
-class ScheduleGuard:
+@register_guard(order=3)
+class ScheduleGuard(BaseGuard):
     """
     Guard that checks foreshadow resolution compliance.
 

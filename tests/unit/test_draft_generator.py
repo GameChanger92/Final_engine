@@ -161,7 +161,7 @@ def test_build_prompt_with_style():
         "voice_main": "3rd_person",
         "voice_side": "present",
         "enter_rule": "custom_rule",
-        "prompt_suffix": "with specific requirements"
+        "prompt_suffix": "with specific requirements",
     }
 
     prompt = build_prompt(context, style)

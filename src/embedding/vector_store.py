@@ -140,17 +140,17 @@ class VectorStore:
         if fast_mode:
             # Still process the call for test assertions, just don't do expensive operations
             return True
-            
+
         try:
             # Generate embedding
             embedding = embed_scene(text, self.config["model"])
 
             # Add to ChromaDB collection
             self.collection.add(
-                embeddings=[embedding], 
-                documents=[text], 
+                embeddings=[embedding],
+                documents=[text],
                 ids=[scene_id],
-                metadatas=[metadata] if metadata else None
+                metadatas=[metadata] if metadata else None,
             )
 
             return True

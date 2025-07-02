@@ -87,7 +87,12 @@ def run_anchor_flow_test(anchors_path: str = None, project: str = "default") -> 
 
     # Initialize anchor guard
     if anchors_path is None:
-        anchor_guard = AnchorGuard(project=project)
+        # Default to data/anchors.json if no path specified
+        default_anchors_path = "data/anchors.json"
+        if Path(default_anchors_path).exists():
+            anchor_guard = AnchorGuard(anchors_path=default_anchors_path)
+        else:
+            anchor_guard = AnchorGuard(project=project)
     else:
         anchor_guard = AnchorGuard(anchors_path=anchors_path)
 

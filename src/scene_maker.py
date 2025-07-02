@@ -8,10 +8,9 @@ Generates 8-12 detailed scene points per beat with pov, purpose, desc, and tags.
 import os
 import re
 import logging
-import random
 import yaml
 from pathlib import Path
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Any
 import typer
 from dotenv import load_dotenv
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
@@ -76,9 +75,13 @@ def build_prompt(beat_desc: str, beat_no: int = 1) -> str:
         return prompt
 
     except TemplateNotFound:
-        raise RetryException("Scene prompt template not found", guard_name="template_load")
+        raise RetryException(
+            "Scene prompt template not found", guard_name="template_load"
+        )
     except Exception as e:
-        raise RetryException(f"Failed to build scene prompt: {str(e)}", guard_name="template_load")
+        raise RetryException(
+            f"Failed to build scene prompt: {str(e)}", guard_name="template_load"
+        )
 
 
 def call_llm(prompt: str) -> str:
@@ -110,7 +113,7 @@ def call_llm(prompt: str) -> str:
         except ImportError:
             # Fast mode for unit tests - return stub immediately (but only after import check)
             if os.getenv("FAST_MODE") == "1":
-                return '''```yaml
+                return """```yaml
 scene_1:
   pov: "main"
   purpose: "Fast mode stub scene 1"
@@ -151,8 +154,8 @@ scene_8:
   purpose: "Fast mode stub scene 8"
   tags: ["test", "fast"]
   desc: "Fast mode stub scene description 8"
-```'''
-            
+```"""
+
             logger.error("google-generativeai not installed")
             raise RetryException(
                 "Google Generative AI library not available", guard_name="llm_call"
@@ -179,7 +182,9 @@ scene_8:
         }
 
         # Generate content
-        logger.info(f"🎬 Scene Maker… (temperature={TEMP_SCENE}, max_output_tokens=8000)")
+        logger.info(
+            f"🎬 Scene Maker… (temperature={TEMP_SCENE}, max_output_tokens=8000)"
+        )
         logger.info(f"Calling {model_name} for scene generation...")
         response = model.generate_content(prompt, generation_config=generation_config)
 
@@ -217,7 +222,7 @@ def parse_scene_yaml(yaml_content: str) -> List[Dict[str, Any]]:
     """
     try:
         # Extract YAML content from response (remove any markdown formatting)
-        yaml_match = re.search(r'```yaml\s*\n(.*?)\n```', yaml_content, re.DOTALL)
+        yaml_match = re.search(r"```yaml\s*\n(.*?)\n```", yaml_content, re.DOTALL)
         if yaml_match:
             yaml_text = yaml_match.group(1)
         else:
@@ -226,32 +231,45 @@ def parse_scene_yaml(yaml_content: str) -> List[Dict[str, Any]]:
 
         # Parse YAML
         parsed_data = yaml.safe_load(yaml_text)
-        
+
         if not isinstance(parsed_data, dict):
-            raise RetryException("Invalid YAML format: expected dictionary", guard_name="yaml_parse")
+            raise RetryException(
+                "Invalid YAML format: expected dictionary", guard_name="yaml_parse"
+            )
 
         scenes = []
         for scene_key, scene_data in parsed_data.items():
             if not scene_key.startswith("scene_"):
                 continue
-                
+
             # Validate required fields
             required_fields = ["pov", "purpose", "tags", "desc"]
             for field in required_fields:
                 if field not in scene_data:
-                    raise RetryException(f"Missing required field '{field}' in {scene_key}", guard_name="yaml_parse")
+                    raise RetryException(
+                        f"Missing required field '{field}' in {scene_key}",
+                        guard_name="yaml_parse",
+                    )
 
             # Validate pov value
             if scene_data["pov"] not in ["main", "side"]:
-                raise RetryException(f"Invalid pov value '{scene_data['pov']}' in {scene_key}", guard_name="yaml_parse")
+                raise RetryException(
+                    f"Invalid pov value '{scene_data['pov']}' in {scene_key}",
+                    guard_name="yaml_parse",
+                )
 
             # Validate tags is a list
             if not isinstance(scene_data["tags"], list) or len(scene_data["tags"]) < 1:
-                raise RetryException(f"Tags must be a non-empty list in {scene_key}", guard_name="yaml_parse")
+                raise RetryException(
+                    f"Tags must be a non-empty list in {scene_key}",
+                    guard_name="yaml_parse",
+                )
 
             # Extract scene number from scene_key
-            scene_num_match = re.search(r'scene_(\d+)', scene_key)
-            scene_idx = int(scene_num_match.group(1)) if scene_num_match else len(scenes) + 1
+            scene_num_match = re.search(r"scene_(\d+)", scene_key)
+            scene_idx = (
+                int(scene_num_match.group(1)) if scene_num_match else len(scenes) + 1
+            )
 
             scene_dict = {
                 "idx": scene_idx,
@@ -264,11 +282,14 @@ def parse_scene_yaml(yaml_content: str) -> List[Dict[str, Any]]:
 
         # Validate scene count (8-12)
         if len(scenes) < 8 or len(scenes) > 12:
-            raise RetryException(f"Invalid scene count: {len(scenes)} (expected 8-12)", guard_name="yaml_parse")
+            raise RetryException(
+                f"Invalid scene count: {len(scenes)} (expected 8-12)",
+                guard_name="yaml_parse",
+            )
 
         # Sort by idx
         scenes.sort(key=lambda x: x["idx"])
-        
+
         logger.info(f"Parsed {len(scenes)} scenes successfully")
         return scenes
 
@@ -278,6 +299,8 @@ def parse_scene_yaml(yaml_content: str) -> List[Dict[str, Any]]:
         if isinstance(e, RetryException):
             raise
         raise RetryException(f"Scene parsing failed: {str(e)}", guard_name="yaml_parse")
+
+
 def make_scenes(beat_json: dict) -> list[dict]:
     """
     Generate 8-12 scene point dictionaries for a given beat using LLM.
@@ -299,18 +322,18 @@ def make_scenes(beat_json: dict) -> list[dict]:
     if os.getenv("FAST_MODE") == "1" or os.getenv("UNIT_TEST_MODE") == "1":
         scenes = [
             {
-                "idx": i+1,
+                "idx": i + 1,
                 "beat_id": beat_idx,
                 "pov": "main" if i % 2 == 0 else "side",
                 "purpose": f"Fast mode stub scene {i+1}",
                 "tags": ["test", "fast"],
                 "desc": f"Scene {i+1}: {beat_desc} (fast mode stub)",
-                "type": "placeholder"  # Fixed to match test expectations
+                "type": "placeholder",  # Fixed to match test expectations
             }
             for i in range(10)  # Generate 10 scenes for fallback compatibility
         ]
         logger.info(f"Scene Maker… generated {len(scenes)} fallback scenes (FAST_MODE)")
-        
+
         # Store scenes in vector store (even in FAST_MODE for metadata testing)
         try:
             vector_store = VectorStore()
@@ -318,16 +341,16 @@ def make_scenes(beat_json: dict) -> list[dict]:
                 scene_id = f"beat_{beat_idx}_scene_{scene['idx']:02d}"
                 metadata = {
                     "beat_id": beat_idx,
-                    "scene_idx": scene['idx'],
-                    "pov": scene['pov'],
-                    "purpose": scene['purpose'],
-                    "tags": scene['tags']
+                    "scene_idx": scene["idx"],
+                    "pov": scene["pov"],
+                    "purpose": scene["purpose"],
+                    "tags": scene["tags"],
                 }
-                vector_store.add(scene_id, scene['desc'], metadata)
+                vector_store.add(scene_id, scene["desc"], metadata)
             logger.info(f"Stored {len(scenes)} scenes in vector store (FAST_MODE)")
         except Exception as e:
             logger.warning(f"Failed to store scenes in vector store: {e}")
-        
+
         return scenes
 
     try:
@@ -338,20 +361,22 @@ def make_scenes(beat_json: dict) -> list[dict]:
         def llm_wrapper():
             raw_output = call_llm(prompt)
             scenes = parse_scene_yaml(raw_output)
-            
+
             # Add beat_id to each scene
             for scene in scenes:
                 scene["beat_id"] = beat_idx
-            
+
             # Validate scenes with critique guard
-            scenes_text = "\n".join([f"Scene {scene['idx']}: {scene['desc']}" for scene in scenes])
+            scenes_text = "\n".join(
+                [f"Scene {scene['idx']}: {scene['desc']}" for scene in scenes]
+            )
             validate_scenes_with_critique(scenes_text)
-                
+
             return scenes
 
         # Execute with retry
         scenes = run_with_retry(llm_wrapper)
-        
+
         # Store scenes in vector store
         try:
             vector_store = VectorStore()
@@ -359,12 +384,12 @@ def make_scenes(beat_json: dict) -> list[dict]:
                 scene_id = f"beat_{beat_idx}_scene_{scene['idx']:02d}"
                 metadata = {
                     "beat_id": beat_idx,
-                    "scene_idx": scene['idx'],
-                    "pov": scene['pov'],
-                    "purpose": scene['purpose'],
-                    "tags": scene['tags']
+                    "scene_idx": scene["idx"],
+                    "pov": scene["pov"],
+                    "purpose": scene["purpose"],
+                    "tags": scene["tags"],
                 }
-                vector_store.add(scene_id, scene['desc'], metadata)
+                vector_store.add(scene_id, scene["desc"], metadata)
             logger.info(f"Stored {len(scenes)} scenes in vector store")
         except Exception as e:
             logger.warning(f"Failed to store scenes in vector store: {e}")
@@ -375,7 +400,7 @@ def make_scenes(beat_json: dict) -> list[dict]:
         logger.error(f"Scene generation failed for beat {beat_idx}: {e}")
         # Fallback to placeholder scenes if LLM fails
         scenes = _generate_fallback_scenes(beat_idx, beat_desc)
-        
+
         # Store fallback scenes in vector store
         try:
             vector_store = VectorStore()
@@ -383,16 +408,16 @@ def make_scenes(beat_json: dict) -> list[dict]:
                 scene_id = f"beat_{beat_idx}_scene_{scene['idx']:02d}"
                 metadata = {
                     "beat_id": beat_idx,
-                    "scene_idx": scene['idx'],
-                    "pov": scene['pov'],
-                    "purpose": scene['purpose'],
-                    "tags": scene['tags']
+                    "scene_idx": scene["idx"],
+                    "pov": scene["pov"],
+                    "purpose": scene["purpose"],
+                    "tags": scene["tags"],
                 }
-                vector_store.add(scene_id, scene['desc'], metadata)
+                vector_store.add(scene_id, scene["desc"], metadata)
             logger.info(f"Stored {len(scenes)} fallback scenes in vector store")
         except Exception as ve:
             logger.warning(f"Failed to store fallback scenes in vector store: {ve}")
-        
+
         return scenes
 
 
@@ -414,7 +439,7 @@ def validate_scenes_with_critique(scenes_text: str) -> None:
     if os.getenv("FAST_MODE") == "1":
         logger.info("Scene critique validation PASS (FAST_MODE)")
         return
-    
+
     try:
         critique_guard(scenes_text)
         logger.info("Scene critique validation PASS")
@@ -426,12 +451,12 @@ def validate_scenes_with_critique(scenes_text: str) -> None:
 def _stub_scene(beat_json: dict) -> dict:
     """
     Generate a single stub scene for fast mode.
-    
+
     Parameters
     ----------
     beat_json : dict
         Beat dictionary with idx and summary
-        
+
     Returns
     -------
     dict
@@ -439,7 +464,7 @@ def _stub_scene(beat_json: dict) -> dict:
     """
     beat_idx = beat_json.get("idx", 1)
     beat_desc = beat_json.get("summary", "Unknown beat")
-    
+
     return {
         "idx": 1,
         "pov": "main",
@@ -447,37 +472,37 @@ def _stub_scene(beat_json: dict) -> dict:
         "tags": ["test", "fast"],
         "desc": f"Scene 1: {beat_desc} (fast mode stub)",
         "beat_id": beat_idx,
-        "type": "stub"
+        "type": "stub",
     }
 
 
 def _generate_fallback_scenes(beat_idx: int, beat_desc: str) -> list[dict]:
     """
     Generate fallback scenes when LLM fails.
-    
+
     Parameters
     ----------
     beat_idx : int
         Beat index
     beat_desc : str
         Beat description
-        
+
     Returns
     -------
     list[dict]
         List of fallback scene dictionaries
     """
     logger.warning(f"Using fallback scene generation for beat {beat_idx}")
-    
+
     # Generate 10 scenes for backward compatibility with existing tests
     # In normal operation, this would be 8-12, but for testing consistency we use 10
     scene_count = 10
     scenes = []
-    
+
     for i in range(scene_count):
         scene_idx = i + 1
         pov = "main" if i % 3 == 0 else "side"  # Mix of main and side perspectives
-        
+
         scene_dict = {
             "idx": scene_idx,
             "pov": pov,
@@ -486,12 +511,12 @@ def _generate_fallback_scenes(beat_idx: int, beat_desc: str) -> list[dict]:
             "desc": f"장면 {scene_idx}: {beat_desc}에서 전개되는 상황",
             "beat_id": beat_idx,
         }
-        
+
         # Add type field for backward compatibility with existing tests
         scene_dict["type"] = "placeholder"
-        
+
         scenes.append(scene_dict)
-    
+
     return scenes
 
 
@@ -536,17 +561,19 @@ def run(
 
     typer.echo(f"Generated {len(scene_points)} scene points:")
     for scene in scene_points:
-        pov_indicator = "🎯" if scene['pov'] == 'main' else "👁️"
-        tags_str = ", ".join(scene['tags']) if scene.get('tags') else "No tags"
+        pov_indicator = "🎯" if scene["pov"] == "main" else "👁️"
+        tags_str = ", ".join(scene["tags"]) if scene.get("tags") else "No tags"
         typer.echo(f"  {pov_indicator} Scene {scene['idx']}: {scene['desc']}")
         typer.echo(f"    Purpose: {scene.get('purpose', 'N/A')}")
         typer.echo(f"    Tags: [{tags_str}]")
         typer.echo("")
 
-    main_scenes = sum(1 for s in scene_points if s.get('pov') == 'main')
-    side_scenes = sum(1 for s in scene_points if s.get('pov') == 'side')
-    typer.echo(f"Scene generation completed successfully.")
-    typer.echo(f"Total: {len(scene_points)} scenes (main: {main_scenes}, side: {side_scenes})")
+    main_scenes = sum(1 for s in scene_points if s.get("pov") == "main")
+    side_scenes = sum(1 for s in scene_points if s.get("pov") == "side")
+    typer.echo("Scene generation completed successfully.")
+    typer.echo(
+        f"Total: {len(scene_points)} scenes (main: {main_scenes}, side: {side_scenes})"
+    )
 
 
 @app.command()
@@ -557,7 +584,7 @@ def info():
     typer.echo("Scene Maker v2.0 - LLM-Powered Scene Generation")
     typer.echo("Features:")
     typer.echo("- Generates 8-12 scene points per beat using Gemini 2.5 Pro")
-    typer.echo("- Includes pov (main/side), purpose, tags, and descriptions") 
+    typer.echo("- Includes pov (main/side), purpose, tags, and descriptions")
     typer.echo("- Stores scenes in vector database with metadata")
     typer.echo(f"- Temperature: {TEMP_SCENE}")
     typer.echo(f"- Model: {os.getenv('MODEL_NAME', 'gemini-2.5-pro')}")

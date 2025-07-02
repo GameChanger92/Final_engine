@@ -12,9 +12,11 @@ import os
 from typing import Dict, Any
 from src.exceptions import RetryException
 from src.utils.path_helper import data_path
+from src.core.guard_registry import BaseGuard, register_guard
 
 
-class ImmutableGuard:
+@register_guard(order=4)
+class ImmutableGuard(BaseGuard):
     """
     Guard that monitors immutable character fields.
 

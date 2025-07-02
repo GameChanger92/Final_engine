@@ -14,6 +14,7 @@ from .context_builder import make_context
 from .draft_generator import generate_draft
 from .exceptions import RetryException
 from .utils.path_helper import data_path, out_path, ensure_project_dirs
+from .core.guard_registry import get_sorted_guards
 
 
 def create_arc_outline(episode_num: int) -> Dict:
@@ -37,6 +38,94 @@ def create_arc_outline(episode_num: int) -> Dict:
     }
 
 
+def run_guards_auto_registry(
+    draft: str, episode_num: int, project: str = "default"
+) -> None:
+    """
+    Run all guards using auto-registry system.
+
+    Parameters
+    ----------
+    draft : str
+        Draft content to validate
+    episode_num : int
+        Episode number
+    project : str, optional
+        Project ID for path resolution, defaults to "default"
+    """
+    # Import all guards to trigger registration
+    import src.plugins.lexi_guard  # noqa: F401
+    import src.plugins.emotion_guard  # noqa: F401
+    import src.plugins.schedule_guard  # noqa: F401
+    import src.plugins.immutable_guard  # noqa: F401
+    import src.plugins.date_guard  # noqa: F401
+    import src.plugins.anchor_guard  # noqa: F401
+    import src.plugins.rule_guard  # noqa: F401
+    import src.plugins.relation_guard  # noqa: F401
+    import src.plugins.pacing_guard  # noqa: F401
+    import src.plugins.critique_guard  # noqa: F401
+
+    # Get registered guards in order
+    guard_classes = get_sorted_guards()
+
+    for guard_class in guard_classes:
+        guard_name = guard_class.__name__
+        try:
+            # Create guard instance
+            guard = guard_class(project=project)
+
+            # Prepare appropriate arguments based on guard type
+            if guard_name == "LexiGuard":
+                guard.check(draft)
+            elif guard_name == "EmotionGuard":
+                # Simple implementation - compare with neutral text
+                prev_text = "This is neutral content from previous episode."
+                guard.check(prev_text, draft)
+            elif guard_name == "ScheduleGuard":
+                guard.check(episode_num)
+            elif guard_name == "ImmutableGuard":
+                # Load character data if available
+                import json
+
+                try:
+                    characters_path = data_path("characters.json", project)
+                    with open(characters_path, "r", encoding="utf-8") as f:
+                        characters = json.load(f)
+                    guard.check(characters)
+                except FileNotFoundError:
+                    print(f"⚠️  {guard_name}: No characters.json found, skipping")
+                    continue
+            elif guard_name == "DateGuard":
+                date_context = {"current_date": f"2024-{episode_num:02d}-01"}
+                guard.check(date_context, episode_num)
+            elif guard_name == "AnchorGuard":
+                guard.check(draft, episode_num)
+            elif guard_name == "RuleGuard":
+                guard.check(draft)
+            elif guard_name == "RelationGuard":
+                guard.check(episode_num)
+            elif guard_name == "PacingGuard":
+                # Simple scene segmentation for pacing analysis
+                scene_texts = [
+                    draft[: len(draft) // 3],
+                    draft[len(draft) // 3 : 2 * len(draft) // 3],
+                    draft[2 * len(draft) // 3 :],
+                ]
+                guard.check(scene_texts, episode_num)
+            elif guard_name == "CritiqueGuard":
+                guard.check(draft)
+            else:
+                print(f"⚠️  Unknown guard: {guard_name}")
+                continue
+
+            print(f"✅ {guard_name}: PASSED")
+        except RetryException as e:
+            # In main pipeline, we show warnings but don't halt execution
+            print(f"⚠️  {guard_name} Warning: {e}")
+        except Exception as e:
+            print(f"⚠️  {guard_name} Error: {e}")
+
+
 def run_pipeline(episode_num: int, project: str = "default") -> str:
     """
     Run the complete integration pipeline.
@@ -55,9 +144,10 @@ def run_pipeline(episode_num: int, project: str = "default") -> str:
     """
     # Enable fast mode for unit tests to avoid LLM retry delays
     import os
+
     if os.getenv("UNIT_TEST_MODE") == "1":
         os.environ.setdefault("FAST_MODE", "1")
-    
+
     # Step 1: Arc Outliner - create basic arc info
     create_arc_outline(episode_num)
 
@@ -102,57 +192,9 @@ def run_pipeline(episode_num: int, project: str = "default") -> str:
     except Exception as e:
         print(f"⚠️  Vector Store Warning: {e}")
 
-    # Step 6: Guard Chain - Quality checks
-
-    # Immutable Guard - check character consistency
-    try:
-        from src.plugins.immutable_guard import immutable_guard
-
-        # Load current character data for checking
-        import json
-
-        try:
-            characters_path = data_path("characters.json", project)
-            with open(characters_path, "r", encoding="utf-8") as f:
-                characters = json.load(f)
-            immutable_guard(characters, project)
-            print("✅ Immutable Guard: PASSED")
-        except FileNotFoundError:
-            print("⚠️  Immutable Guard: No characters.json found, skipping")
-    except RetryException as e:
-        print(f"⚠️  Immutable Guard Warning: {e}")
-
-    # Date Guard - check chronological progression
-    try:
-        from src.plugins.date_guard import date_guard
-
-        # Create context with date for checking (if available)
-        date_context = {"date": f"2024-{episode_num:02d}-01"}  # Simple date progression
-        date_guard(date_context, episode_num, project)
-        print("✅ Date Guard: PASSED")
-    except RetryException as e:
-        print(f"⚠️  Date Guard Warning: {e}")
-
-    # Lexi Guard - check lexical quality (message only on failure)
-    try:
-        from src.plugins.lexi_guard import lexi_guard
-
-        lexi_guard(draft)
-        print("✅ Lexi Guard: PASSED")
-    except RetryException as e:
-        # In this implementation, we just show a message but don't retry
-        # This follows the requirement: "실패 시 메시지만"
-        print(f"⚠️  Lexi Guard Warning: {e}")
-
-    # Rule Guard - check forbidden patterns and world rules
-    try:
-        from src.plugins.rule_guard import rule_guard
-
-        rule_guard(draft, project=project)
-        print("✅ Rule Guard: PASSED")
-    except RetryException as e:
-        # Show warning for rule violations but don't stop pipeline
-        print(f"⚠️  Rule Guard Warning: {e}")
+    # Step 6: Guard Chain - Quality checks using auto-registry
+    print("🛡️  Running Guard Chain (Auto-Registry)...")
+    run_guards_auto_registry(draft, episode_num, project)
 
     return draft
 

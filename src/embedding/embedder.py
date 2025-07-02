@@ -40,7 +40,7 @@ def embed_scene(text: str, model: str = "text-embedding-3-small") -> List[float]
     # Fast mode for unit tests - skip actual embedding generation for speed
     if os.getenv("FAST_MODE") == "1" or os.getenv("UNIT_TEST_MODE") == "1":
         return [0.1] * 1536  # Return dummy embedding quickly
-        
+
     if not text or not text.strip():
         raise ValueError("Text cannot be empty")
 

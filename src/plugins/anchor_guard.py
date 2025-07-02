@@ -14,9 +14,11 @@ from pathlib import Path
 from typing import Dict, List, Any
 from src.exceptions import RetryException
 from src.utils.path_helper import data_path
+from src.core.guard_registry import BaseGuard, register_guard
 
 
-class AnchorGuard:
+@register_guard(order=6)
+class AnchorGuard(BaseGuard):
     """
     Anchor Guard - validates anchor events appear within expected episodes.
 

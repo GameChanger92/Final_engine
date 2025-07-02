@@ -13,6 +13,7 @@ import re
 import numpy as np
 from typing import Dict
 from src.exceptions import RetryException
+from src.core.guard_registry import BaseGuard, register_guard
 
 
 # Emotion keyword mapping for simple classification
@@ -521,3 +522,36 @@ def emotion_guard(prev_text: str, curr_text: str) -> bool:
     except RetryException:
         # Re-raise the exception to be handled by the caller
         raise
+
+
+@register_guard(order=2)
+class EmotionGuard(BaseGuard):
+    """
+    Emotion Guard class for emotional transition validation.
+
+    Provides class-based interface for emotion change detection between
+    text segments using emotion classification and delta analysis.
+    """
+
+    def check(self, prev_text: str, curr_text: str) -> Dict[str, any]:
+        """
+        Check for emotional transition violations.
+
+        Parameters
+        ----------
+        prev_text : str
+            Previous text segment
+        curr_text : str
+            Current text segment
+
+        Returns
+        -------
+        Dict[str, any]
+            Check results with emotion metrics and pass/fail status
+
+        Raises
+        ------
+        RetryException
+            If emotional delta exceeds threshold
+        """
+        return check_emotion_guard(prev_text, curr_text)

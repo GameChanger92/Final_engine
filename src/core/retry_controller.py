@@ -54,7 +54,7 @@ def run_with_retry(func, *args, max_retry=2, **kwargs) -> Any:
     >>> result = run_with_retry(guard_function, "some text", max_retry=2)
     """
     fast_mode = os.getenv("FAST_MODE") == "1" or os.getenv("UNIT_TEST_MODE") == "1"
-    
+
     messages = []
 
     func_name = getattr(func, "__name__", str(func))

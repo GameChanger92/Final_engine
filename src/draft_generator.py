@@ -103,7 +103,7 @@ def call_llm(prompt: str) -> str:
         except ImportError:
             # Fast mode for unit tests - return stub immediately (but only after import check)
             if os.getenv("FAST_MODE") == "1":
-                return '''Fast mode stub draft content that is long enough to meet the minimum character requirements.
+                return """Fast mode stub draft content that is long enough to meet the minimum character requirements.
 This is a placeholder draft generated in fast mode for unit testing purposes.
 It contains multiple lines and sufficient content to pass basic validation checks.
 The draft includes narrative elements and meets the length requirements.
@@ -112,8 +112,8 @@ Additional content is added here to ensure the minimum character count is met.
 The story continues with engaging dialogue and scene descriptions.
 Characters interact meaningfully as the plot unfolds through various scenes.
 Each paragraph adds depth to the narrative while maintaining readability.
-The draft concludes with a satisfying resolution that ties together the themes.'''
-            
+The draft concludes with a satisfying resolution that ties together the themes."""
+
             logger.error("google-generativeai not installed")
             raise RetryException(
                 "Google Generative AI library not available", guard_name="call_llm"
@@ -141,7 +141,9 @@ The draft concludes with a satisfying resolution that ties together the themes.'
         }
 
         # Generate content
-        logger.info(f"✍️  Draft Generator… (temperature={temperature}, max_output_tokens=60000)")
+        logger.info(
+            f"✍️  Draft Generator… (temperature={temperature}, max_output_tokens=60000)"
+        )
         logger.info(f"Calling {model_name} for draft generation...")
         response = model.generate_content(prompt, generation_config=generation_config)
 
@@ -278,14 +280,14 @@ def validate_with_guard_chain(draft: str, episode_num: int) -> bool:
     """
     try:
         logger.info("🛡️  Running Guard Chain …")
-        
+
         # Run critique guard with retry mechanism
         def critique_wrapper():
             critique_guard(draft)
             logger.info("     - Critique   ✅  Self-Critique PASS")
-        
+
         run_with_retry(critique_wrapper, max_retry=2)
-        
+
         # For now, we focus on the critique guard integration
         # Other guards can be added here following the same pattern
         logger.info(f"Draft validated with guard chain - {len(draft)} chars")
@@ -346,8 +348,7 @@ def generate_fallback_draft(context: str, episode_num: int) -> str:
     result = (
         "=== [PLACEHOLDER DRAFT CONTENT] ===\n"
         "[Generated using fallback mode - replace with Gemini output when available]\n\n"
-        "Context used: (scenes + metadata omitted in fallback)\n\n"
-        + fallback_text
+        "Context used: (scenes + metadata omitted in fallback)\n\n" + fallback_text
     )
 
     logger.info(f"Fallback draft generated: {len(result)} characters")
@@ -396,7 +397,7 @@ def info():
 def simulate_guards_validation(draft: str, episode_num: int) -> bool:
     """
     Simulate guards validation for testing purposes.
-    
+
     This is a legacy support function for tests that checks basic
     draft quality requirements.
 
@@ -415,15 +416,15 @@ def simulate_guards_validation(draft: str, episode_num: int) -> bool:
     # Basic validation checks
     if not draft or len(draft) < 100:
         return False
-    
+
     # Check for multiple lines
-    if '\n' not in draft:
+    if "\n" not in draft:
         return False
-    
+
     # Check minimum content length
     if len(draft.strip()) < 500:
         return False
-    
+
     return True
 
 
