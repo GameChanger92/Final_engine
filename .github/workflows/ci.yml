@@ -2,39 +2,48 @@ name: CI
 
 on:
   push:
-    branches: [ "*" ]
+    branches: ["*"]          # 모든 브랜치에서 푸시 시 동작
   pull_request:
-    branches: [ "*" ]
+    branches: ["*"]          # 모든 브랜치 PR에서 동작
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
+      # 1) 소스 체크아웃
       - uses: actions/checkout@v4
 
+      # 2) 파이썬 설치
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
-      # 1) 의존성 설치 + 스타일 툴
+      # 3) 의존성 + 포매터/린터 설치
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          pip install black ruff            # 스타일 게이트용
-          pip install pytest                # requirements.txt 에 없으면 추가
+          pip install black ruff pytest
 
-      # 2) Ruff → Black 순으로 빠르게 실패 감지
+      # 4) 품질 검사 (Ruff → Black)
       - name: Ruff Lint
         run: ruff check .
 
       - name: Black Check
         run: black --check .
 
-      # 3) 기존 테스트 실행
+      # 5) 단위 테스트
       - name: Run pytest
         run: pytest -q
 
-      # 4) 스모크 파이프라인 (FAST_MODE 가정)
+      # 6) 스모크 파이프라인
+      #    - LLM 호출은 건너뛰고(UNIT_TEST_MODE)
+      #    - 대량 임베딩도 생략(FAST_MODE)
       - name: Test pipeline script
-        run: python scripts/run_pipeline.py --project-id default --episodes 1-2
+        env:
+          UNIT_TEST_MODE: "1"
+          FAST_MODE: "1"
+          # ↓ 실제 API 키를 넣고 싶으면, 두 줄 주석 해제
+          # GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          # OPENAI_API_KEY:  ${{ secrets.OPENAI_API_KEY }}
+        run: python scripts/run_pipeline.py --project-id default --episodes 2
