@@ -13,7 +13,7 @@ import gc
 import json
 import os
 from pathlib import Path
-from typing import Any, List, Tuple
+from typing import Any
 
 import chromadb
 from chromadb.config import Settings
@@ -33,7 +33,7 @@ class VectorStore:
     project : str, optional
         프로젝트 ID (기본값 ``"default"``)
     test_mode : bool, optional
-        • ``True``  → 메모리 DB(in‑memory) 사용 – 단위테스트 용도  
+        • ``True``  → 메모리 DB(in‑memory) 사용 – 단위테스트 용도
         • ``False`` → Persistent DB(Chroma SQLite) 사용
     """
 
@@ -65,9 +65,7 @@ class VectorStore:
         )
 
         # 내부 카운터 – test_mode일 땐 직접 관리(쿼리 속도 절약)
-        self._count: int = (
-            0 if self.test_mode else self.collection.count()
-        )
+        self._count: int = 0 if self.test_mode else self.collection.count()
 
     # --------------------------------------------------------------------- #
     # 내부 유틸
@@ -126,7 +124,7 @@ class VectorStore:
 
         try:
             # 임베딩 생성 (FAST_MODE or UNIT_TEST_MODE시 embedder가 dummy 벡터 반환)
-            embedding: List[float] = embed_scene(text, self.config["model"])
+            embedding: list[float] = embed_scene(text, self.config["model"])
 
             # 중복 ID 덮어쓰기 대비 → upsert 사용
             if hasattr(self.collection, "upsert"):
@@ -150,18 +148,14 @@ class VectorStore:
                 self.collection.persist()
 
             # 카운트 업데이트
-            self._count = (
-                self._count + 1
-                if self.test_mode
-                else self.collection.count()
-            )
+            self._count = self._count + 1 if self.test_mode else self.collection.count()
             return True
 
         except Exception:
             return False
 
     # ------------------------------------------------------------------ #
-    def similar(self, query: str, top_k: int = 5) -> List[Tuple[str, float]]:
+    def similar(self, query: str, top_k: int = 5) -> list[tuple[str, float]]:
         """
         코사인 유사도 기준 scene 검색.
 
@@ -212,7 +206,7 @@ class VectorStore:
     # ------------------------------------------------------------------ #
     # Context / cleanup
     # ------------------------------------------------------------------ #
-    def __enter__(self) -> "VectorStore":  # noqa: D401
+    def __enter__(self) -> VectorStore:  # noqa: D401
         return self
 
     def __exit__(self, exc_type, exc, tb) -> None:  # noqa: D401
