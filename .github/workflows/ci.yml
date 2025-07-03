@@ -10,6 +10,15 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    # ① 여기!  ──────────────────────────────
+    env:
+      UNIT_TEST_MODE: "1"                 # LLM · 임베딩 모두 더미로 돌리기
+      FAST_MODE: "1"                      # 대량 임베딩 스킵 (벡터 저장만)
+      # 실제 키로 돌리고 싶을 때만 두 줄 활성화
+      # GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+      # OPENAI_API_KEY:  ${{ secrets.OPENAI_API_KEY }}
+    # ─────────────────────────────────────
+
     steps:
       - uses: actions/checkout@v4
 
@@ -21,20 +30,20 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          pip install black ruff            # 스타일 게이트용
-          pip install pytest                # requirements.txt 에 없으면 추가
+          pip install black ruff
+          pip install pytest
 
-      # 2) Ruff → Black 순으로 빠르게 실패 감지
+      # 2) Ruff → Black
       - name: Ruff Lint
         run: ruff check .
 
       - name: Black Check
         run: black --check .
 
-      # 3) 기존 테스트 실행
+      # 3) 단위 테스트
       - name: Run pytest
         run: pytest -q
 
-      # 4) 스모크 파이프라인 (FAST_MODE 가정)
+      # 4) 스모크 파이프라인 (FAST_MODE + UNIT_TEST_MODE)
       - name: Test pipeline script
-        run: python scripts/run_pipeline.py --project-id default --episodes 1-2
+        run: python scripts/run_pipeline.py --project-id default --episodes 2   # ②
