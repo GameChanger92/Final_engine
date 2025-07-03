@@ -1,10 +1,15 @@
 """
 vector_store.py
+===============
 
-ChromaDB wrapper for Final Engine with project-aware paths.
-Provides scene point similarity search functionality.
+ChromaDB 래퍼 – Final Engine 전용
+* 프로젝트별 벡터 DB 경로 관리
+* scene 임베딩 저장 / 유사도 검색
 """
 
+from __future__ import annotations
+
+import gc
 import json
 import os
 from pathlib import Path
@@ -16,221 +21,218 @@ from chromadb.config import Settings
 from src.embedding.embedder import embed_scene
 from src.utils.path_helper import data_path
 
+__all__ = ["VectorStore"]
+
 
 class VectorStore:
     """
-    ChromaDB-based vector store for scene embeddings with project-aware paths.
+    프로젝트 단위 Scene 임베딩 저장소.
 
-    Manages scene embeddings and provides similarity search functionality.
+    Parameters
+    ----------
+    project : str, optional
+        프로젝트 ID (기본값 ``"default"``)
+    test_mode : bool, optional
+        • ``True``  → 메모리 DB(in‑memory) 사용 – 단위테스트 용도
+        • ``False`` → Persistent DB(Chroma SQLite) 사용
     """
 
-    def __init__(self, project: str = "default"):
-        """
-        Initialize VectorStore for a specific project.
+    def __init__(self, project: str = "default", *, test_mode: bool = False) -> None:
+        # -------- 기본 설정 --------
+        self.project: str = project
+        # 환경변수(UNIT_TEST_MODE)와 인자 두 가지를 모두 허용
+        env_test = os.getenv("UNIT_TEST_MODE") == "1"
+        self.test_mode: bool = test_mode or env_test
 
-        Parameters
-        ----------
-        project : str, optional
-            Project ID for path resolution, defaults to "default"
-        """
-        self.project = project
-        self.config = self._load_config()
+        # 임베딩/DB 경로 설정 불러오기
+        self.config: dict[str, Any] = self._load_config()
 
-        # Set up ChromaDB path based on project
-        db_path = self._get_db_path()
+        # -------- Chroma 클라이언트/컬렉션 --------
+        if self.test_mode:
+            # 메모리 전용 클라이언트 (파일 락 우려 無)
+            self.client = chromadb.Client()
+        else:
+            db_path = self._get_db_path()
+            self.client = chromadb.PersistentClient(
+                path=str(db_path),
+                settings=Settings(anonymized_telemetry=False),
+            )
 
-        # Initialize ChromaDB client
-        self.client = chromadb.PersistentClient(
-            path=str(db_path), settings=Settings(anonymized_telemetry=False)
-        )
-
-        # Get or create collection for this project
+        # 컬렉션 생성 or 조회
         self.collection = self.client.get_or_create_collection(
-            name=f"scenes_{project}", metadata={"hnsw:space": "cosine"}
+            name=f"scenes_{self.project}",
+            metadata={"hnsw:space": "cosine"},
         )
 
+        # 내부 카운터 – test_mode일 땐 직접 관리(쿼리 속도 절약)
+        self._count: int = 0 if self.test_mode else self.collection.count()
+
+    # --------------------------------------------------------------------- #
+    # 내부 유틸
+    # --------------------------------------------------------------------- #
     def _load_config(self) -> dict[str, Any]:
-        """
-        Load embedding configuration from JSON file.
+        """embedding_config.json 로드 (없으면 기본값 생성)."""
+        cfg_path = data_path("embedding_config.json", self.project)
 
-        Returns
-        -------
-        Dict[str, Any]
-            Configuration with model and chroma_path settings
-        """
-        config_path = data_path("embedding_config.json", self.project)
+        default_cfg = {
+            "model": "text-embedding-3-small",
+            "chroma_path": f"projects/{self.project}/db",
+        }
 
-        # Create default config if it doesn't exist
-        if not config_path.exists():
-            default_config = {
-                "model": "text-embedding-3-small",
-                "chroma_path": f"projects/{self.project}/db",
-            }
-
-            # Ensure directory exists
-            config_path.parent.mkdir(parents=True, exist_ok=True)
-
-            with open(config_path, "w", encoding="utf-8") as f:
-                json.dump(default_config, f, indent=2)
-
-            return default_config
+        if not cfg_path.exists():
+            cfg_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(cfg_path, "w", encoding="utf-8") as f:
+                json.dump(default_cfg, f, indent=2)
+            return default_cfg
 
         try:
-            with open(config_path, encoding="utf-8") as f:
-                config = json.load(f)
-
-            # Provide defaults for missing keys
-            config.setdefault("model", "text-embedding-3-small")
-            config.setdefault("chroma_path", f"projects/{self.project}/db")
-
-            return config
-
+            with open(cfg_path, encoding="utf-8") as f:
+                cfg = json.load(f)
+            cfg.setdefault("model", default_cfg["model"])
+            cfg.setdefault("chroma_path", default_cfg["chroma_path"])
+            return cfg
         except (json.JSONDecodeError, OSError):
-            # Return default config on file errors
-            return {
-                "model": "text-embedding-3-small",
-                "chroma_path": f"projects/{self.project}/db",
-            }
+            # 손상 시 기본값으로 복구
+            return default_cfg
 
     def _get_db_path(self) -> Path:
-        """
-        Get the database path for ChromaDB storage.
+        """프로젝트별 ChromaDB 경로(Path 객체) 반환."""
+        chroma_path = self.config["chroma_path"].replace("{id}", self.project)
 
-        Returns
-        -------
-        Path
-            Path to ChromaDB database directory
-        """
-        chroma_path = self.config["chroma_path"]
-
-        # Replace {id} placeholder with actual project ID
-        chroma_path = chroma_path.replace("{id}", self.project)
-
-        # Ensure it's an absolute path
         if not os.path.isabs(chroma_path):
-            # Relative to project root
             chroma_path = Path("projects") / self.project / "db"
         else:
             chroma_path = Path(chroma_path)
 
-        # Ensure directory exists
         chroma_path.mkdir(parents=True, exist_ok=True)
-
         return chroma_path
 
-    def add(self, scene_id: str, text: str, metadata: dict = None) -> bool:
+    # --------------------------------------------------------------------- #
+    # 공용 API
+    # --------------------------------------------------------------------- #
+    def add(self, scene_id: str, text: str, metadata: dict | None = None) -> bool:
         """
-        Add a scene embedding to the vector store.
-
-        Parameters
-        ----------
-        scene_id : str
-            Unique identifier for the scene
-        text : str
-            Scene text content to embed
-        metadata : dict, optional
-            Additional metadata to store with the scene (e.g., tags, pov, purpose)
+        Scene 임베딩 추가.
 
         Returns
         -------
         bool
-            True if successfully added, False otherwise
+            성공 여부
         """
-        # Fast mode for unit tests - skip expensive embedding operations but keep metadata behavior
-        fast_mode = os.getenv("UNIT_TEST_MODE") == "1" or os.getenv("FAST_MODE") == "1"
-        if fast_mode:
-            # Still process the call for test assertions, just don't do expensive operations
-            return True
+        if not text or not text.strip():
+            return False
 
         try:
-            # Generate embedding
-            embedding = embed_scene(text, self.config["model"])
+            # 임베딩 생성 (FAST_MODE or UNIT_TEST_MODE시 embedder가 dummy 벡터 반환)
+            embedding: list[float] = embed_scene(text, self.config["model"])
 
-            # Add to ChromaDB collection
-            self.collection.add(
-                embeddings=[embedding],
-                documents=[text],
-                ids=[scene_id],
-                metadatas=[metadata] if metadata else None,
-            )
+            # 중복 ID 덮어쓰기 대비 → upsert 사용
+            if hasattr(self.collection, "upsert"):
+                self.collection.upsert(
+                    embeddings=[embedding],
+                    documents=[text],
+                    ids=[scene_id],
+                    metadatas=[metadata] if metadata else None,
+                )
+            else:
+                # 구버전 호환
+                self.collection.add(
+                    embeddings=[embedding],
+                    documents=[text],
+                    ids=[scene_id],
+                    metadatas=[metadata] if metadata else None,
+                )
 
+            # 파일 DB라면 바로 flush
+            if not self.test_mode and hasattr(self.collection, "persist"):
+                self.collection.persist()
+
+            # 카운트 업데이트
+            self._count = self._count + 1 if self.test_mode else self.collection.count()
             return True
 
         except Exception:
             return False
 
+    # ------------------------------------------------------------------ #
     def similar(self, query: str, top_k: int = 5) -> list[tuple[str, float]]:
         """
-        Find similar scenes using cosine similarity.
+        코사인 유사도 기준 scene 검색.
 
-        Parameters
-        ----------
-        query : str
-            Query text to find similar scenes for
-        top_k : int, optional
-            Number of similar scenes to return, defaults to 5
-
-        Returns
-        -------
-        List[Tuple[str, float]]
-            List of (scene_id, similarity_score) tuples, ordered by similarity
+        Notes
+        -----
+        * 빈 컬렉션일 경우 **빈 리스트** 반환 (예외 아님).
         """
-        if not query or not query.strip():
+        if not query or top_k <= 0:
             return []
 
         try:
-            # Generate embedding for query
-            query_embedding = embed_scene(query, self.config["model"])
+            query_vec = embed_scene(query, self.config["model"])
+            n_results = min(top_k, self.count())
+            if n_results == 0:
+                return []
 
-            # Search for similar embeddings
             results = self.collection.query(
-                query_embeddings=[query_embedding],
-                n_results=min(top_k, self.collection.count()),
+                query_embeddings=[query_vec],
+                n_results=n_results,
             )
 
-            # Format results as (scene_id, score) tuples
-            if results["ids"] and results["distances"]:
-                scene_ids = results["ids"][0]
-                distances = results["distances"][0]
-
-                # Convert distances to similarity scores (higher = more similar)
-                # ChromaDB returns cosine distances, so similarity = 1 - distance
-                similarities = [1.0 - distance for distance in distances]
-
-                return list(zip(scene_ids, similarities, strict=False))
-
-            return []
-
+            ids = results.get("ids", [[]])[0]
+            dists = results.get("distances", [[]])[0]
+            sims = [1.0 - d for d in dists]
+            return list(zip(ids, sims, strict=False))
         except Exception:
             return []
 
+    # ------------------------------------------------------------------ #
     def count(self) -> int:
-        """
-        Get the number of scenes in the vector store.
+        """저장된 scene 개수."""
+        return self._count if self.test_mode else self.collection.count()
 
-        Returns
-        -------
-        int
-            Number of stored scene embeddings
-        """
-        return self.collection.count()
-
+    # ------------------------------------------------------------------ #
     def clear(self) -> bool:
-        """
-        Clear all embeddings from the vector store.
-
-        Returns
-        -------
-        bool
-            True if successfully cleared, False otherwise
-        """
+        """모든 임베딩 삭제."""
         try:
-            # Delete and recreate collection
             self.client.delete_collection(f"scenes_{self.project}")
             self.collection = self.client.get_or_create_collection(
-                name=f"scenes_{self.project}", metadata={"hnsw:space": "cosine"}
+                name=f"scenes_{self.project}",
+                metadata={"hnsw:space": "cosine"},
             )
+            self._count = 0
             return True
-
         except Exception:
             return False
+
+    # ------------------------------------------------------------------ #
+    # Context / cleanup
+    # ------------------------------------------------------------------ #
+    def __enter__(self) -> VectorStore:  # noqa: D401
+        return self
+
+    def __exit__(self, exc_type, exc, tb) -> None:  # noqa: D401
+        self.close()
+
+    def close(self) -> None:
+        """
+        리소스 해제 – 윈도우 파일 락 방지.
+
+        * 컬렉션 persist → 클라이언트 reset → 레퍼런스 제거 → GC
+        """
+        try:
+            if self.collection is not None and hasattr(self.collection, "persist"):
+                self.collection.persist()
+
+            if isinstance(self.client, chromadb.PersistentClient):
+                # 0.4.x 이상: reset() 존재 → 연결 종료 & 락 해제
+                if hasattr(self.client, "reset"):
+                    self.client.reset()
+
+            # 참조 끊고 GC
+            self.collection = None
+            self.client = None
+            gc.collect()
+        except Exception:
+            pass
+
+    def __del__(self) -> None:  # noqa: D401
+        self.close()
