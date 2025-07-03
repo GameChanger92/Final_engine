@@ -1,49 +1,43 @@
 name: CI
-
 on:
-  push:
-    branches: [ "*" ]
-  pull_request:
-    branches: [ "*" ]
+  push:        { branches: ["*"] }
+  pull_request: { branches: ["*"] }
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
-    # ① 여기!  ──────────────────────────────
+    # 🌱 (잡 전체 env → 두 변수 제거)
     env:
-      UNIT_TEST_MODE: "1"                 # LLM · 임베딩 모두 더미로 돌리기
-      FAST_MODE: "1"                      # 대량 임베딩 스킵 (벡터 저장만)
-      # 실제 키로 돌리고 싶을 때만 두 줄 활성화
+      # 실제 키가 필요하면 주석 해제
       # GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
       # OPENAI_API_KEY:  ${{ secrets.OPENAI_API_KEY }}
-    # ─────────────────────────────────────
 
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+        with: { python-version: "3.11" }
 
-      # 1) 의존성 설치 + 스타일 툴
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          pip install black ruff
-          pip install pytest
+          pip install black ruff pytest
 
-      # 2) Ruff → Black
       - name: Ruff Lint
         run: ruff check .
 
       - name: Black Check
         run: black --check .
 
-      # 3) 단위 테스트
       - name: Run pytest
-        run: pytest -q
+        run: pytest -q          # ← 이제 원래 기대값으로 통과
 
-      # 4) 스모크 파이프라인 (FAST_MODE + UNIT_TEST_MODE)
+      # 🔧  파이프라인만 더미 모드로
       - name: Test pipeline script
-        run: python scripts/run_pipeline.py --project-id default --episodes 2   # ②
+        env:
+          UNIT_TEST_MODE: "1"
+          FAST_MODE: "1"
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          OPENAI_API_KEY:  ${{ secrets.OPENAI_API_KEY }}
+        run: python scripts/run_pipeline.py --project-id default --episodes 2
