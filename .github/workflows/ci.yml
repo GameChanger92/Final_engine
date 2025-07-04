@@ -9,6 +9,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:                     # 👈 모든 스텝 공통 환경변수
+      UNIT_TEST_MODE: "1"
+      FAST_MODE: "1"
 
     steps:
       # 1) 소스 체크아웃
@@ -40,10 +43,4 @@ jobs:
       #    - LLM 호출은 건너뛰고(UNIT_TEST_MODE)
       #    - 대량 임베딩도 생략(FAST_MODE)
       - name: Test pipeline script
-        env:
-          UNIT_TEST_MODE: "1"
-          FAST_MODE: "1"
-          # ↓ 실제 API 키를 넣고 싶으면, 두 줄 주석 해제
-          # GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-          # OPENAI_API_KEY:  ${{ secrets.OPENAI_API_KEY }}
         run: python scripts/run_pipeline.py --project-id default --episodes 2
