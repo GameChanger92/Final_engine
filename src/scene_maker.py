@@ -425,9 +425,7 @@ def make_scenes(beat_json: dict) -> list[dict]:
                         vector_store.add(scene_id, scene["desc"], metadata)
                     logger.info(f"Stored {len(scenes)} fallback scenes in vector store")
                 except Exception as ve:
-                    logger.warning(
-                        f"Failed to store fallback scenes in vector store: {ve}"
-                    )
+                    logger.warning(f"Failed to store fallback scenes in vector store: {ve}")
 
                 return scenes
 

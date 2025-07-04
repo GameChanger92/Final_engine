@@ -31,6 +31,7 @@ _DUMMY_TEXT = (
     + "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " * 20
 )
 
+
 # ────────────────── 프롬프트 빌더 ──────────────────
 def build_prompt(
     context: str,
@@ -60,6 +61,7 @@ def build_prompt(
     except Exception as e:
         logger.error(f"build_prompt error: {e}")
         return f"Generate an episode draft from: {context}"
+
 
 # ──────────────── LLM 호출 (stub/real) ────────────────
 def call_llm(prompt: str) -> str:
@@ -92,6 +94,7 @@ def call_llm(prompt: str) -> str:
         raise RetryException("Empty Gemini response", guard_name="call_llm")
     return res.text
 
+
 # ───────────────────── 후처리 ─────────────────────
 def _post_edit(text: str) -> str:
     if not text:
@@ -101,6 +104,7 @@ def _post_edit(text: str) -> str:
     # 3줄 이상 빈 줄 → 2줄
     text = re.sub(r"\n\s*\n\s*\n+", "\n\n", text)
     return text.replace("\r\n", "\n").replace("\r", "\n")
+
 
 # ──────────────── 드래프트 생성 ────────────────
 def generate_draft(
@@ -130,9 +134,7 @@ def generate_draft(
 
     # 600 자 미만 → RetryException (unit test 용)
     if len(raw) < 600:
-        raise RetryException(
-            f"LLM output too short ({len(raw)} chars)", guard_name="short_output"
-        )
+        raise RetryException(f"LLM output too short ({len(raw)} chars)", guard_name="short_output")
 
     draft_body = _post_edit(raw)
 
@@ -144,16 +146,18 @@ def generate_draft(
 
     return f"Episode {episode_number}\n\n{draft_body}"
 
+
 # ───────────────────── Fallback ─────────────────────
 def generate_fallback_draft(context: str, episode_number: int) -> str:
     body = (
-        "This story continues as our narrative heroes face new challenges and twists.\n"
-        * 6
+        "This story continues as our narrative heroes face new challenges and twists.\n" * 6
     ) + _DUMMY_TEXT
     return f"Episode {episode_number}\n\n{body}"
 
+
 # ───────────────────── CLI (간단) ─────────────────────
 app = typer.Typer(help="Draft Generator – create episode drafts", no_args_is_help=True)
+
 
 @app.command()
 def run_draft(
@@ -161,6 +165,7 @@ def run_draft(
     episode: int = typer.Option(1, "--episode"),
 ):
     print(generate_draft(context=context, episode_number=episode))
+
 
 if __name__ == "__main__":
     app()
