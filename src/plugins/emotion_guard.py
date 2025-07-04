@@ -522,7 +522,7 @@ def emotion_guard(prev_text: str, curr_text: str) -> bool:
         raise
 
 
-@register_guard(order=2)
+@register_guard(order=6)
 class EmotionGuard(BaseGuard):
     """
     Emotion Guard class for emotional transition validation.
@@ -530,6 +530,17 @@ class EmotionGuard(BaseGuard):
     Provides class-based interface for emotion change detection between
     text segments using emotion classification and delta analysis.
     """
+
+    def __init__(self, project=None):
+        """
+        Initialize EmotionGuard.
+
+        Parameters
+        ----------
+        project : str, optional
+            Project identifier (optional, for compatibility)
+        """
+        self.project = project
 
     def check(self, prev_text: str, curr_text: str) -> dict[str, any]:
         """

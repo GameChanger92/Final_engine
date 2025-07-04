@@ -17,7 +17,7 @@ from src.exceptions import RetryException
 from src.utils.path_helper import data_path
 
 
-@register_guard(order=5)
+@register_guard(order=1)
 class DateGuard(BaseGuard):
     """
     Guard that monitors chronological date progression.

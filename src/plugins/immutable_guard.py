@@ -16,7 +16,7 @@ from src.exceptions import RetryException
 from src.utils.path_helper import data_path
 
 
-@register_guard(order=4)
+@register_guard(order=7)
 class ImmutableGuard(BaseGuard):
     """
     Guard that monitors immutable character fields.
