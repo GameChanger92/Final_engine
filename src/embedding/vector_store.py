@@ -204,6 +204,24 @@ class VectorStore:
             return False
 
     # ------------------------------------------------------------------ #
+    def get(self, scene_id: str) -> str:
+        """
+        저장된 scene 텍스트 1개를 ID로 찾는다.
+
+        Returns
+        -------
+        str
+            문서 원문 (없으면 빈 문자열)
+        """
+        try:
+            res = self.collection.get(ids=[scene_id])
+            # chromadb 는 {'documents': [['...']], 'ids': [['...']]} 형태 반환
+            docs = res.get("documents", [[]])[0]
+            return docs[0] if docs else ""
+        except Exception:
+            return ""
+
+    # ------------------------------------------------------------------ #
     # Context / cleanup
     # ------------------------------------------------------------------ #
     def __enter__(self) -> VectorStore:  # noqa: D401

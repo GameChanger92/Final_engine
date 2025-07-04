@@ -186,6 +186,9 @@ def run_pipeline(episode_num: int, project: str = "default") -> str:
             else:
                 print(f"⚠️  Failed to save embedding for scene {scene_id}")
 
+        # Save episode draft embedding
+        vector_store.add(f"ep{episode_num:03d}_draft", draft)
+
     except Exception as e:
         print(f"⚠️  Vector Store Warning: {e}")
 
