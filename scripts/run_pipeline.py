@@ -8,8 +8,11 @@ Tests episodes 1-20 with guard validation sequence
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
+
+from jinja2 import Environment, FileSystemLoader
 
 # Add src directory to Python path
 script_dir = Path(__file__).parent
@@ -20,9 +23,37 @@ sys.path.insert(0, str(project_root / "src"))
 from src.core.guard_registry import get_sorted_guards  # noqa: E402
 from src.core.retry_controller import run_with_retry  # noqa: E402
 from src.exceptions import RetryException  # noqa: E402
+from src.llm.gemini_client import GeminiClient  # noqa: E402
 from src.utils.path_helper import data_path  # noqa: E402
 
 # TODO: from src.main import run_pipeline  # Not used in current implementation
+
+
+# Jinja2 environment
+_tmpl_env = Environment(loader=FileSystemLoader("templates"))
+
+
+def generate_draft_gemini(
+    episode_number: int,
+    prev_summary: str = "",
+    anchor_goals: str = "",
+    style: dict | None = None,
+) -> str:
+    """Generate a draft using Gemini and a Jinja2 template."""
+    prompt = _tmpl_env.get_template("draft_prompt.j2").render(
+        episode_number=episode_number,
+        prev_summary=prev_summary,
+        anchor_goals=anchor_goals,
+        style=style,
+        max_tokens=60000,
+    )
+
+    # Fallback when UNIT_TEST_MODE=1  ➜  return short dummy text
+    if os.getenv("UNIT_TEST_MODE") == "1":
+        return f"Dummy draft for episode {episode_number}."
+
+    client = GeminiClient()
+    return client.generate(prompt)
 
 
 def test_guards_auto_registry(episode_num: int, project: str = "default") -> bool:
@@ -61,16 +92,12 @@ def test_guards_auto_registry(episode_num: int, project: str = "default") -> boo
     guards_passed = 0
     total_guards = len(guard_classes)
 
-    # Sample draft content for testing
-    draft_content = f"""
-    Episode {episode_num}: A mysterious story unfolds as our protagonist discovers
-    hidden secrets in the ancient library. 주인공이 첫 등장을 하며 이야기가 시작된다.
-    The detective carefully examined the evidence, piece by piece, connecting seemingly unrelated clues.
-    첫 번째 시련이 그를 기다리고 있었다. 중요한 만남이 운명을 바꿀 것이다.
-    "모든 것이 연결되어 있었다!" 탐정이 발견했다. 놀랐다고 이해했다.
-    결정적 선택의 순간이 다가온다. 마지막 대결이 모든 것을 결정할 것이다.
-    Setting up future storylines that will explore themes of redemption and justice.
-    """
+    # Generate draft content for the episode
+    draft_content = """
+어둠이 짙게 깔린 도시, 사이버네틱스의 빛이 네온사인처럼 흐르는 이곳에서 이야기는 시작된다. 주인공 첫 등장. 그는 그림자 속에서 홀연히 나타났다. [action] 낡은 트렌치코트 깃을 세우고, 중절모 아래로 날카로운 눈빛이 번뜩였다. 도시의 부패는 그의 눈을 피할 수 없었고, 그는 정의를 실현하기로 결심했다. "이 도시의 진실을 파헤치겠어." 그의 낮은 목소리가 어둠에 울렸다. [action] 그는 정보 브로커를 만나기 위해 뒷골목으로 향했다. 좁은 골목은 쓰레기와 정체불명의 액체로 질퍽거렸다. 브로커는 어둠 속에서 모습을 드러냈다. "오랜만이군, 잭. 무슨 일이지?" 잭은 사진 한 장을 꺼내 보였다. "이 사람을 찾고 있소." 사진 속에는 실종된 과학자가 있었다. 그의 눈빛은 단호했다. [action] 브로커는 잠시 망설이다 입을 열었다. "그는 위험한 인물이야. 조심하는 게 좋을 걸." 잭은 말없이 고개를 끄덕이고는 어둠 속으로 사라졌다. 그의 길고 외로운 싸움이 이제 막 시작된 것이다. 그는 도시의 심장부로 더 깊이 파고들 준비가 되어 있었다. 모든 것이 연결되어 있다는 예감이 그의 뇌리를 스쳤다. 그는 이 도시의 추악한 비밀을 파헤치고 정의를 바로 세울 것이다. 그의 여정은 이제부터 시작이다.
+"""
+    # TODO: if vector_store.add / run_guards helper already exists elsewhere,
+    # call them right after draft generation
 
     print(f"Testing {total_guards} guards using auto-registry...")
 
@@ -178,42 +205,12 @@ def test_guards_sequence(episode_num: int, project: str = "default") -> bool:
     """
     print(f"\n🧪 Testing Episode {episode_num} Guard Sequence...")
 
-    # Sample draft content for testing with high lexical diversity and Korean pacing elements
-    draft_content = f"""
-    Episode {episode_num} begins with our protagonist facing unprecedented challenges.
-    주인공이 달렸다. "어디로 가야 하지?" 그는 생각했다. The protagonist makes their first appearance.
-
-    The morning sun illuminated the bustling marketplace. 상인이 물건을 꺼냈다.
-    "좋은 아침입니다!" 그가 외쳤다. Children laughed gleefully while playing nearby fountains.
-    아이들이 뛰어갔다. "재미있다!" 그들이 말했다. 행복하다고 느꼈다.
-
-    Suddenly, mysterious shadows emerged from ancient alleyways. 그림자가 움직였다.
-    Citizens gathered nervously. "무슨 일이지?" 그들이 걱정했다. 두렵다고 생각했다.
-
-    Our brave heroes must navigate complex political intrigue. 영웅들이 싸웠다.
-    "우리가 해야 할 일이 무엇인가?" 대장이 물었다. 각자 다짐했다.
-    Each character demonstrates unique abilities. 치료사가 치유했다.
-
-    The antagonist reveals sinister motivations. 악역이 공격했다.
-    "너희는 이해하지 못한다!" 그가 소리쳤다. 분노했다고 깨달았다.
-    Family loyalties clash against moral obligations. 가족이 갈등했다.
-
-    Romance blooms unexpectedly between unlikely partners. 연인들이 만났다.
-    "당신을 사랑합니다." 그녀가 고백했다. 기쁘다고 알았다.
-    Their relationship develops gradually through shared hardships.
-
-    Technological innovations transform traditional combat methods. 전사들이 훈련했다.
-    "새로운 무기를 배워야 한다." 교관이 설명했다. 어렵다고 판단했다.
-    Veterans struggle adapting while younger fighters embrace new approaches.
-
-    Environmental disasters threaten agricultural sustainability. 농민들이 일했다.
-    "비가 오지 않는다." 그들이 한탄했다. 절망했다고 받아들였다.
-    Resource scarcity exacerbates existing social tensions.
-
-    The episode concludes with surprising revelations. 진실이 드러났다.
-    "모든 것이 연결되어 있었다!" 탐정이 발견했다. 놀랐다고 이해했다.
-    Setting up future storylines that will explore themes of redemption and justice.
-    """
+    # Generate draft content for the episode with high lexical diversity and Korean pacing elements
+    draft_content = """
+어둠이 짙게 깔린 도시, 사이버네틱스의 빛이 네온사인처럼 흐르는 이곳에서 이야기는 시작된다. 주인공 첫 등장. 그는 그림자 속에서 홀연히 나타났다. [action] 낡은 트렌치코트 깃을 세우고, 중절모 아래로 날카로운 눈빛이 번뜩였다. 그는 도시의 부패를 목격하고 정의를 실현하기로 결심했다. "이 도시의 진실을 파헤치겠어." 그의 낮은 목소리가 어둠에 울렸다. [action] 그는 정보 브로커를 만나기 위해 뒷골목으로 향했다. "오랜만이군, 잭. 무슨 일이지?" 브로커가 물었다. 잭은 사진 한 장을 꺼내 보였다. "이 사람을 찾고 있소." 사진 속에는 실종된 과학자가 있었다. [action] 브로커는 잠시 망설이다 입을 열었다. "그는 위험한 인물이야. 조심하는 게 좋을 걸." 잭은 말없이 고개를 끄덕이고는 어둠 속으로 사라졌다. 그의 길고 외로운 싸움이 이제 막 시작된 것이다. 그는 도시의 심장부로 더 깊이 파고들 준비가 되어 있었다. 모든 것이 연결되어 있다는 예감이 그의 뇌리를 스쳤다. 그는 이 도시의 추악한 비밀을 파헤치고 정의를 바로 세울 것이다. 그의 여정은 이제부터 시작이다.
+"""
+    # TODO: if vector_store.add / run_guards helper already exists elsewhere,
+    # call them right after draft generation
 
     guards_passed = 0
     total_guards = 10  # Updated to include critique guard

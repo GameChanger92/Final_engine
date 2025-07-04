@@ -1,33 +1,40 @@
-# Draft Generation Request
+{# ──────────────────────────────────────────────
+   Episode Draft Prompt – Gemini 2.5 (Full)
+─────────────────────────────────────────────── #}
 
-## Task
-Generate a compelling episode draft based on the provided context and style guidelines.
+Write Episode {{ episode_number }} (~5500 chars) continuing the story.
 
-## Context Information
-{{ context }}
+<PrevSummary>
+{{ prev_summary }}
+</PrevSummary>
 
-## Style Guidelines
+
+<Context>
+{{ context }} 
+</Context>
+
+
+<AnchorGoals>
+{{ anchor_goals }}
+</AnchorGoals>
+
 {% if style %}
-- 플랫폼: {{ style.platform }}
-- 문체: {{ style.tone }}
-- 주요 시점: {{ style.voice_main }}
-- 보조 시점: {{ style.voice_side }}
-- 줄바꿈 규칙: {{ style.enter_rule }}
+Platform: {{ style.platform }}
+Tone: {{ style.tone }}
+Main POV: {{ style.voice_main }}
+Side POV: {{ style.voice_side }}
+Enter Rule: {{ style.enter_rule }}
 {% else %}
-- 문체: 균형 잡힌
-- 주요 시점: 3인칭 관찰자
-- 보조 시점: 표준형
-- 줄바꿈 규칙: 문단별 줄바꿈
+Tone: balanced
+Main POV: third-person observer
+Enter Rule: paragraph break
 {% endif %}
 
-## Requirements
-- Write a complete episode draft of at least 500 characters
-- Follow the specified style guidelines
-- Maintain narrative consistency with the context
-- Include character development and plot progression
-- Use vivid descriptions and engaging dialogue
-- Ensure proper pacing and story flow
-{% if style and style.prompt_suffix %}- {{ style.prompt_suffix }}{% endif %}
+Requirements:
+- Maintain narrative consistency
+- Draft length ≥ 5500 
+{% if style and style.prompt_suffix %}
+- {{ style.prompt_suffix }}
+{% endif %}
 
-## Output Format
-Provide only the episode draft text without any additional commentary or metadata.
+(Max tokens {{ max_tokens }})
