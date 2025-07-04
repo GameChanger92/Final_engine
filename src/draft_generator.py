@@ -180,12 +180,14 @@ if __name__ == "__main__":
 # ---------- unit-test alias ----------
 post_edit = _post_edit
 
+
 # ---------- simulate_guards_validation for tests ----------
 def _simulate_guards_validation(text: str, episode_number: int) -> bool:
     """Simulate guards validation for unit tests."""
     if len(text) < 500:
         raise RetryException("LLM output too short", guard_name="short_output")
     return True
+
 
 # Export for unit tests
 simulate_guards_validation = _simulate_guards_validation
