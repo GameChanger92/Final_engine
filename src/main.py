@@ -10,7 +10,6 @@ import typer
 from .beat_planner import plan_beats
 from .context_builder import make_context
 from .core.guard_registry import get_sorted_guards
-from .draft_generator import generate_draft
 from .exceptions import RetryException
 from .scene_maker import make_scenes
 from .utils.path_helper import data_path, ensure_project_dirs, out_path
@@ -167,7 +166,24 @@ def run_pipeline(episode_num: int, project: str = "default") -> str:
     context = make_context(scene_descriptions)
 
     # Step 5: Draft Generator - generate final draft
-    draft = generate_draft(context, episode_num)
+    import os
+
+    from src.draft_generator import build_prompt, generate_draft  # 기존 placeholder 함수
+    from src.llm.gemini_client import GeminiClient
+
+    prompt = build_prompt(
+        context=context,
+        episode_number=episode_num,
+        prev_summary="",
+        anchor_goals="",
+        style=None,
+        max_tokens=3500,
+    )
+
+    if os.getenv("UNIT_TEST_MODE") == "1" or os.getenv("GOOGLE_API_KEY") is None:
+        draft = generate_draft(context, episode_num)  # 빠른 더미
+    else:
+        draft = GeminiClient().generate(prompt)  # 실제 초안
 
     # Step 5.5: Vector Store - save scene embeddings
     try:
