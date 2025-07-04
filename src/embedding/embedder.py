@@ -6,12 +6,13 @@ Provides text embedding functionality using OpenAI's text-embedding models.
 """
 
 import os
-from typing import List
+import openai
 
 # 길이 1536 의 더미 벡터
-_DUMMY_EMBED: List[float] = [0.1] * 1536
+_DUMMY_EMBED: list[float] = [0.1] * 1536
 
-def embed_scene(text: str, model: str = "text-embedding-3-small") -> List[float]:
+
+def embed_scene(text: str, model: str = "text-embedding-3-small") -> list[float]:
     """
     Generate embeddings for scene text using OpenAI.
 
@@ -24,7 +25,7 @@ def embed_scene(text: str, model: str = "text-embedding-3-small") -> List[float]
 
     Returns
     -------
-    List[float]
+    list[float]
         Embedding vector as list of floats
 
     Raises
@@ -49,8 +50,7 @@ def embed_scene(text: str, model: str = "text-embedding-3-small") -> List[float]
 
     # 3) 실제 OpenAI 호출 (테스트에서 mock 으로 대체됨)
     try:
-        import openai                    # ← 여기서 import 해야 patch 가 먹힘
-        client = openai.OpenAI()         # 인자 없이 호출 → MagicMock 호환
+        client = openai.OpenAI()  # 인자 없이 호출 → MagicMock 호환
         resp = client.embeddings.create(
             input=text,
             model=model,

@@ -54,7 +54,6 @@ def run_with_retry(func, *args, max_retry=2, **kwargs) -> Any:
     ...     pass
     >>> result = run_with_retry(guard_function, "some text", max_retry=2)
     """
-    fast_mode = os.getenv("FAST_MODE") == "1"
     unit_test_mode = os.getenv("UNIT_TEST_MODE") == "1"
 
     messages = []
@@ -74,7 +73,6 @@ def run_with_retry(func, *args, max_retry=2, **kwargs) -> Any:
             if attempt == max_retry:
                 # Final attempt failed - raise combined exception
                 guard_name = getattr(e, "guard_name", None) or func_name
-                
                 # Check if we should use old format (for backward compatibility with tests)
                 if unit_test_mode:
                     # Use old combined message format for tests
