@@ -38,6 +38,15 @@ PLATFORM=munpia
 
 ## Advanced Settings
 
+### FAST MODE (임베딩 스킵)
+
+대량 임베딩 과정(수천 개 장면)을 생략하고 **빠르게 파이프라인**을 돌리고 싶을 때 사용합니다.
+
+```bash
+# .env 파일 예시
+FAST_MODE=1
+```
+
 ### LLM Temperature Control
 
 The engine allows fine-tuning of creativity levels for different pipeline stages using temperature parameters:
