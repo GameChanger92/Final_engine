@@ -25,32 +25,54 @@ load_dotenv(".env", override=True)
 logger = logging.getLogger(__name__)
 
 
-def build_prompt(context: str, style: dict[str, Any] | None = None) -> str:
+def build_prompt(
+    episode_number: int,
+    prev_summary: str,
+    context: str,
+    anchor_goals: str,
+    max_tokens: int,
+    style: dict[str, Any] | None = None,
+) -> str:
     """
     Build a prompt for draft generation using Jinja2 template.
 
     Parameters
     ----------
+    episode_number : int
+        The current episode number.
+    prev_summary : str
+        A summary of the previous episode.
     context : str
-        Context information for the episode
+        Context information for the episode.
+    anchor_goals : str
+        The anchor goals for the episode.
+    max_tokens : int
+        The maximum number of tokens for the generated draft.
     style : Dict[str, Any], optional
-        Style configuration dictionary
+        Style configuration dictionary.
 
     Returns
     -------
     str
-        Formatted prompt for LLM
+        Formatted prompt for LLM.
     """
     try:
         # Setup Jinja2 environment
-        template_dir = Path(__file__).parent.parent / "templates"
-        jinja_env = Environment(loader=FileSystemLoader(str(template_dir)))
+        template_dir = Path(__file__).resolve().parent.parent / "templates"
+        jinja_env = Environment(loader=FileSystemLoader(str(template_dir)), autoescape=True)
 
         # Load the draft prompt template
         template = jinja_env.get_template("draft_prompt.j2")
 
         # Render the template with context and style
-        prompt = template.render(context=context, style=style)
+        prompt = template.render(
+            episode_number=episode_number,
+            prev_summary=prev_summary,
+            context=context,
+            anchor_goals=anchor_goals,
+            max_tokens=max_tokens,
+            style=style,
+        )
 
         logger.debug(f"Built prompt: {len(prompt)} characters")
         return prompt
@@ -188,27 +210,47 @@ def post_edit(text: str) -> str:
     return text
 
 
-def generate_draft(context: str, episode_num: int) -> str:
+def generate_draft(
+    context: str,
+    episode_num: int,
+    prev_summary: str,
+    anchor_goals: str,
+    style: dict[str, Any] | None = None,
+) -> str:
     """
     Generate a draft episode using Gemini 2.5 Pro with guard validation.
 
     Parameters
     ----------
     context : str
-        Context information for the episode
+        Context information for the episode.
     episode_num : int
-        Episode number
+        Episode number.
+    prev_summary : str
+        A summary of the previous episode.
+    anchor_goals : str
+        The anchor goals for the episode.
+    style : dict[str, Any] | None, optional
+        Style configuration for the draft.
 
     Returns
     -------
     str
-        Generated and validated draft text
+        Generated and validated draft text.
     """
     logger.info(f"Generating draft for episode {episode_num}...")
 
     try:
         # Build the prompt
-        prompt = build_prompt(context)
+        max_tokens = 60000  # TODO: make this configurable
+        prompt = build_prompt(
+            episode_number=episode_num,
+            prev_summary=prev_summary,
+            context=context,
+            anchor_goals=anchor_goals,
+            max_tokens=max_tokens,
+            style=style,
+        )
 
         # Call LLM with retry mechanism
         def llm_wrapper():
@@ -363,13 +405,24 @@ def run_draft(
         "Default context", "--context", help="Context for draft generation"
     ),
     episode_num: int = typer.Option(1, "--episode", help="Episode number"),
+    prev_summary: str = typer.Option(
+        "No summary available.", "--prev_summary", help="Previous episode summary"
+    ),
+    anchor_goals: str = typer.Option(
+        "No anchor goals specified.", "--anchor_goals", help="Anchor goals for the episode"
+    ),
 ):
     """
     Generate and display a draft for the given context and episode number.
     """
     typer.echo(f"Generating draft for episode {episode_num}...")
 
-    draft = generate_draft(context, episode_num)
+    draft = generate_draft(
+        context=context,
+        episode_num=episode_num,
+        prev_summary=prev_summary,
+        anchor_goals=anchor_goals,
+    )
 
     typer.echo("\n" + "=" * 50)
     typer.echo(draft)
