@@ -211,6 +211,9 @@ def test_retry_on_short_output(monkeypatch):
     """Test retry mechanism when LLM output is too short."""
     from src.draft_generator import RetryException, generate_draft
 
+    # Temporarily disable UNIT_TEST_MODE for this test
+    monkeypatch.setenv("UNIT_TEST_MODE", "0")
+
     # Mock call_llm to return short content
     monkeypatch.setattr("src.draft_generator.call_llm", lambda *a, **k: "abc")
 
