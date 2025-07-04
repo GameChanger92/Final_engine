@@ -6,6 +6,7 @@ Provides text embedding functionality using OpenAI's text-embedding models.
 """
 
 import os
+
 import openai
 
 # 길이 1536 의 더미 벡터
