@@ -193,7 +193,12 @@ def run_pipeline(episode_num: int, project: str = "default") -> str:
     print("🛡️  Running Guard Chain (Auto-Registry)...")
     run_guards_auto_registry(draft, episode_num, project)
 
-    return draft
+    # Add context information to the result
+    context_summary = f"Generated from {len(scene_descriptions)} scenes across {len(beats)} beats ({len(draft)} characters)"
+    context_line = f"\nContext used:\n{context_summary}\n"
+    result = f"{draft}{context_line}"
+
+    return result
 
 
 # CLI setup

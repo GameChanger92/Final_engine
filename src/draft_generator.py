@@ -139,8 +139,8 @@ def generate_draft(
         logger.warning(f"LLM unavailable: {e}, using fallback draft.")
         raw = _DUMMY_TEXT
 
-    # 길이 체크: 500자 미만 시 RetryException
-    if len(raw) < 500:
+    # 길이 체크: 100자 미만 시 RetryException (더 엄격한 기준)
+    if len(raw) < 100:
         raise RetryException(f"LLM output too short ({len(raw)} chars)", guard_name="short_output")
 
     draft_body = _post_edit(raw)

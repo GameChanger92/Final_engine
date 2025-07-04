@@ -212,7 +212,8 @@ def test_retry_on_short_output(monkeypatch):
     from src.draft_generator import RetryException, generate_draft
 
     # Temporarily disable UNIT_TEST_MODE for this test
-    monkeypatch.setenv("UNIT_TEST_MODE", "0")
+    monkeypatch.delenv("UNIT_TEST_MODE", raising=False)
+    monkeypatch.delenv("FAST_MODE", raising=False)
 
     # Mock call_llm to return short content
     monkeypatch.setattr("src.draft_generator.call_llm", lambda *a, **k: "abc")
