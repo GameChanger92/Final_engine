@@ -360,8 +360,8 @@ def make_scenes(beat_json: dict) -> list[dict]:
             prompt = build_prompt(beat_desc, beat_idx)
 
             # Call LLM with retry logic and guard validation
-            def llm_wrapper():
-                raw_output = call_llm(prompt)
+            def llm_wrapper(prompt_str: str = prompt):
+                raw_output = call_llm(prompt_str)
                 scenes = parse_scene_yaml(raw_output)
 
                 # Add beat_id to each scene
