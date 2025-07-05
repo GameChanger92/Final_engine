@@ -54,7 +54,13 @@ def test_output_file_creation():
         output_file.unlink()
 
     # Run the CLI command using subprocess to test the full CLI functionality
+    import os
     import subprocess
+
+    # Set up environment for test mode
+    test_env = os.environ.copy()
+    test_env["UNIT_TEST_MODE"] = "1"
+    test_env["FAST_MODE"] = "1"
 
     result = subprocess.run(
         [
@@ -70,6 +76,7 @@ def test_output_file_creation():
         capture_output=True,
         text=True,
         cwd=Path(__file__).parent.parent.parent,
+        env=test_env,
     )
 
     # Verify command succeeded
@@ -82,7 +89,7 @@ def test_output_file_creation():
     content = output_file.read_text(encoding="utf-8")
 
     # Verify file contains PLACEHOLDER text
-    assert "PLACEHOLDER" in content, "Output file should contain PLACEHOLDER text"
+    assert "[PLACEHOLDER DRAFT CONTENT]" in content, "Output file should contain PLACEHOLDER text"
 
     # Verify it contains episode information
     assert "Episode 1" in content, "Output file should contain episode number"
@@ -107,7 +114,13 @@ def test_output_directory_creation():
     run_pipeline(1, "default")
 
     # Run CLI to create file
+    import os
     import subprocess
+
+    # Set up environment for test mode
+    test_env = os.environ.copy()
+    test_env["UNIT_TEST_MODE"] = "1"
+    test_env["FAST_MODE"] = "1"
 
     subprocess.run(
         [
@@ -123,6 +136,7 @@ def test_output_directory_creation():
         capture_output=True,
         text=True,
         cwd=Path(__file__).parent.parent.parent,
+        env=test_env,
     )
 
     # Verify directory was created
@@ -136,31 +150,56 @@ def test_output_directory_creation():
 
 def test_pipeline_content_structure():
     """Test that the pipeline generates content with expected structure."""
-    result = run_pipeline(42)  # Use different episode number
+    import os
 
-    # Verify basic structure
-    assert "Episode 42" in result, "Should contain episode number"
-    assert "[PLACEHOLDER DRAFT CONTENT]" in result, "Should contain placeholder content"
-    assert "Context used:" in result, "Should mention context usage"
-    assert "characters" in result, "Should mention character count"
+    # Set environment variables for test mode
+    os.environ["UNIT_TEST_MODE"] = "1"
+    os.environ["FAST_MODE"] = "1"
 
-    # Verify it's a multi-line string
-    lines = result.split("\n")
-    assert len(lines) > 1, "Output should be multi-line"
+    try:
+        result = run_pipeline(42)  # Use different episode number
+
+        # Verify basic structure
+        assert "Episode 42" in result, "Should contain episode number"
+        assert "[PLACEHOLDER DRAFT CONTENT]" in result, "Should contain placeholder content"
+        assert "Context used:" in result, "Should mention context usage"
+        assert "characters" in result, "Should mention character count"
+
+        # Verify it's a multi-line string
+        lines = result.split("\n")
+        assert len(lines) > 1, "Output should be multi-line"
+    finally:
+        # Clean up environment variables
+        if "UNIT_TEST_MODE" in os.environ:
+            del os.environ["UNIT_TEST_MODE"]
+        if "FAST_MODE" in os.environ:
+            del os.environ["FAST_MODE"]
 
 
 def test_different_episode_numbers():
     """Test that the pipeline works with different episode numbers."""
-    episodes = [1, 5, 10, 100]
+    import os
 
-    for ep_num in episodes:
-        result = run_pipeline(ep_num)
+    # Set environment variables for test mode
+    os.environ["UNIT_TEST_MODE"] = "1"
+    os.environ["FAST_MODE"] = "1"
 
-        # Verify episode number is included
-        assert f"Episode {ep_num}" in result, f"Should contain episode number {ep_num}"
-
-        # Verify basic content is present
-        assert "PLACEHOLDER" in result, f"Episode {ep_num} should contain placeholder content"
+    try:
+        episodes = [1, 5, 10, 100]
+        for ep_num in episodes:
+            result = run_pipeline(ep_num)
+            # Verify episode number is included
+            assert f"Episode {ep_num}" in result, f"Should contain episode number {ep_num}"
+            # Verify basic content is present
+            assert (
+                "[PLACEHOLDER DRAFT CONTENT]" in result
+            ), f"Episode {ep_num} should contain placeholder content"
+    finally:
+        # Clean up environment variables
+        if "UNIT_TEST_MODE" in os.environ:
+            del os.environ["UNIT_TEST_MODE"]
+        if "FAST_MODE" in os.environ:
+            del os.environ["FAST_MODE"]
         assert len(result) > 0, f"Episode {ep_num} should not be empty"
 
 

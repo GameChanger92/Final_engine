@@ -100,15 +100,25 @@ def call_llm(prompt: str) -> str:
         If API call fails or returns invalid content
     """
     try:
-        # Fast mode for unit tests - return stub immediately
+        # Check for API key early
+        api_key = os.getenv("GOOGLE_API_KEY")
+        if not api_key:
+            raise RetryException("API key not configured for Gemini", guard_name="api_key_check")
+
+        # Use GeminiClient for LLM calls - check for import errors
+        try:
+            from src.llm.gemini_client import GeminiClient
+        except ImportError as e:
+            raise RetryException(
+                f"Gemini library not available: {str(e)}", guard_name="import_error"
+            ) from e
+
+        # Fast mode for unit tests - return stub after import and API key checks
         if os.getenv("FAST_MODE") == "1":
             return '''beat_1: "Fast mode stub beat 1"
 beat_2: "Fast mode stub beat 2"
 beat_3: "Fast mode stub beat 3"
 beat_tp: "Fast mode stub turning point"'''
-
-        # Use GeminiClient for LLM calls
-        from src.llm.gemini_client import GeminiClient
 
         # Get temperature from environment
         temperature = float(os.getenv("TEMP_BEAT", "0.3"))

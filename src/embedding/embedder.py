@@ -44,9 +44,11 @@ def embed_scene(text: str, model: str = "text-embedding-3-small") -> list[float]
     fast_mode = os.getenv("FAST_MODE") == "1"
 
     # 2) 더미 반환 조건
-    #    • FAST_MODE   켜져 있으면 무조건
+    #    • FAST_MODE 켜져 있으면 무조건
     #    • API 키가 없으면 (no-key 테스트)
-    if fast_mode or api_key is None:
+    #    • UNIT_TEST_MODE 켜져 있으면 더미 사용
+    unit_test_mode = os.getenv("UNIT_TEST_MODE") == "1"
+    if fast_mode or api_key is None or unit_test_mode:
         return _DUMMY_EMBED
 
     # 3) 실제 OpenAI 호출 (테스트에서 mock 으로 대체됨)

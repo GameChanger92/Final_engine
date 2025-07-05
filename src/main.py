@@ -89,7 +89,7 @@ def run_guards_auto_registry(draft: str, episode_num: int, project: str = "defau
                         characters = json.load(f)
                     guard.check(characters)
                 except FileNotFoundError:
-                    print(f"⚠️  {guard_name}: No characters.json found, skipping")
+                    print(f"WARNING {guard_name}: No characters.json found, skipping")
                     continue
             elif guard_name == "DateGuard":
                 date_context = {"current_date": f"2024-{episode_num:02d}-01"}
@@ -111,15 +111,15 @@ def run_guards_auto_registry(draft: str, episode_num: int, project: str = "defau
             elif guard_name == "CritiqueGuard":
                 guard.check(draft)
             else:
-                print(f"⚠️  Unknown guard: {guard_name}")
+                print(f"WARNING Unknown guard: {guard_name}")
                 continue
 
-            print(f"✅ {guard_name}: PASSED")
+            print(f"PASS {guard_name}: PASSED")
         except RetryException as e:
             # In main pipeline, we show warnings but don't halt execution
-            print(f"⚠️  {guard_name} Warning: {e}")
+            print(f"WARNING {guard_name} Warning: {e}")
         except Exception as e:
-            print(f"⚠️  {guard_name} Error: {e}")
+            print(f"WARNING {guard_name} Error: {e}")
 
 
 def run_pipeline(episode_num: int, project: str = "default") -> str:
@@ -198,24 +198,25 @@ def run_pipeline(episode_num: int, project: str = "default") -> str:
 
             success = vector_store.add(scene_id, scene_text)
             if success:
-                print(f"✅ Saved embedding for scene {scene_id}")
+                print(f"SAVED embedding for scene {scene_id}")
             else:
-                print(f"⚠️  Failed to save embedding for scene {scene_id}")
+                print(f"WARNING Failed to save embedding for scene {scene_id}")
 
         # Save episode draft embedding
         vector_store.add(f"ep{episode_num:03d}_draft", draft)
 
     except Exception as e:
-        print(f"⚠️  Vector Store Warning: {e}")
+        print(f"WARNING Vector Store Warning: {e}")
 
     # Step 6: Guard Chain - Quality checks using auto-registry
-    print("🛡️  Running Guard Chain (Auto-Registry)...")
+    print("RUNNING Guard Chain (Auto-Registry)...")
     run_guards_auto_registry(draft, episode_num, project)
 
-    # Add context information to the result
+    # Add context information to the result with episode number
     context_summary = f"Generated from {len(scene_descriptions)} scenes across {len(beats)} beats ({len(draft)} characters)"
+    episode_header = f"Episode {episode_num}\n\n"
     context_line = f"\nContext used:\n{context_summary}\n"
-    result = f"{draft}{context_line}"
+    result = f"{episode_header}{draft}{context_line}"
 
     return result
 
@@ -232,18 +233,18 @@ def run(
     """
     Run the complete pipeline to generate an episode.
     """
-    typer.echo(f"🚀 Starting pipeline for Episode {episode} (Project: {project_id})...")
+    typer.echo(f"Starting pipeline for Episode {episode} (Project: {project_id})...")
 
     # Ensure project directories exist
     ensure_project_dirs(project_id)
 
     # Run the pipeline
-    typer.echo("📝 Running Arc Outliner...")
-    typer.echo("⚡ Running Beat Planner...")
-    typer.echo("🎬 Running Scene Maker...")
-    typer.echo("🔗 Running Context Builder...")
-    typer.echo("✍️  Running Draft Generator...")
-    typer.echo("🛡️  Running Guard Chain...")
+    typer.echo(">> Running Arc Outliner...")
+    typer.echo(">> Running Beat Planner...")
+    typer.echo(">> Running Scene Maker...")
+    typer.echo(">> Running Context Builder...")
+    typer.echo(">> Running Draft Generator...")
+    typer.echo(">> Running Guard Chain...")
     typer.echo("   - Immutable Guard")
     typer.echo("   - Date Guard")
     typer.echo("   - Lexi Guard")
@@ -256,8 +257,8 @@ def run(
     output_file.parent.mkdir(parents=True, exist_ok=True)
     output_file.write_text(draft, encoding="utf-8")
 
-    typer.echo(f"✅ Pipeline complete! Output saved to: {output_file}")
-    typer.echo(f"📄 Generated {len(draft)} characters")
+    typer.echo(f"Pipeline complete! Output saved to: {output_file}")
+    typer.echo(f"Generated {len(draft)} characters")
 
 
 @app.command()
@@ -269,16 +270,16 @@ def info():
     typer.echo("Day 13 - Rule Guard Implementation")
     typer.echo("")
     typer.echo("Pipeline stages:")
-    typer.echo("1. Arc Outliner → Basic arc structure")
-    typer.echo("2. Beat Planner → 3 beats")
-    typer.echo("3. Scene Maker → ~10 scenes total")
-    typer.echo("4. Context Builder → Combined context")
-    typer.echo("5. Draft Generator → Final PLACEHOLDER text")
-    typer.echo("6. Guard Chain → Quality checks")
-    typer.echo("   - Immutable Guard → Character consistency")
-    typer.echo("   - Date Guard → Chronological progression")
-    typer.echo("   - Lexi Guard → Lexical quality")
-    typer.echo("   - Rule Guard → Forbidden pattern detection")
+    typer.echo("1. Arc Outliner -> Basic arc structure")
+    typer.echo("2. Beat Planner -> 3 beats")
+    typer.echo("3. Scene Maker -> ~10 scenes total")
+    typer.echo("4. Context Builder -> Combined context")
+    typer.echo("5. Draft Generator -> Final PLACEHOLDER text")
+    typer.echo("6. Guard Chain -> Quality checks")
+    typer.echo("   - Immutable Guard -> Character consistency")
+    typer.echo("   - Date Guard -> Chronological progression")
+    typer.echo("   - Lexi Guard -> Lexical quality")
+    typer.echo("   - Rule Guard -> Forbidden pattern detection")
 
 
 if __name__ == "__main__":

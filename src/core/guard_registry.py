@@ -68,15 +68,18 @@ class GuardRegistry:
         ValueError
             If order is already registered
         """
-        if order in self._guards:
-            existing_class = self._guards[order]
+        # Use explicit order or default to 1000 if not set
+        effective_order = order if order is not None else getattr(guard_class, "order", 1000)
+
+        if effective_order in self._guards:
+            existing_class = self._guards[effective_order]
             raise ValueError(
-                f"Guard order {order} already registered by {existing_class.__name__}. "
+                f"Guard order {effective_order} already registered by {existing_class.__name__}. "
                 f"Cannot register {guard_class.__name__} with the same order."
             )
 
-        self._guards[order] = guard_class
-        logger.debug(f"Registered guard {guard_class.__name__} with order {order}")
+        self._guards[effective_order] = guard_class
+        logger.debug(f"Registered guard {guard_class.__name__} with order {effective_order}")
 
     def get_sorted_guards(self) -> list[type[BaseGuard]]:
         """

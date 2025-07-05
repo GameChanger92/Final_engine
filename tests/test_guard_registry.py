@@ -218,19 +218,19 @@ class TestGuardRegistry:
         expected_orders = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         assert get_registered_orders() == expected_orders
 
-        # Verify guard classes are in correct order
+        # Verify guard classes are in correct order (by their numerical order values)
         guards = get_sorted_guards()
         expected_guard_names = [
-            "LexiGuard",
-            "EmotionGuard",
-            "ScheduleGuard",
-            "ImmutableGuard",
-            "DateGuard",
-            "AnchorGuard",
-            "RuleGuard",
-            "RelationGuard",
-            "PacingGuard",
-            "CritiqueGuard",
+            "DateGuard",  # order=1
+            "AnchorGuard",  # order=2
+            "RuleGuard",  # order=3
+            "LexiGuard",  # order=4
+            "ScheduleGuard",  # order=5
+            "EmotionGuard",  # order=6
+            "ImmutableGuard",  # order=7
+            "RelationGuard",  # order=8
+            "PacingGuard",  # order=9
+            "CritiqueGuard",  # order=10
         ]
 
         actual_guard_names = [guard.__name__ for guard in guards]
