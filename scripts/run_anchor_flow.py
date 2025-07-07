@@ -81,7 +81,7 @@ def run_anchor_flow_test(anchors_path: str = None, project: str = "default") -> 
     bool
         True if all anchors pass validation, False otherwise
     """
-    print("🚀 Starting Anchor-Driven Integration Test")
+    print("STARTING Anchor-Driven Integration Test")
     print("=" * 60)
 
     # Initialize anchor guard
@@ -96,14 +96,14 @@ def run_anchor_flow_test(anchors_path: str = None, project: str = "default") -> 
         anchor_guard = AnchorGuard(anchors_path=anchors_path)
 
     if not anchor_guard.anchors:
-        print("❌ ERROR: No anchors found in anchors.json")
+        print("ERROR: No anchors found in anchors.json")
         return False
 
-    print(f"📋 Loaded {len(anchor_guard.anchors)} anchor events:")
+    print(f"Loaded {len(anchor_guard.anchors)} anchor events:")
     for anchor in anchor_guard.anchors:
-        print(f"   • {anchor['id']}: '{anchor['goal']}' (Episode {anchor['anchor_ep']})")
+        print(f"   - {anchor['id']}: '{anchor['goal']}' (Episode {anchor['anchor_ep']})")
 
-    print("\n🎬 Simulating 20 episodes...")
+    print("\nSimulating 20 episodes...")
     print("-" * 40)
 
     # Track anchor validation results
@@ -126,9 +126,9 @@ def run_anchor_flow_test(anchors_path: str = None, project: str = "default") -> 
             if episode_found > 0:
                 anchor_ids = [a["id"] for a in result["anchors_checked"] if a.get("found", False)]
                 found_anchors.update(anchor_ids)
-                print(f"✅ Found {episode_found} anchor(s): {', '.join(anchor_ids)}")
+                print(f"FOUND {episode_found} anchor(s): {', '.join(anchor_ids)}")
             else:
-                print("⚪ No anchors expected")
+                print("No anchors expected")
 
             validation_results.append(
                 {
@@ -139,36 +139,36 @@ def run_anchor_flow_test(anchors_path: str = None, project: str = "default") -> 
             )
 
         except Exception as e:
-            print(f"❌ ERROR: {e}")
+            print(f"ERROR: {e}")
             validation_results.append(
                 {"episode": episode_num, "error": str(e), "content_length": 0}
             )
 
     # Analyze results
     print("\n" + "=" * 60)
-    print("📊 ANCHOR VALIDATION RESULTS")
+    print("ANCHOR VALIDATION RESULTS")
     print("=" * 60)
 
     expected_anchors = {anchor["id"] for anchor in anchor_guard.anchors}
     missing_anchor_ids = expected_anchors - found_anchors
 
-    print(f"✅ Anchors Found ({len(found_anchors)}/{len(expected_anchors)}):")
+    print(f"Anchors Found ({len(found_anchors)}/{len(expected_anchors)}):")
     for anchor_id in sorted(found_anchors):
         anchor_info = next(a for a in anchor_guard.anchors if a["id"] == anchor_id)
-        print(f"   • {anchor_id}: '{anchor_info['goal']}' ✓")
+        print(f"   - {anchor_id}: '{anchor_info['goal']}' FOUND")
 
     if missing_anchor_ids:
-        print(f"\n❌ Missing Anchors ({len(missing_anchor_ids)}):")
+        print(f"\nMissing Anchors ({len(missing_anchor_ids)}):")
         for anchor_id in sorted(missing_anchor_ids):
             anchor_info = next(a for a in anchor_guard.anchors if a["id"] == anchor_id)
             print(
-                f"   • {anchor_id}: '{anchor_info['goal']}' (Expected in episode {anchor_info['anchor_ep']} ± 1)"
+                f"   - {anchor_id}: '{anchor_info['goal']}' (Expected in episode {anchor_info['anchor_ep']} +/- 1)"
             )
 
     # Success criteria: All 5 anchors must be found
     success = len(missing_anchor_ids) == 0
 
-    print(f"\n🎯 TEST RESULT: {'PASS' if success else 'FAIL'}")
+    print(f"\nTEST RESULT: {'PASS' if success else 'FAIL'}")
     if success:
         print("   All anchor events were found in their expected episodes!")
     else:
@@ -191,8 +191,8 @@ Examples:
   python scripts/run_anchor_flow.py --anchors custom.json            # Use custom anchors file
 
 Expected Output:
-  ✅ All anchor events found → Exit code 0
-  ❌ Missing anchor events → Exit code 1 + failure log
+  SUCCESS: All anchor events found → Exit code 0
+  FAILURE: Missing anchor events → Exit code 1 + failure log
         """,
     )
 
@@ -216,17 +216,17 @@ Expected Output:
         success = run_anchor_flow_test(args.anchors, args.project_id)
 
         if success:
-            print("\n🎉 SUCCESS: All anchor events validated!")
+            print("\nSUCCESS: All anchor events validated!")
             sys.exit(0)
         else:
-            print("\n💥 FAILURE: Anchor validation failed!")
+            print("\nFAILURE: Anchor validation failed!")
             sys.exit(1)
 
     except KeyboardInterrupt:
-        print("\n⏹️  Test interrupted by user")
+        print("\nTest interrupted by user")
         sys.exit(1)
     except Exception as e:
-        print(f"\n❌ Unexpected error: {e}")
+        print(f"\nERROR: Unexpected error: {e}")
         sys.exit(1)
 
 

@@ -175,7 +175,7 @@ def lexi_guard(text: str) -> bool:
         raise
 
 
-@register_guard(order=1)
+@register_guard(order=4)
 class LexiGuard(BaseGuard):
     """
     Lexical Guard class for text quality validation.
@@ -183,6 +183,17 @@ class LexiGuard(BaseGuard):
     Provides class-based interface for lexical quality checks including
     TTR (Type-Token Ratio) and 3-gram duplication analysis.
     """
+
+    def __init__(self, project=None):
+        """
+        Initialize LexiGuard.
+
+        Parameters
+        ----------
+        project : str, optional
+            Project identifier (optional, for compatibility)
+        """
+        self.project = project
 
     def check(self, text: str) -> dict[str, any]:
         """

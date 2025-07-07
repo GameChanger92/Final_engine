@@ -6,7 +6,7 @@ Tests LLM-based fun and logic evaluation with retry functionality.
 """
 
 import os
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
@@ -192,14 +192,16 @@ class TestCritiqueGuard:
         """Test that missing API key triggers fallback mode instead of failure."""
         guard = CritiqueGuard(min_score=7.0)
 
+        # Mock google.generativeai import to succeed, then test API key check
         with patch.dict(os.environ, {}, clear=True):
-            result = guard.check("Some text")
+            with patch.dict("sys.modules", {"google.generativeai": MagicMock()}):
+                result = guard.check("Some text")
 
-            # Should succeed with fallback instead of raising exception
-            assert result["passed"] is True
-            assert "no API key configured" in result["comment"]
-            assert result["fun_score"] == 8.0
-            assert result["logic_score"] == 8.0
+                # Should succeed with fallback instead of raising exception
+                assert result["passed"] is True
+                assert "no API key configured" in result["comment"]
+                assert result["fun_score"] == 8.0
+                assert result["logic_score"] == 8.0
 
     def test_critique_guard_handles_gemini_api_error(self):
         """Test that Gemini API errors are handled gracefully."""

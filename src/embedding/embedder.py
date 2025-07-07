@@ -41,8 +41,8 @@ def embed_scene(text: str, model: str = "text-embedding-3-small") -> list[float]
         raise ValueError("Text cannot be empty")
 
     api_key = os.getenv("OPENAI_API_KEY")
-    unit_test_mode = os.getenv("UNIT_TEST_MODE") == "1"
     fast_mode = os.getenv("FAST_MODE") == "1"
+    unit_test_mode = os.getenv("UNIT_TEST_MODE") == "1"
 
     # 2) 브랜치 우선순위: UNIT_TEST_MODE → FAST_MODE → 실제 호출
     #    • UNIT_TEST_MODE: 테스트에서 mock을 사용할 수 있도록 실제 호출 경로로 진행

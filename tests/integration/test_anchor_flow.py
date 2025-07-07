@@ -11,6 +11,14 @@ import tempfile
 from pathlib import Path
 
 
+def get_test_env():
+    """Get environment variables for test mode."""
+    test_env = os.environ.copy()
+    test_env["UNIT_TEST_MODE"] = "1"
+    test_env["FAST_MODE"] = "1"
+    return test_env
+
+
 class TestAnchorFlow:
     """Test class for anchor flow integration test."""
 
@@ -51,6 +59,7 @@ class TestAnchorFlow:
             capture_output=True,
             text=True,
             cwd=self.script_path.parent.parent,
+            env=get_test_env(),
         )
 
         # Should succeed with all anchors found
@@ -70,6 +79,7 @@ class TestAnchorFlow:
             capture_output=True,
             text=True,
             cwd=self.script_path.parent.parent,
+            env=get_test_env(),
         )
 
         # Should fail gracefully when no anchors file exists
@@ -85,6 +95,7 @@ class TestAnchorFlow:
             capture_output=True,
             text=True,
             cwd=self.script_path.parent.parent,
+            env=get_test_env(),
         )
 
         # Should fail when no anchors are defined
@@ -103,6 +114,7 @@ class TestAnchorFlow:
             capture_output=True,
             text=True,
             cwd=self.script_path.parent.parent,
+            env=get_test_env(),
         )
 
         assert result.returncode == 0
@@ -125,6 +137,7 @@ class TestAnchorFlow:
             capture_output=True,
             text=True,
             cwd=self.script_path.parent.parent,
+            env=get_test_env(),
         )
 
         # Should succeed and report correct count
@@ -140,6 +153,7 @@ class TestAnchorFlow:
             capture_output=True,
             text=True,
             cwd=self.script_path.parent.parent,
+            env=get_test_env(),
         )
 
         # Should run successfully with default anchors

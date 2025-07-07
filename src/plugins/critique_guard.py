@@ -65,7 +65,7 @@ class CritiqueGuard(BaseGuard):
             return {
                 "fun": 8.0,
                 "logic": 8.0,
-                "comment": "FastMode fallback - no API key configured",
+                "comment": "no API key configured",
             }
 
         # 예시 응답 – 실무에선 Gemini 호출

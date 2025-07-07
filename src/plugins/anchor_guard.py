@@ -18,7 +18,7 @@ from src.exceptions import RetryException
 from src.utils.path_helper import data_path
 
 
-@register_guard(order=6)
+@register_guard(order=2)
 class AnchorGuard(BaseGuard):
     """
     Anchor Guard - validates anchor events appear within expected episodes.

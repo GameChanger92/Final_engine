@@ -139,9 +139,21 @@ class TestBeatPlannerV2:
 
     def test_call_llm_handles_import_error(self, monkeypatch):
         """Test call_llm handles import error gracefully."""
-        # Set unit test mode to trigger import error
-        monkeypatch.setenv("UNIT_TEST_MODE", "1")
+        # Set environment variables
         monkeypatch.setenv("GOOGLE_API_KEY", "test_key")
+        monkeypatch.delenv("FAST_MODE", raising=False)  # Disable fast mode to test import
+
+        # Mock the import to fail
+        import builtins
+
+        original_import = builtins.__import__
+
+        def mock_import(name, *args, **kwargs):
+            if name == "src.llm.gemini_client":
+                raise ImportError("Mocked import failure")
+            return original_import(name, *args, **kwargs)
+
+        monkeypatch.setattr(builtins, "__import__", mock_import)
 
         with pytest.raises(RetryException) as excinfo:
             call_llm("test prompt")

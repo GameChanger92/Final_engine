@@ -220,16 +220,17 @@ class TestEmbedder:
     @patch.dict("os.environ", {"UNIT_TEST_MODE": "1", "FAST_MODE": "0"})
     def test_embed_scene_empty_text(self):
         """Test embedding empty text raises ValueError."""
-        with pytest.raises(ValueError, match="Text cannot be empty"):
-            embed_scene("")
+        with patch.dict("os.environ", {"UNIT_TEST_MODE": "1", "FAST_MODE": "0"}):
+            with pytest.raises(ValueError, match="Text cannot be empty"):
+                embed_scene("")
 
-        with pytest.raises(ValueError, match="Text cannot be empty"):
-            embed_scene("   ")
+            with pytest.raises(ValueError, match="Text cannot be empty"):
+                embed_scene("   ")
 
     @patch.dict("os.environ", {"UNIT_TEST_MODE": "1", "FAST_MODE": "0"})
     def test_embed_scene_no_api_key(self):
         """Test embedding without API key returns dummy embedding."""
-        with patch.dict("os.environ", {}, clear=True):
+        with patch.dict("os.environ", {"UNIT_TEST_MODE": "0", "FAST_MODE": "0"}, clear=True):
             # Remove OPENAI_API_KEY if it exists
             if "OPENAI_API_KEY" in os.environ:
                 del os.environ["OPENAI_API_KEY"]
@@ -252,7 +253,7 @@ class TestEmbedder:
         mock_client.embeddings.create.return_value = mock_response
         mock_openai.return_value = mock_client
 
-        with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}):
+        with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key", "UNIT_TEST_MODE": "1", "FAST_MODE": "0"}):
             result = embed_scene("test text")
             assert result == [0.1, 0.2, 0.3]
 
@@ -264,6 +265,6 @@ class TestEmbedder:
         mock_client.embeddings.create.side_effect = Exception("API Error")
         mock_openai.return_value = mock_client
 
-        with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}):
+        with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key", "UNIT_TEST_MODE": "1", "FAST_MODE": "0"}):
             with pytest.raises(RuntimeError, match="Failed to generate embedding"):
                 embed_scene("test text")

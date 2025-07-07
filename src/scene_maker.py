@@ -108,16 +108,9 @@ def call_llm(prompt: str) -> str:
         If API call fails or returns invalid content
     """
     try:
-        # Import google.generativeai
-        try:
-            # Test mode flag for unit tests
-            if os.getenv("UNIT_TEST_MODE") == "1":
-                raise ImportError("Forced import error for unit test")
-            import google.generativeai as genai
-        except ImportError:
-            # Fast mode for unit tests - return stub immediately (but only after import check)
-            if os.getenv("FAST_MODE") == "1":
-                return """```yaml
+        # Fast mode for unit tests - return stub immediately
+        if os.getenv("FAST_MODE") == "1":
+            return """```yaml
 scene_1:
   pov: "main"
   purpose: "Fast mode stub scene 1"
@@ -160,41 +153,17 @@ scene_8:
   desc: "Fast mode stub scene description 8"
 ```"""
 
-            logger.error("google-generativeai not installed")
-            raise RetryException(
-                "Google Generative AI library not available", guard_name="llm_call"
-            ) from None
+        # Use GeminiClient for LLM calls
+        from src.llm.gemini_client import GeminiClient
 
-        # Configure the API
-        api_key = os.getenv("GOOGLE_API_KEY")
-        if not api_key:
-            logger.error("GOOGLE_API_KEY not found in environment")
-            raise RetryException("API key not configured", guard_name="llm_call")
+        # Create client with scene-specific temperature
+        client = GeminiClient(temperature=TEMP_SCENE)
 
-        genai.configure(api_key=api_key)
+        logger.info(f"🎬 Scene Maker… (temperature={TEMP_SCENE})")
+        result = client.generate(prompt)
 
-        # Get model name from environment
-        model_name = os.getenv("MODEL_NAME", "gemini-2.5-pro")
-
-        # Create the model
-        model = genai.GenerativeModel(model_name)
-
-        # Configure generation parameters
-        generation_config = {
-            "max_output_tokens": 8000,
-            "temperature": TEMP_SCENE,
-        }
-
-        # Generate content
-        logger.info(f"🎬 Scene Maker… (temperature={TEMP_SCENE}, max_output_tokens=8000)")
-        logger.info(f"Calling {model_name} for scene generation...")
-        response = model.generate_content(prompt, generation_config=generation_config)
-
-        if not response.text:
-            raise RetryException("Empty response from Gemini", guard_name="llm_call")
-
-        logger.info(f"Generated scenes: {len(response.text)} characters")
-        return response.text
+        logger.info(f"Generated scenes: {len(result)} characters")
+        return result
 
     except Exception as e:
         if isinstance(e, RetryException):

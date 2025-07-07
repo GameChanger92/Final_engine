@@ -16,13 +16,24 @@ from src.plugins.foreshadow_scheduler import (
 )
 
 
-@register_guard(order=3)
+@register_guard(order=5)
 class ScheduleGuard(BaseGuard):
     """
     Guard that checks foreshadow resolution compliance.
 
     Ensures that foreshadows are resolved by their due episode.
     """
+
+    def __init__(self, project=None):
+        """
+        Initialize ScheduleGuard.
+
+        Parameters
+        ----------
+        project : str, optional
+            Project identifier (optional, for compatibility)
+        """
+        self.project = project
 
     def check(self, current_episode: int) -> dict[str, any]:
         """

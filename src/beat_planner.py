@@ -100,56 +100,37 @@ def call_llm(prompt: str) -> str:
         If API call fails or returns invalid content
     """
     try:
-        # Import google.generativeai
+        # Check for API key early
+        api_key = os.getenv("GOOGLE_API_KEY")
+        if not api_key:
+            raise RetryException("API key not configured for Gemini", guard_name="api_key_check")
+
+        # Use GeminiClient for LLM calls - check for import errors
         try:
-            # Test mode flag for unit tests
-            if os.getenv("UNIT_TEST_MODE") == "1":
-                raise RetryException("Gemini import error", guard_name="call_llm")
-            import google.generativeai as genai
-        except ImportError:
-            # Fast mode for unit tests - return stub immediately (but only after import check)
-            if os.getenv("FAST_MODE") == "1":
-                return '''beat_1: "Fast mode stub beat 1"
+            from src.llm.gemini_client import GeminiClient
+        except ImportError as e:
+            raise RetryException(
+                f"Gemini library not available: {str(e)}", guard_name="import_error"
+            ) from e
+
+        # Fast mode for unit tests - return stub after import and API key checks
+        if os.getenv("FAST_MODE") == "1":
+            return '''beat_1: "Fast mode stub beat 1"
 beat_2: "Fast mode stub beat 2"
 beat_3: "Fast mode stub beat 3"
 beat_tp: "Fast mode stub turning point"'''
 
-            logger.error("google-generativeai not installed")
-            raise RetryException(
-                "Google Generative AI library not available", guard_name="beat_planner"
-            ) from None
-
-        # Configure the API
-        api_key = os.getenv("GOOGLE_API_KEY")
-        if not api_key:
-            logger.error("GOOGLE_API_KEY not found in environment")
-            raise RetryException("API key not configured", guard_name="llm_call")
-
-        genai.configure(api_key=api_key)
-
-        # Get model name from environment
-        model_name = os.getenv("MODEL_NAME", "gemini-2.5-pro")
-
-        # Create the model
-        model = genai.GenerativeModel(model_name)
-
-        # Configure generation parameters
+        # Get temperature from environment
         temperature = float(os.getenv("TEMP_BEAT", "0.3"))
-        generation_config = {
-            "max_output_tokens": 2048,
-            "temperature": temperature,
-        }
 
-        # Generate content
-        logger.info(f"⚡ Beat Planner… (temperature={temperature}, max_output_tokens=2048)")
-        logger.info(f"Calling {model_name} for beat generation...")
-        response = model.generate_content(prompt, generation_config=generation_config)
+        # Create client with beat-specific temperature
+        client = GeminiClient(temperature=temperature)
 
-        if not response.text:
-            raise RetryException("Empty response from Gemini", guard_name="llm_call")
+        logger.info(f"⚡ Beat Planner… (temperature={temperature})")
+        result = client.generate(prompt)
 
-        logger.info(f"Generated beats: {len(response.text)} characters")
-        return response.text
+        logger.info(f"Generated beats: {len(result)} characters")
+        return result
 
     except Exception as e:
         if isinstance(e, RetryException):

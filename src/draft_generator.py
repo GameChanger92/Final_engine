@@ -74,25 +74,14 @@ def call_llm(prompt: str) -> str:
         return _DUMMY_TEXT
 
     # ③ 실제 Gemini 호출
-    try:
-        import google.generativeai as genai
-    except ImportError:
-        raise RetryException("google-generativeai missing", guard_name="call_llm") from None
+    from src.llm.gemini_client import GeminiClient
 
-    api_key = os.getenv("GOOGLE_API_KEY")
-    if not api_key:
-        raise RetryException("GOOGLE_API_KEY not set", guard_name="call_llm")
-    genai.configure(api_key=api_key)
-
-    model = genai.GenerativeModel(os.getenv("MODEL_NAME", "gemini-2.5-pro"))
     temperature = float(os.getenv("TEMP_DRAFT", "0.7"))
-    cfg = {"max_output_tokens": 60_000, "temperature": temperature}
+    client = GeminiClient(temperature=temperature)
 
     logger.info(f"Gemini draft… temp={temperature}")
-    res = model.generate_content(prompt, generation_config=cfg)
-    if not res.text:
-        raise RetryException("Empty Gemini response", guard_name="call_llm")
-    return res.text
+    result = client.generate(prompt)
+    return result
 
 
 # ───────────────────── 후처리 ─────────────────────
