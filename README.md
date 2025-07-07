@@ -53,9 +53,9 @@ The engine supports multiple environment flags for testing and development:
 
 #### Flag Priority Order
 When multiple flags are set, the following priority order applies:
-1. **UNIT_TEST_MODE=1** - Allows mocks to work in unit tests, takes precedence over FAST_MODE
+1. **UNIT_TEST_MODE=1** - Allows mocks to work in unit tests, takes precedence over FAST_MODE and API key checks
 2. **FAST_MODE=1** - Returns dummy values for fast execution  
-3. **Normal execution** - Makes real API calls
+3. **Normal execution** - Makes real API calls (requires valid API key)
 
 #### Usage Examples
 ```bash
@@ -70,8 +70,8 @@ python scripts/run_pipeline.py
 ```
 
 #### CI/CD Configuration
-- **Unit tests**: `UNIT_TEST_MODE=1 FAST_MODE=0` 
-- **Benchmark tests**: `UNIT_TEST_MODE=0 FAST_MODE=1`
+- **Unit tests**: `UNIT_TEST_MODE=1 FAST_MODE=0` - Ensures mocks work properly
+- **Benchmark tests**: `UNIT_TEST_MODE=0 FAST_MODE=1` - Fast execution with dummy data
 
 ### LLM Temperature Control
 
