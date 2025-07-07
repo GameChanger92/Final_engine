@@ -113,5 +113,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# ChromaDB database files
-projects/*/db/projects/*/db/
+# ChromaDB database files and test artifacts
+projects/*/db/
+projects/*/outputs/
+*.sqlite3
+*.bin
