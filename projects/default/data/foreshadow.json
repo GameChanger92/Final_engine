@@ -3333,213 +3333,45 @@
       "payoff": null
     },
     {
-      "id": "f35efa4",
-      "hint": "",
-      "introduced": 5,
-      "due": 21,
-      "payoff": null
-    },
-    {
-      "id": "f27a8da",
-      "hint": "시작 복선",
-      "introduced": 0,
-      "due": 10,
-      "payoff": null
-    },
-    {
-      "id": "fc7dc20",
-      "hint": "과거 복선",
-      "introduced": -5,
-      "due": 17,
-      "payoff": null
-    },
-    {
-      "id": "fcccbad",
-      "hint": "빈 내용 테스트",
-      "introduced": 5,
-      "due": 32,
-      "payoff": null
-    },
-    {
-      "id": "f63c1f5",
-      "hint": "잘못된 패턴",
-      "introduced": 5,
-      "due": 33,
-      "payoff": null
-    },
-    {
-      "id": "f7bfb4b",
-      "hint": "🔮 마법의 수정구 ✨",
-      "introduced": 10,
-      "due": 27,
-      "payoff": null
-    },
-    {
-      "id": "fb9f691",
+      "id": "fe25109",
       "hint": "",
       "introduced": 5,
       "due": 22,
       "payoff": null
     },
     {
-      "id": "f6fd881",
+      "id": "f223f59",
       "hint": "시작 복선",
       "introduced": 0,
-      "due": 14,
+      "due": 26,
       "payoff": null
     },
     {
-      "id": "f5d4a13",
+      "id": "f1b0621",
       "hint": "과거 복선",
       "introduced": -5,
-      "due": 6,
+      "due": 7,
       "payoff": null
     },
     {
-      "id": "f4fcd49",
+      "id": "fbd76e0",
       "hint": "빈 내용 테스트",
-      "introduced": 5,
-      "due": 17,
-      "payoff": null
-    },
-    {
-      "id": "f93bcc3",
-      "hint": "잘못된 패턴",
-      "introduced": 5,
-      "due": 17,
-      "payoff": null
-    },
-    {
-      "id": "f3e9a1c",
-      "hint": "🔮 마법의 수정구 ✨",
-      "introduced": 10,
-      "due": 39,
-      "payoff": null
-    },
-    {
-      "id": "f488de7",
-      "hint": "",
-      "introduced": 5,
-      "due": 25,
-      "payoff": null
-    },
-    {
-      "id": "f5e6cb0",
-      "hint": "시작 복선",
-      "introduced": 0,
-      "due": 21,
-      "payoff": null
-    },
-    {
-      "id": "f236b4e",
-      "hint": "과거 복선",
-      "introduced": -5,
-      "due": 13,
-      "payoff": null
-    },
-    {
-      "id": "f5dbdcb",
-      "hint": "빈 내용 테스트",
-      "introduced": 5,
-      "due": 31,
-      "payoff": null
-    },
-    {
-      "id": "f56b3c1",
-      "hint": "잘못된 패턴",
       "introduced": 5,
       "due": 19,
       "payoff": null
     },
     {
-      "id": "f00180b",
-      "hint": "🔮 마법의 수정구 ✨",
-      "introduced": 10,
-      "due": 39,
-      "payoff": null
-    },
-    {
-      "id": "f354bc4",
-      "hint": "",
-      "introduced": 5,
-      "due": 22,
-      "payoff": null
-    },
-    {
-      "id": "fd5d71c",
-      "hint": "시작 복선",
-      "introduced": 0,
-      "due": 10,
-      "payoff": null
-    },
-    {
-      "id": "f3713c8",
-      "hint": "과거 복선",
-      "introduced": -5,
-      "due": 10,
-      "payoff": null
-    },
-    {
-      "id": "f8d9c3a",
-      "hint": "빈 내용 테스트",
-      "introduced": 5,
-      "due": 28,
-      "payoff": null
-    },
-    {
-      "id": "fb53c82",
+      "id": "f409272",
       "hint": "잘못된 패턴",
       "introduced": 5,
-      "due": 24,
-      "payoff": null
-    },
-    {
-      "id": "f6779e0",
-      "hint": "🔮 마법의 수정구 ✨",
-      "introduced": 10,
       "due": 25,
       "payoff": null
     },
     {
-      "id": "f915a4b",
-      "hint": "",
-      "introduced": 5,
-      "due": 16,
-      "payoff": null
-    },
-    {
-      "id": "fbf60bb",
-      "hint": "시작 복선",
-      "introduced": 0,
-      "due": 18,
-      "payoff": null
-    },
-    {
-      "id": "fd83642",
-      "hint": "과거 복선",
-      "introduced": -5,
-      "due": 17,
-      "payoff": null
-    },
-    {
-      "id": "f70b88c",
-      "hint": "빈 내용 테스트",
-      "introduced": 5,
-      "due": 22,
-      "payoff": null
-    },
-    {
-      "id": "ff38022",
-      "hint": "잘못된 패턴",
-      "introduced": 5,
-      "due": 31,
-      "payoff": null
-    },
-    {
-      "id": "f04d5e4",
+      "id": "f42f443",
       "hint": "🔮 마법의 수정구 ✨",
       "introduced": 10,
-      "due": 40,
+      "due": 33,
       "payoff": null
     }
   ]

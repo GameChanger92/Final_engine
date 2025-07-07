@@ -12,10 +12,6 @@ jobs:
     strategy:
       matrix:
         job_type: [unit, bench]
-    
-    env:                     # 👈 매트릭스별 환경변수 설정
-      UNIT_TEST_MODE: ${{ matrix.job_type == 'unit' && '1' || '0' }}
-      FAST_MODE: ${{ matrix.job_type == 'bench' && '1' || '0' }}
 
     steps:
       # 1) 소스 체크아웃
@@ -32,7 +28,7 @@ jobs:
           pip install -r requirements.txt
           pip install black ruff pytest
 
-      # 4) 품질 검사 (unit 테스트에서만 실행)
+      # 4) 품질 검사 (Ruff → Black) - 단위 테스트에서만 실행
       - name: Ruff Lint
         if: matrix.job_type == 'unit'
         run: ruff check .
@@ -41,12 +37,20 @@ jobs:
         if: matrix.job_type == 'unit'
         run: black --check .
 
-      # 5) 단위 테스트 (unit에서는 UNIT_TEST_MODE=1, FAST_MODE=0)
-      - name: Run pytest (Unit Tests)
-        if: matrix.job_type == 'unit'
+      # 5) 테스트 실행
+      - name: Run pytest
+        env:
+          UNIT_TEST_MODE: ${{ matrix.job_type == 'unit' && '1' || '0' }}
+          FAST_MODE: ${{ matrix.job_type == 'bench' && '1' || '0' }}
         run: pytest -q
 
-      # 6) 벤치마크/통합 테스트 (bench에서는 UNIT_TEST_MODE=0, FAST_MODE=1)
-      - name: Test pipeline script (Benchmark)
+      # 6) 스모크 파이프라인 - 벤치마크에서만 실행
+      - name: Test pipeline script
         if: matrix.job_type == 'bench'
+        env:
+          UNIT_TEST_MODE: "1"
+          FAST_MODE: "1"
+          # ↓ 실제 API 키를 넣고 싶으면, 두 줄 주석 해제
+          # GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          # OPENAI_API_KEY:  ${{ secrets.OPENAI_API_KEY }}
         run: python scripts/run_pipeline.py --project-id default --episodes 2
