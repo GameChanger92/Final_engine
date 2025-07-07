@@ -47,6 +47,32 @@ PLATFORM=munpia
 FAST_MODE=1
 ```
 
+### Testing Environment Flags
+
+The engine supports multiple environment flags for testing and development:
+
+#### Flag Priority Order
+When multiple flags are set, the following priority order applies:
+1. **UNIT_TEST_MODE=1** - Allows mocks to work in unit tests, takes precedence over FAST_MODE
+2. **FAST_MODE=1** - Returns dummy values for fast execution  
+3. **Normal execution** - Makes real API calls
+
+#### Usage Examples
+```bash
+# Unit testing (mocks work, FAST_MODE ignored)
+UNIT_TEST_MODE=1 FAST_MODE=1 pytest tests/
+
+# Fast execution (dummy values, no API calls)
+FAST_MODE=1 python scripts/run_pipeline.py
+
+# Normal execution (real API calls)
+python scripts/run_pipeline.py
+```
+
+#### CI/CD Configuration
+- **Unit tests**: `UNIT_TEST_MODE=1 FAST_MODE=0` 
+- **Benchmark tests**: `UNIT_TEST_MODE=0 FAST_MODE=1`
+
 ### LLM Temperature Control
 
 The engine allows fine-tuning of creativity levels for different pipeline stages using temperature parameters:

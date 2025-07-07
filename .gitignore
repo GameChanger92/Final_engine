@@ -114,4 +114,4 @@ dmypy.json
 .pyre/
 
 # ChromaDB database files
-projects/*/db/
+projects/*/db/projects/*/db/
