@@ -73,7 +73,12 @@ def call_llm(prompt: str) -> str:
     if os.getenv("FAST_MODE") == "1":
         return _DUMMY_TEXT
 
-    # ③ 실제 Gemini 호출
+    # ③ API 키 없음: 더미 텍스트 반환
+    if not os.getenv("GOOGLE_API_KEY"):
+        logger.warning("No GOOGLE_API_KEY found, returning dummy text")
+        return _DUMMY_TEXT
+
+    # ④ 실제 Gemini 호출
     from src.llm.gemini_client import GeminiClient
 
     temperature = float(os.getenv("TEMP_DRAFT", "0.7"))
@@ -124,8 +129,8 @@ def generate_draft(
 
     try:
         raw = call_llm(prompt)
-    except RetryException as e:
-        logger.warning(f"LLM unavailable: {e}, using fallback draft.")
+    except (RetryException, Exception) as e:
+        logger.warning(f"LLM failed: {e}, using fallback draft.")
         raw = _DUMMY_TEXT
 
     # 길이 체크: 100자 미만 시 RetryException (더 엄격한 기준)

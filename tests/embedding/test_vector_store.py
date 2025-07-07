@@ -253,7 +253,9 @@ class TestEmbedder:
         mock_client.embeddings.create.return_value = mock_response
         mock_openai.return_value = mock_client
 
-        with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key", "UNIT_TEST_MODE": "1", "FAST_MODE": "0"}):
+        with patch.dict(
+            "os.environ", {"OPENAI_API_KEY": "test-key", "UNIT_TEST_MODE": "1", "FAST_MODE": "0"}
+        ):
             result = embed_scene("test text")
             assert result == [0.1, 0.2, 0.3]
 
@@ -265,6 +267,8 @@ class TestEmbedder:
         mock_client.embeddings.create.side_effect = Exception("API Error")
         mock_openai.return_value = mock_client
 
-        with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key", "UNIT_TEST_MODE": "1", "FAST_MODE": "0"}):
+        with patch.dict(
+            "os.environ", {"OPENAI_API_KEY": "test-key", "UNIT_TEST_MODE": "1", "FAST_MODE": "0"}
+        ):
             with pytest.raises(RuntimeError, match="Failed to generate embedding"):
                 embed_scene("test text")
