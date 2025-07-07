@@ -3331,6 +3331,48 @@
       "introduced": 10,
       "due": 34,
       "payoff": null
+    },
+    {
+      "id": "fe25109",
+      "hint": "",
+      "introduced": 5,
+      "due": 22,
+      "payoff": null
+    },
+    {
+      "id": "f223f59",
+      "hint": "시작 복선",
+      "introduced": 0,
+      "due": 26,
+      "payoff": null
+    },
+    {
+      "id": "f1b0621",
+      "hint": "과거 복선",
+      "introduced": -5,
+      "due": 7,
+      "payoff": null
+    },
+    {
+      "id": "fbd76e0",
+      "hint": "빈 내용 테스트",
+      "introduced": 5,
+      "due": 19,
+      "payoff": null
+    },
+    {
+      "id": "f409272",
+      "hint": "잘못된 패턴",
+      "introduced": 5,
+      "due": 25,
+      "payoff": null
+    },
+    {
+      "id": "f42f443",
+      "hint": "🔮 마법의 수정구 ✨",
+      "introduced": 10,
+      "due": 33,
+      "payoff": null
     }
   ]
 }

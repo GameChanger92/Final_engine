@@ -9,6 +9,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        job_type: [unit, bench]
 
     steps:
       # 1) 소스 체크아웃
@@ -25,21 +28,25 @@ jobs:
           pip install -r requirements.txt
           pip install black ruff pytest
 
-      # 4) 품질 검사 (Ruff → Black)
+      # 4) 품질 검사 (Ruff → Black) - 단위 테스트에서만 실행
       - name: Ruff Lint
+        if: matrix.job_type == 'unit'
         run: ruff check .
 
       - name: Black Check
+        if: matrix.job_type == 'unit'
         run: black --check .
 
-      # 5) 단위 테스트
+      # 5) 테스트 실행
       - name: Run pytest
+        env:
+          UNIT_TEST_MODE: ${{ matrix.job_type == 'unit' && '1' || '0' }}
+          FAST_MODE: ${{ matrix.job_type == 'bench' && '1' || '0' }}
         run: pytest -q
 
-      # 6) 스모크 파이프라인
-      #    - LLM 호출은 건너뛰고(UNIT_TEST_MODE)
-      #    - 대량 임베딩도 생략(FAST_MODE)
+      # 6) 스모크 파이프라인 - 벤치마크에서만 실행
       - name: Test pipeline script
+        if: matrix.job_type == 'bench'
         env:
           UNIT_TEST_MODE: "1"
           FAST_MODE: "1"

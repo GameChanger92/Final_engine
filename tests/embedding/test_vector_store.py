@@ -19,8 +19,9 @@ from src.embedding.vector_store import VectorStore
 
 @pytest.fixture
 def set_unit_test_mode(monkeypatch):
-    """Set UNIT_TEST_MODE for all tests in this module."""
+    """Set UNIT_TEST_MODE and disable FAST_MODE for all tests in this module."""
     monkeypatch.setenv("UNIT_TEST_MODE", "1")
+    monkeypatch.setenv("FAST_MODE", "0")
 
 
 @pytest.mark.usefixtures("set_unit_test_mode")
@@ -216,6 +217,7 @@ class TestVectorStore:
 class TestEmbedder:
     """Test embedder functionality."""
 
+    @patch.dict("os.environ", {"UNIT_TEST_MODE": "1", "FAST_MODE": "0"})
     def test_embed_scene_empty_text(self):
         """Test embedding empty text raises ValueError."""
         with pytest.raises(ValueError, match="Text cannot be empty"):
@@ -224,6 +226,7 @@ class TestEmbedder:
         with pytest.raises(ValueError, match="Text cannot be empty"):
             embed_scene("   ")
 
+    @patch.dict("os.environ", {"UNIT_TEST_MODE": "1", "FAST_MODE": "0"})
     def test_embed_scene_no_api_key(self):
         """Test embedding without API key returns dummy embedding."""
         with patch.dict("os.environ", {}, clear=True):
@@ -237,6 +240,7 @@ class TestEmbedder:
             assert all(isinstance(x, float) for x in result)
 
     @patch("openai.OpenAI")
+    @patch.dict("os.environ", {"UNIT_TEST_MODE": "1", "FAST_MODE": "0"})
     def test_embed_scene_api_success(self, mock_openai):
         """Test successful embedding generation."""
         # Mock OpenAI response
@@ -253,6 +257,7 @@ class TestEmbedder:
             assert result == [0.1, 0.2, 0.3]
 
     @patch("openai.OpenAI")
+    @patch.dict("os.environ", {"UNIT_TEST_MODE": "1", "FAST_MODE": "0"})
     def test_embed_scene_api_failure(self, mock_openai):
         """Test embedding generation failure."""
         mock_client = MagicMock()
