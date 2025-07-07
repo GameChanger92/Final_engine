@@ -47,6 +47,28 @@ PLATFORM=munpia
 FAST_MODE=1
 ```
 
+### Testing Environment Variables
+
+테스트 실행 시 사용되는 환경 변수들의 우선순위와 사용법:
+
+```bash
+# 단위 테스트 실행 (Mock 사용, 실제 API 호출 없음)
+UNIT_TEST_MODE=1 FAST_MODE=0 pytest tests/
+
+# 벤치마크/통합 테스트 (더미 데이터 사용, 빠른 실행)
+UNIT_TEST_MODE=0 FAST_MODE=1 python scripts/run_pipeline.py
+```
+
+**환경 변수 우선순위:**
+1. **UNIT_TEST_MODE=1** + API 키 있음 → Mock으로 실제 호출 시뮬레이션
+2. **FAST_MODE=1** → 더미 벡터 `[0.1]*1536` 반환
+3. **API 키 없음** → 더미 벡터 반환
+4. **기본** → 실제 OpenAI API 호출
+
+**CI/CD 매트릭스:**
+- **unit job**: `UNIT_TEST_MODE=1`, `FAST_MODE=0` (단위 테스트용)
+- **bench job**: `UNIT_TEST_MODE=0`, `FAST_MODE=1` (통합 테스트용)
+
 ### LLM Temperature Control
 
 The engine allows fine-tuning of creativity levels for different pipeline stages using temperature parameters:

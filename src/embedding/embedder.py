@@ -42,13 +42,14 @@ def embed_scene(text: str, model: str = "text-embedding-3-small") -> list[float]
 
     api_key = os.getenv("OPENAI_API_KEY")
     fast_mode = os.getenv("FAST_MODE") == "1"
-
-    # 2) 더미 반환 조건
-    #    • FAST_MODE 켜져 있으면 무조건
-    #    • API 키가 없으면 (no-key 테스트)
-    #    • UNIT_TEST_MODE 켜져 있으면 더미 사용
     unit_test_mode = os.getenv("UNIT_TEST_MODE") == "1"
-    if fast_mode or api_key is None or unit_test_mode:
+
+    # 2) 모드별 분기 처리 (우선순위: UNIT_TEST → FAST → 실제 호출)
+    # UNIT_TEST_MODE가 켜져 있고 API 키가 있으면 실제 OpenAI 호출 (Mock으로 대체됨)
+    if unit_test_mode and api_key is not None:
+        pass  # 아래 실제 호출 로직으로 진행
+    # FAST_MODE이거나 API 키가 없으면 더미 반환
+    elif fast_mode or api_key is None:
         return _DUMMY_EMBED
 
     # 3) 실제 OpenAI 호출 (테스트에서 mock 으로 대체됨)
