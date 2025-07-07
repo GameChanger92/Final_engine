@@ -41,7 +41,7 @@ jobs:
       - name: Run pytest
         env:
           UNIT_TEST_MODE: ${{ matrix.job_type == 'unit' && '1' || '0' }}
-          FAST_MODE: ${{ matrix.job_type == 'bench' && '1' || '0' }}
+          FAST_MODE: ${{ matrix.job_type == 'unit' && '0' || '1' }}
         run: pytest -q
 
       # 6) 스모크 파이프라인 - 벤치마크에서만 실행
